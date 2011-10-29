@@ -1,0 +1,15 @@
+# Two-chromosome regions. Note: this also exists as BAM.
+# I took out the 1-long regions because the BED->BAM->BED conversion
+# by Bedtools/Bamtools got confused...
+# chr1
+chr1	100	200	REGa	0.8	+
+chr1	210	220	REGa	0.8	+
+chr1	224	230	REGa	0.8	+
+chr1	250	300	REGa	0.8	+
+chr1	350	450	REGa	0.8	+
+# chr2 same coords + 1000, - strand
+chr2	1100	1200	REGa	0.8	-
+chr2	1210	1220	REGa	0.8	-
+chr2	1224	1230	REGa	0.8	-
+chr2	1250	1300	REGa	0.8	-
+chr2	1350	1450	REGa	0.8	-

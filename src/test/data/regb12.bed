@@ -1,0 +1,18 @@
+# two-chromosome regions (repeated)
+# took out the 1-long regions because the BED->BAM->BED conversion
+# got confused somewhere along the line
+# chr1
+chr1	50	150	REGa	0.8	+
+chr1	250	300	REGa	0.8	+
+chr1	400	410	REGa	0.8	+
+chr1	420	430	REGa	0.8	+
+chr1	440	500	REGa	0.8	+
+chr1	490	510	REGa	0.8	+
+# chr2, same coords as chr1 + 1000, - strand
+chr2	1050	1150	REGa	0.8	-
+chr2	1250	1300	REGa	0.8	-
+chr2	1400	1410	REGa	0.8	-
+chr2	1420	1430	REGa	0.8	-
+chr2	1440	1500	REGa	0.8	-
+chr2	1490	1510	REGa	0.8	-
+

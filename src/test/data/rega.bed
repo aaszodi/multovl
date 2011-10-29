@@ -1,0 +1,9 @@
+# Same regions as in multioverlaptest.cc	pairwise testing
+chr1	100	200	REGa
+chr1	210	220	REGa
+chr1	222	222	REGa
+chr1	224	230	REGa
+chr1	250	300	REGa
+chr1	333	333	REGa
+chr1	340	340	REGa
+chr1	350	450	REGa

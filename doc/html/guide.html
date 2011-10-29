@@ -1,0 +1,562 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><HTML>
+<head>
+<title>MULTOVL Guide</title>
+<link href="guide.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h1 style="color:navy">MULTOVL: Multiple Region Overlap Guide</h1>
+
+<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.1, Summer 2011</em></center></p>
+
+<h2>Table of contents</h2>
+
+<ul class='nodot'>
+    <li><a href='#overview'>Overview</a></li>
+    <li><a href='#installation'>Installation</a>
+        <ul class='nodot'>
+            <li>Prerequisites</li>
+            <li>Building the API and the tools</li>
+        </ul>
+    </li>
+    <li><a href='#tools'>Command-line tools</a></li>
+    <li><a href='#formats'>File formats</a></li>
+    <li><a href='#thanks'>Acknowledgements</a></li>
+</ul>
+
+<h2><a name='overview'>Overview</a></h2>
+
+<p>The MULTOVL suite of programs finds multiple overlaps among genomic regions.
+The basic idea is that the start and end coordinates of the regions on the same chromosome
+are sorted in increasing position and then we walk along this list and increase 
+or decrease a counter whenever a start or end position is encountered, respectively.</p>
+
+<a name='basicidea'><div><img class='bordered' src="basicidea.jpg" ALT="The Basic Idea"></div></a>
+
+<p>The actual value of this counter indicates the <span class='verb'>multiplicity</span>
+of the underlying overlap. The multiplicity is 0 outside the regions, 1 over those parts
+that do not overlap, 2 over pairwise overlaps, 3 over triples, ... etc. The sorting
+can be done in <em>O(N log N)</em> time, and the walking-over is linear, which makes
+the whole process very efficient.</p>
+
+<p>The MULTOVL algorithm can produce several kinds of output regions. In addition to the
+<span class='verb'>N-fold overlaps</span> you can detect
+<span class='verb'>solitary regions</span> which are the input regions that do not overlap
+with any other region in the input data set, and <span class='verb'>union overlaps</span>
+that is the union of the input regions that overlap at least once somewhere.</p>
+
+<a name='soli_union'><div><img class='bordered' src="soli_union.jpg" ALT="Types of overlaps"></div></a>
+
+<p>Which kind of overlaps are detected will be specified through 
+<a href='#tools'>command-line options</a>.</p>
+
+<p>Because overlaps make sense only between regions on the same chromosome, the MULTOVL
+algorithm can easily be parallelized as the overlap detection on a chromosome is fully
+independent from what's happening on another chromosome. Reading lots of huge input files can also
+be done in parallel in theory, leading to the following high-level schema:-</p>
+
+<a name='parallel'><div><img class='bordered' src="parallel.jpg" ALT="Parallelization schema"></div></a>
+
+<p>Parallelisation is currently under development which means no parallel executables
+will be built.</p>
+
+<!--
+<p>The parallel implementations of MULTOVL either use
+the <a href='http://www.openmp.org' _target='blank'>OpenMP</a> standard or Intel's
+<a href='http://'http://www.threadingbuildingblocks.org/' _target='blank'>Threading Building Blocks</a> (TBB).
+It turns out, however, that on the hardware platforms accessible to me the speedup was nowhere
+near the theoretical optimum. The parallel versions are therefore offered as
+"work in progress": maybe you find an architecture on which they perform as they should.</p>
+-->
+
+<h2><a name='installation'>Installation</a></h2>
+
+<h3>Prerequisites</h3>
+
+<h4>Basic requirements</h4>
+
+<ul>
+<li>A UNIX-like operating system. MULTOVL is developed and tested under
+Mac OS X "Leopard", "Snow Leopard",
+Linux (Ubuntu, Debian, OpenSUSE), Solaris, and sometimes even IRIX.</li>
+<li>An ANSI-compliant C++ compiler. MULTOVL is developed and tested with the 
+<a href='gcc.gnu.org' target='_blank'>GNU G++</a>, the 
+<a href='http://software.intel.com/en-us/intel-compilers' _target='blank'>Intel C++</a>
+compilers and 
+<a href= 'http://www.oracle.com/technetwork/server-storage/solarisstudio/downloads/studio12-update1-136165.html' _target='blank'>SunStudio 12u1</a>
+under Solaris.</li>
+<li>The <a href='www.boost.org' target='_blank'>Boost C++ library</a>, at least V1.45.
+Note that Debian distros contain antediluvian versions
+of Boost, which may lead to problems. You have to remove them fully and then compile your own from source,
+because CMake will link the system Boost libraries if it can find them, leading to all sorts of
+unpleasant linking errors.</li>
+<li>The <a href='www.cmake.org' target='_blank'>CMake</a> build system, Version 2.8 or above.</li>
+</ul>
+
+<h4>Optional requirements</h4>
+
+<p>If the basic requirements are met, then only the "classic" MULTOVL will be built that takes
+BED or GFF files as input. More functionality can be added, however, if the following tools and
+libraries are available:</p>
+
+<ul>
+<li>If you have the <a href='http://pezmaster31.github.com/bamtools' target='_blank'>BAMtools</a> library
+then the "classic" MULTOVL will support BAM-formatted binary input files. You will need
+the most up-to-date version of course.</li>
+<li>MULTOVL can also get its input data from PostgreSQL databases if you have the PostgreSQL
+development headers and libraries (at least Version 8.4) and the official PostgreSQL C++ library
+<a href=http://pqxx.org' target='_blank'>libpqxx</a>
+available. Version 3.1 is required.</li>
+</ul>
+
+<!--
+<h4>Requirements for the parallel MULTOVL versions</h4>
+
+<ul>
+<li>To build the OpenMP version, your compiler must support the OpenMP 2.0 standard.
+Most modern C++ compilers support at least OpenMP 2.5, g++ from Version 4.2 or above.</li>
+<li>To build the TBB version, you obviously need the TBB library. The open source variant
+is quite portable, I even got it working under OpenSolaris 2009.06.</li>
+</ul>
+-->
+
+<h3>Building MULTOVL</h3>
+
+<p>Change to the top-level 
+directory which will be called <tt>${MULTOVL}</tt> from now on, make a directory called 
+<tt>build</tt>, change to it and configure your build with CMake:</p>
+
+<pre><code>cd ${MULTOVL}
+mkdir build 
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_COMPILER=your_favourite_C++_compiler \
+    -DBOOST_ROOT=/path/to/boost \
+    -DBAMTOOLS_ROOT=/path/to/BAMtools \
+    -DPOSTGRES_ROOT=/path/to/postgresql \
+    -DPQXX_ROOT=/path/to/libpqxx \
+    -DCMAKE_INSTALL_PREFIX=/path/to/installdir ..
+</code></pre>
+
+<p>If the <tt>-DCMAKE_CXX_COMPILER</tt> parameter is omitted, the system default C++ compiler
+will be used. On Linux and OS X, this will be the GNU g++ compiler.</p>
+
+<p>If the <tt>-DBAMTOOLS_ROOT</tt> parameter is specified, then BAM-formatted binary
+input files will be supported.</p>
+
+<p>The PostgreSQL-based version <tt>pgmultovl</tt> will be built if <tt>-DPQXX_ROOT</tt>
+specifies the location of the official PostgreSQL C++ library. The other necessary PostgreSQL
+development headers and libraries will be found automatically if the <tt>pg_config</tt> utility
+is in your <tt>PATH</tt>. If this is not the case, you can help CMake by specifying
+<tt>-DPOSTGRES_ROOT</tt> or by adding <tt>pg_config</tt> to your <tt>PATH</tt>.</p>
+
+<p>The libraries will be linked dynamically by default. You can ask CMake to use static linking
+by specifying the option <tt>-D&lt;lib&gt;_USE_STATIC_LIBS=ON</tt> where <tt>&lt;lib&gt;</tt>
+can be <tt>Boost, BAMTOOLS, POSTGRES, PQXX</tt>.</p>
+<!--
+<p>Additionally, you may need to specify the
+location of the TBB (see <tt>${MULTOVL}/FindTBB.cmake</tt>). </p>
+-->
+
+<p>Assuming the configuration went well, you can compile and install the package:-</p>
+
+<pre><code>make all
+make doc
+make install
+</code></pre>
+
+<p>The tools will be installed in <tt>/path/to/installdir/multovl-1.1/bin</tt>.</p>
+
+<p>Alternatively you can configure a debug build by specifying
+<tt>-DCMAKE_BUILD_TYPE=Debug</tt> and omitting the
+<tt>-DCMAKE_INSTALL_PREFIX</tt> setting when invoking <tt>cmake</tt>.
+This is important only for developers.</p>
+
+<!--
+<h3>Exercising the parallel MULTOVL variants</h3>
+
+<p>The parallel exercise tools are built when OpenMP or TBB are detected. To check for 
+difficult-to-reproducible deadlocks, run the <tt>runner.sh</tt> script in the <tt>bin/exercise</tt>
+subdirectory of the build directory:</p>
+
+<p><tt>runner.sh omp|tbb [&lt;trackno&gt; [&lt;threadno&gt; [&lt;groupcnt&gt;]]]</tt></p>
+
+<p>where the first parameter selects the OpenMP or TBB MULTOVL variant,
+<tt>trackno</tt> is the number of synthetic tracks (i.e. input files),
+<tt>threadno</tt> is the number of threads, 2 by default, and <tt>groupcnt</tt>
+is the number of overlapping region groups in the track set, 1000 by default.
+The script first runs the classic serial MULTOVL, then runs the selected parallel version
+until a mismatch between the serial and parallel output is found. Ideally, this should never
+happen and the script should run forever. Just kill it with Ctrl-C when you get bored.</p>
+
+<p>Timing tests can be done with the <tt>timer.sh</tt> script. It takes the same arguments
+as <tt>runner.sh</tt>. First it runs the serial MULTOVL, then the selected parallel version
+with 1,2, ..., <tt>maxthreadno</tt> threads. The timing results are printed to the standard
+output.</p>
+-->
+
+<h2><a name='tools'>Command-line tools</a></h2>
+
+<h3>Common options</h3>
+
+<p>The MULTOVL tools obey a few conventions. When invoked without arguments or with the
+<tt>-h</tt> or <tt>--help</tt> command-line switch, they print a short help and then exit.</p>
+
+<p>The overlap multiplicity is controlled by the <tt>-c,-m,-M</tt> options. <tt>-c N</tt>
+requests exactly N-fold overlaps, the default being N=2 for pairwise overlaps. 
+If you want to detect a range of
+multiplicities, say you have 7 input files and you want three-, four- and five-fold 
+overlaps, then specify <tt>-m 3 -M 5</tt> on the commandline. The special setting
+<tt>-M 0</tt> means "any multiplicity". Union overlaps can be
+requested by specifying the <tt>-u</tt> switch.</p>
+
+<p><tt>-c 1</tt> requests solitary region detection. Note that "solitaryness"
+is always relative to the set of input tracks: what you get as "solitary" regions
+is a list of regions that do not overlap with any other region <em>within the
+current input dataset</em>. Solitary region detection can also be requested
+by specifying <tt>-m 1</tt>. Depending on what you set for <tt>-M x</tt>, this 
+will produce solitaries AND up to x-fold overlaps.</p>
+
+<p>The minimal length of overlaps (in basepair units) that are detected as such
+can be set with the <tt>-L n</tt> option, with n=1 by default. Sometimes you want
+to get "really solid overlaps" by accepting only longer overlaps, e.g.
+by setting <tt>-L 50</tt>. This won't list overlaps that are shorter than 50 basepairs.</p>
+
+<p>Input tracks may contain overlapping regions, and these will be detected by default.
+The <tt>-n</tt> (no intra-overlaps) switch reduces the clutter somewhat by filtering out
+those overlaps that occur only between regions on the same track. Complex overlaps 
+within and between tracks will still be reported, with a multiplicity corresponding to
+the number of tracks participating in the overlap, rather than the number of 
+ancestor regions (which will be larger). In such cases it is advisable
+to after-process the MULTOVL output according to your needs. Note that when solitary
+region detection (<tt>-c 1</tt>) or unions of overlapping regions (<tt>-u</tt>)
+are requested, then the <tt>-n</tt> switch is ignored.</p>
+
+<p>You can request timing information by specifying the <tt>-t</tt> switch.
+This is interesting only for serial/parallel runtime comparisons, normal users
+should not use this (all the more so because no output will be generated).</p>
+
+<h3>"Classic" serial MULTOVL using text files</h3>
+
+<pre><code>Multiple Chromosome / Multiple Region Overlaps
+Usage: multovl [options] regfile1 [ regfile2 ... ]
+Output goes to stdout, select format with the -f option
+Options:
+  -h [ --help ]            Print this help and exit
+  --version                Print version information and exit
+  -c [ --common-mult ] arg Find exactly arg-fold overlaps (default 2), -c 1 
+                           detects 'solitary regions', overrides -m, -M
+  -L [ --ovlen ] arg       Minimal overlap length (default 1), -c 1 forces -L 1
+  -m [ --minmult ] arg     Minimal multiplicity of the overlaps (default 2), 1 
+                           detects solitary regions,too
+  -M [ --maxmult ] arg     Maximal multiplicity of the overlaps, 0 (the 
+                           default) means no upper limit
+  -u [ --uniregion ]       List union of overlapping regions instead of each 
+                           overlap, ignored if -c 1 is set
+  -n [ --nointrack ]       Do not detect overlaps within the same track, 
+                           ignored if -c 1 or -u is set
+  -t [ --timing ]          List execution times only, no region output
+  -s [ --source ] arg      Source field in GFF output
+  -f [ --outformat ] arg   Output format {BED,GFF}, case-insensitive, 
+                           default GFF
+</code></pre>
+
+<p>You should supply at least one input file in BED or GFF format. The output
+will be written to the standard output in 
+<a href='#outfile'>GFF2 or BED format with ancestry annotations</a> (it is a good idea to pipe it to a file).
+The second column ("source") will be set to "multovl" by default but you can change this
+using the <tt>-s sourcestr</tt> option.</p>
+
+<h3>MULTOVL talking to a relational database</h3>
+
+<p>The <tt>pgmultovl</tt> version of the program can fetch input track/region information
+from a PostgreSQL database and write the results back. The coupling between <tt>pgmultovl</tt>
+and the database is implemented by a <span class="verb">configuration file</span> to keep things
+flexible. The configuration file is in <a href='http://www.json.org' target='_blank'>JSON format</a>.
+It specifies the database connection parameters and the SQL queries necessary to download and upload
+the tracks. Here is an example configuration file for my "RegAn" database which you can find
+in the <tt>config/regan.cfg</tt> file in your installation:</p>
+
+<pre><code>{
+    "conn":
+    {
+        "hostname": "localhost",
+        "database": "reg",
+        "read":
+        {
+            "user": "readonly",
+            "password": "rpass"
+        },
+        "write":
+        {
+            "user": "readwrite",
+            "password": "wpass"
+        }
+    },
+    "sql":
+    {
+        "download": "SELECT regionid, chrom, pb.iint_low(coords) AS first, pb.iint_high(coords) AS last, strand FROM reg.trackregview WHERE tracknm = $1",
+        "upload":
+        {
+            "track": "SELECT diag FROM reg.add_comb_operation($1, 'pgmultovl', $2, 'overlap',$3, $4)",
+            "region": "SELECT diag FROM reg.store_region($1, $2, $3, $4, $5, 'overlap', $6)"
+        }
+    }
+}
+</code></pre>
+
+<p>The <tt>"conn"</tt> group describes the connection parameters, these should be self-explanatory.
+<tt>pgmultovl</tt> requires one read-only and one read-write login to the DB, these are defined
+in the <tt>conn.read</tt> and <tt>conn.write</tt> parameter groups, respectively.</p>
+
+<p>The interesting bits are in the <tt>"sql"</tt> group. These contain SQL prepared statements
+that are supposed to obey certain conventions as described below.</p>
+
+<h4>The <tt>sql.download</tt> statement</h4>
+
+<p>This statement is used to fetch all regions for an input track. It takes a single text parameter
+<tt>$1</tt>, the name of the track (we assume that tracks are uniquely identifiable by a name).
+The statement shall return 5 columns as follows:-</p>
+
+<ol>
+<li><span class='verb'>regionid</span>: a unique identifier of the region. Can be text or integer.</li>
+<li><span class='verb'>chrom</span>: the name of the chromosome the current region is on (text).</li>
+<li><span class='verb'>first</span>: the first coordinate of the region (integer).</li>
+<li><span class='verb'>last</span>: the last coordinate of the region (integer).</li>
+<li><span class='verb'>strand</span>: the strand information, can be <tt>'+'</tt>, <tt>'-'</tt>, <tt>'.'</tt>
+(the latter for 'any' or 'unknown', as usual).</li>
+</ol>
+
+<h4>The <tt>sql.upload.track</tt> statement</h4>
+
+<p>This statement is used to create the result track, i.e. the set of overlap regions in the DB.
+It takes four input parameters:</p>
+
+<ol>
+<li><span class='verb'>user login</span> ($1): the login name of the user who ran <tt>pgmultovl</tt>.</li>
+<li><span class='verb'>parameters</span> ($2): the command-line parameters given to <tt>pgmultovl</tt>.</li>
+<li><span class='verb'>ancestor tracks</span> ($3): the names of the input tracks as a PostgreSQL
+    array literal such as <tt>'{track1, track2}'</tt>.</li>
+<li><span class='verb'>output track name</span> ($4): the name of the output track.</li>
+</ol>
+
+<p>This setup is admittedly inspired by the way how track combinations are handled in my RegAn DB,
+you may of course ignore some of these input parameters if your database schema does not support them.</p>
+
+<p>The track upload statement is expected to return a single text value called "diag". The value
+must be <tt>'OK'</tt> if the track upload operation was successful. Any other text will be 
+interpreted as an error message and will be printed to standard error by <tt>pgmultovl</tt>.</p>
+
+<h4>The <tt>sql.upload.region</tt> statement</h4>
+
+<p>This statement is used to upload one result region. It assumes that the track containing
+the output regions has been created already. It takes 6 input parameters:</p>
+
+<ol>
+<li><span class='verb'>output track name</span> ($1): the name of the output track.</li>
+<li><span class='verb'>chromosome name</span> ($2): the name of the chromosome containing the overlap region.</li>
+<li><span class='verb'>first, last, strand</span> ($3, $4, $5): the coordinates and strand information
+of the overlap region.</li>
+<li><span class='verb'>ancestor IDs</span> ($6): a PostgreSQL array literal listing the database IDs
+of the regions that generated the current overlap, e.g. <tt>'{35,78,112}'</tt>.</li>
+</ol>
+
+<p>The region upload statement is also expected to return a single "diag" text value which must be
+<tt>'OK'</tt> if all went well.</p>
+
+<h4>Running pgmultovl</h4>
+
+<p><tt>pgmultovl</tt> takes the following command-line parameters:</p>
+
+<pre><code>Multiple Region Overlaps in a PostgreSQL Database
+Usage: pgmultovl [options] &lt;trackname1&gt; [ &lt;trackname2&gt; ... ]
+Output will be inserted into the same database.
+Options:
+  -h [ --help ]            Print this help and exit
+  --version                Print version information and exit
+  -c [ --common-mult ] arg Find exactly arg-fold overlaps (default 2), -c 1 
+                           detects 'solitary regions', overrides -m, -M
+  -L [ --ovlen ] arg       Minimal overlap length (default 1), -c 1 forces -L 1
+  -m [ --minmult ] arg     Minimal multiplicity of the overlaps (default 2), 1 
+                           detects solitary regions,too
+  -M [ --maxmult ] arg     Maximal multiplicity of the overlaps, 0 (the 
+                           default) means no upper limit
+  -u [ --uniregion ]       List union of overlapping regions instead of each 
+                           overlap, ignored if -c 1 is set
+  -n [ --nointrack ]       Do not detect overlaps within the same track, 
+                           ignored if -c 1 or -u is set
+  -t [ --timing ]          List execution times only, no region output
+  -C [ --configfile ] arg  Configuration file, default is "./pgmultovl.cfg"
+  -o [ --outtrack ] arg    Output track name
+</code></pre>
+
+<p>The parameters are essentially the same as with the "classic" MULTOVL. Note the <tt>-C</tt>
+option for specifying the configuration file, and the mandatory <tt>-o</tt> option. The input 
+track names are specified as positional parameters, you'll need to specify at least one.</p>
+
+<p><tt>pgmultovl</tt> also prints some general information to standard output which corresponds
+to the comments written in the output file by the "classic" variant. Here is an example:</p>
+
+<pre><code># PgMultovl version 1.1 rev. 178 (Jun 28 2011), Debug build: GNU compiler on Darwin
+# Built with libpqxx version 3.1
+# Parameters =  -L 1 -m 2 -M 0 -o ovl -C ../config/regan.cfg
+# Input tracks = 2
+# rega = track 1, region count = 9
+# regb = track 2, region count = 8
+# Overlap count = 7
+# Multiplicity counts = 1,2:7
+</code></pre>
+
+<h3>Parallel MULTOVL versions</h3>
+
+<p>These will come later whenever there is a pressing need (and time!) to implement them.</p>
+<!--
+<pre><code>Multiple Chromosome / Multiple Region Overlaps
+Parallel OpenMP version
+Number of available CPU cores: 4
+Usage: ompmultovl [options] <regfile1> [<regfile2> ...]
+Output goes to stdout in GFF2 format.
+Options:
+  -h [ --help ]                  Print this help and exit
+  --version                      Print version information and exit
+  -c [ --common-mult ] arg (=0)  Find exactly arg-fold overlaps, -c 1 detects 
+                                 'solitary regions', overrides -m, -M
+  -L [ --ovlen ] arg (=1)        Minimal overlap length, -c 1 forces -L 1
+  -m [ --minmult ] arg (=1)      Minimal multiplicity of the overlaps, 1 
+                                 detects solitary regions,too
+  -M [ --maxmult ] arg (=0)      Maximal multiplicity of the overlaps, 0 means 
+                                 no upper limit
+  -u [ --uniregion ]             List union of overlapping regions instead of 
+                                 each overlap, ignored if -c 1 is set
+  -n [ --nointrack ]             Do not detect overlaps within the same track, 
+                                 ignored if -c 1 or -u is set
+  -t [ --timing ]                List execution times only, no region output
+  -s [ --source ] arg (=multovl) Source field in GFF output
+  -T [ --threadno ] arg (=4)     Number of threads to be used
+</code></pre>
+-->
+<!--
+<p>Shown above is the help for the OpenMP-parallelized version <tt>ompmultovl</tt>;
+the Intel TBB-based parallel version <tt>tbbmultovl</tt> uses exactly the same settings.
+The only difference to the "classic" MULTOVL is that you can specify the number of
+parallel threads with the <tt>-T</tt> option, which is set to the number of available
+CPU cores by default.</p>
+-->
+
+<h3>Extracting ancestor regions with the script <tt>anctrack.awk</tt></h3>
+
+<p>Sometimes you would like to list the ancestor regions from one of the input tracks
+that overlapped with the others. This little script helps you do this. Invoke it as follows:-</p>
+
+<p><tt>anctrack.awk -v trackid=X ovl.gff</tt></p>
+
+<p>where <tt>X</tt> is the parent track ID, an integer 1,2, ... and <tt>multovl.gff</tt> is
+the output of a MULTOVL run. The ancestor regions from the specified parent track are
+printed to the standard output in BED format. Note that it is possible that an ancestor region
+participated in more than one overlap. It is advisable to run the result 
+through the UNIX tools <tt>sort</tt> and <tt>uniq</tt> to obtain a unique list of regions
+like this:-</p>
+
+<pre><code>anctrack.awk -v trackid=X ovl.gff | sort | uniq > Xancestor.gff
+</code></pre>
+
+<h2><a name='formats'>File formats</a></h2>
+
+<h3><a name='infile'>Input file formats</a></h3>
+
+<p>The MULTOVL program accepts text files in 
+<a href='http://genome.ucsc.edu/FAQ/FAQformat.html#format1' target='_blank'>BED</a>
+or 
+<a href='http://www.sanger.ac.uk/resources/software/gff/spec.html' target='_blank'>GFF</a>
+format. Only the chromosome, first/last position, region name (if present) and strand information
+is parsed. The program can also read 
+<a href='http://genome.ucsc.edu/goldenPath/help/bam.html' target='_blank'>BAM files</a> using the 
+<a href='http://pezmaster31.github.com/bamtools' target='_blank'>BAMtools</a> library.
+When reading from BAM files even the region names are ignored in the interest of speed.</p>
+
+<p>Note that MULTOVL uses the <em>extremely simple-minded</em> "strategy" of deducing the file format
+from the input file extension. So please call your BED files <tt>something.bed</tt>,
+your GFF files <tt>something.gff</tt>, and your BAM files <tt>something.bam</tt> -- you get
+the idea.</p>
+
+<h3><a name='outfile'>Output file format</a></h3>
+
+<p>The MULTOVL output file format is <a href='http://www.sanger.ac.uk/resources/software/gff/spec.html' target='_blank'>GFF2</a> 
+by default, with some additional goodies. Here is an example. Note that the line numbers are not
+part of the actual output, I added them by hand for the sake of the explanations below:-</p>
+
+<pre><code>1 ##gff-version 2
+2 ##date 2011-06-18
+3 ##source-version Multovl version 1.1 rev. 166 (Jun 18 2011), Debug build: GNU compiler on Darwin
+4 # Parameters =  -L 1 -c 2
+5 # Input files = 2
+6 # ../src/test/data/rega.bed = track 1, region count = 8
+7 # ../src/test/data/regb.bed = track 2, region count = 9
+8 # Overlap count = 8
+9 # Multiplicity counts = 1,2:7 2:1
+10 chr1	multovl	overlap	100	150	2	.	.	ANCESTORS 1:REGa:.:100-200|2:REGb:.:50-150
+11 chr1	multovl	overlap	250	300	2	.	.	ANCESTORS 1:REGa:.:250-300|2:REGb:.:250-300
+12 chr1	multovl	overlap	340	340	2	.	.	ANCESTORS 1:REGa:.:340-340|2:REGb:.:340-340
+13 chr1	multovl	overlap	400	410	2	.	.	ANCESTORS 1:REGa:.:350-450|2:REGb:.:400-410
+14 chr1	multovl	overlap	415	415	2	.	.	ANCESTORS 1:REGa:.:350-450|2:REGb:.:415-415
+15 chr1	multovl	overlap	420	430	2	.	.	ANCESTORS 1:REGa:.:350-450|2:REGb:.:420-430
+16 chr1	multovl	overlap	440	450	2	.	.	ANCESTORS 1:REGa:.:350-450|2:REGb:.:440-500
+17 chr1	multovl	overlap	490	500	2	.	.	ANCESTORS 2:REGb:.:440-500|2:REGb:.:490-510
+</code></pre>
+
+<p>Let's walk through this line-by-line:</p>
+<ul>
+<li>Line 1: GFF metainfo: version information. This is always Version 2.</li>
+<li>Line 2: GFF metainfo: file creation date.</li>
+<li>Line 3: GFF metainfo: Multovl version information.</li>
+<li>Line 4: Command-line parameters used in this run.</li>
+<li>Line 5: Number of input files read.</li>
+<li>Lines 6-7: Ancestor track information. There is one line for each input file.
+They look like<tt># inputfilename = track N, region count = M</tt> 
+where the track identifier number N runs from 1.
+Input track files that could not be parsed will be listed as <tt>skipped</tt> instead of 
+<tt>track N</tt> and the <tt>region count</tt> part will be omitted.
+The track ID numbers are used in the region ancestor specification
+in the <tt>ANCESTORS</tt> attribute of the overlap regions 
+specifying which regions gave rise to a particular combination region.</li>
+<li>Line 8: Total number of result regions. Note that solitary regions are also counted here
+although they are not "overlaps" in the strict sense.</li>
+<li>Line 9: Multiplicity counts. In the example line we can see that there are 7 pairwise overlaps
+between regions from input tracks 1 and 2, and one solitary region from track 2. The counts
+in this line sum to the total overlap count in the line above.</li>
+<li>The rest of the lines list the result regions as GFF2 records.</li>
+</ul>
+
+<p>The <span class='verb'>multiplicity</span> of the overlap is indicated in Column 6 ("score"). If you searched for union
+overlaps, then this field shows the <em>maximal</em> multiplicity seen in the union, and this
+number can be less than the total number of ancestor regions participating in the overlap.</p>
+
+<p>The <span class='verb'>ancestry</span> information is listed in Column 9 as the
+attribute "ANCESTORS". The value consists of 
+<span class='verb'>ancestor description strings</span>, which are concatenated using
+the pipe symbol <tt>|</tt>, have the format <tt>[rep*]trackid:name:strand:first-last</tt>.
+For instance the string <tt>2:REGb:.:50-150</tt> represents an ancestor region in Track 2
+with the name 'RegB', unknown strand orientation, from position 50 to 150. (The chromosome
+needs not be specified as it is the same as that of the descendant region.) The optional
+prefix <tt>rep*</tt> where <tt>rep</tt> is an integer &gt; 1 indicates ancestor regions
+that occurred more than once in the input file. For instance <tt>3*2:REGb:.:50-150</tt>
+shows that there were 3 REGb regions in track 2 with exactly the same coordinates.
+The ancestors are listed in increasing track ID order, within the same track regions with
+lower start positions come first.</p>
+
+<p>The BED output format is very similar. It begins with exactly the same comments
+as the GFF output (lines 4 to 9 above), and then the regions are listed. The ancestry
+information is provided in Column 4 (the "name" field), the multiplicity in Column 5 ("score").
+</p>
+
+<h2><a name='thanks'>Acknowledgements</a></h2>
+
+<p>I would like to thank my colleagues Markus Jaritz and Johanna Trupke
+for providing me with use cases, feature requests and bug reports while developing MULTOVL.
+Special thanks are due to Meinrad Busslinger for his support.
+This work was financed by the 
+<a href='http://www.gen-au.at/projekt.jsp?projektId=106&lang=en' target='_blank'>Gen-AU epigenetics consortium</a>.</p>
+
+</body>
+</html>
+
+

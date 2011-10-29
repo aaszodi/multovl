@@ -1,0 +1,20 @@
+# This is Track 1 from the "complex overlap test"
+# see 'multioverlaptest.cc'
+#
+# ASCII art illustration (not to scale):-
+#
+# 
+#          /  100--------------140       200-----------------250           300---------330
+# Track 1 -|      110--------------150           220-----------------270       310---------340
+#          \                                                                       320---------350
+# 
+# Track 2 - /         120--130               210---------240
+#           \                                       230---------260
+#
+chrTEST	100	140	Track1	0	+
+chrTEST	110	150	Track1	0	+
+chrTEST	200	250	Track1	0	+
+chrTEST	220	270	Track1	0	+
+chrTEST	300	330	Track1	0	+
+chrTEST	310	340	Track1	0	+
+chrTEST	320	350	Track1	0	+

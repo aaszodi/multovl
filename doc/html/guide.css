@@ -1,0 +1,79 @@
+/* Style sheet for the User guide */
+/* Andras Aszodi, 2010-08-06 */
+
+/* The pictures were exported as 720x540 px JPEG from PowerPoint slides
+    the overall with will therefore also be 720px
+*/
+body {
+	font-family: Arial, Helvetica, sans-serif;
+    width: 720px; 
+    margin-left: auto;
+    margin-right: auto;
+    text-align: justify;
+    line-height: 1.5;
+    background: #eeeeff;
+}
+
+h1, h2, h3 {
+	font-weight: bold;
+	text-align: center;
+	vertical-align: middle;
+}
+
+h2 {
+    color: white; 
+    background-color: navy;
+}
+
+h3 {
+    color: navy; 
+}
+
+h4, h5, h6 {
+	font-weight: bold;
+	text-align: left;
+	vertical-align: middle;
+}
+
+/* use this for images to be centered like <div><img ...></div>*/
+div img {
+    display: block;
+    margin: auto;
+}
+
+.bordered {
+    border: solid 1px;
+    border-color: black;
+}
+
+/*  the ul needs to be set to display:table
+    so that its right margin gets aligned with the rest
+*/
+ul {
+    display: table; 
+    list-style-type: square;
+}
+
+ul.nodot { list-style-type: none; }
+
+.warning {
+    color: red;
+    background-color: transparent;
+}
+
+/* "Verbatim" words that look the same on the GUI */
+.verb {
+    font-style: italic;
+    font-weight: bold;
+}
+
+/* no-breaking hypens in <tt> */
+tt {
+    white-space: nowrap;
+}
+
+code {
+    display: block;
+    border: 1px solid #CCCCCC;
+    background-color: #FFFFEE;
+}

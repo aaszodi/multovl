@@ -1,0 +1,3 @@
+# Same regions as in multioverlaptest.cc	triple-overlap testing
+chr1	200	500	REGb
+chr1	700	800	REGb

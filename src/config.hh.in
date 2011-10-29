@@ -1,0 +1,41 @@
+#ifndef MULTOVL_CONFIG_HEADER
+#define MULTOVL_CONFIG_HEADER
+
+// == Config header template ==
+
+// NOTE: this template will be filled in by CMake
+
+// stringification
+#ifndef CONFIG_STRINGIFY_MACROS
+    #define CONFIG_STRINGIFY_MACROS
+    #define STRINGIFY(x) #x
+    #define TOSTRING(x) STRINGIFY(x)
+#endif
+
+// -- Version --
+
+#define MULTOVL_VERSION_MAJOR @MULTOVL_VERSION_MAJOR@
+#define MULTOVL_VERSION_MINOR @MULTOVL_VERSION_MINOR@
+#define MULTOVL_REVISION @SUBVERSION_REVISION@
+#define MULTOVL_VER() TOSTRING(MULTOVL_VERSION_MAJOR.MULTOVL_VERSION_MINOR rev. MULTOVL_REVISION)
+
+// -- Compiler details --
+
+#define MULTOVL_BUILD() TOSTRING(@CMAKE_BUILD_TYPE@ build: @CMAKE_CXX_COMPILER_ID@ compiler on @CMAKE_SYSTEM_NAME@)
+
+// -- Boost details --
+
+#ifndef CONFIG_BOOST_MACROS
+    #define CONFIG_BOOST_MACROS
+    #include "boost/version.hpp"
+    #define BOOST_PATCHLEVEL (BOOST_VERSION % 100)
+    #define BOOST_VERSION_MINOR (BOOST_VERSION / 100 % 1000)
+    #define BOOST_VERSION_MAJOR (BOOST_VERSION / 100000)
+#endif
+
+// -- BAM tools --
+
+#define USE_BAMTOOLS @BAMTOOLS_FOUND@
+
+#endif  // MULTOVL_CONFIG_HEADER
+

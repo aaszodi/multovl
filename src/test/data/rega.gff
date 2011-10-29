@@ -1,0 +1,12 @@
+##gff-version 2
+##date 2010-08-14
+# pairwise testing, 250-300 is a duplicate
+chr1	convert	REGa	100	200	0	.	0
+chr1	convert	REGa	210	220	0	.	0
+chr1	convert	REGa	222	222	0	.	0
+chr1	convert	REGa	224	230	0	.	0
+chr1	convert	REGa	250	300	0	.	0
+chr1	convert	REGa	250	300	0	.	0
+chr1	convert	REGa	333	333	0	.	0
+chr1	convert	REGa	340	340	0	.	0
+chr1	convert	REGa	350	450	0	.	0
