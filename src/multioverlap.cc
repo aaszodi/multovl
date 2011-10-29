@@ -370,59 +370,6 @@ std::string MultiOverlap::Counter::get_key(
     return keystr;
 }
 
-// -- Private MultiOverlap methods --
-
-/**
- * Scans the internally stored position/region limit multimap
- * and returns a vector of uint pairs. The first in a pair is a position,
- * the second is the number of overlapping regions at that position.
- * The vector entries correspond to the positions where the number of
- * overlapping regions just changed. Implicitly, there is a <0,0> pair
- * at the beginning but this is not stored.
- * Private
- */
-MultiOverlap::uintpairvec_t MultiOverlap::overlap_counts() const
-{
-    uintpairvec_t ovlapcounts;
-    ovlapcounts.reserve(_reglim.size()); // cannot grow longer than this
-    
-    int ocount = 0;   // keeps track of how many regions overlap
-    unsigned int pos = 0;
-    reglim_t::const_iterator lowbound = _reglim.begin(), upbound;
-    while (_reglim.end() != lowbound)
-    {
-        pos = lowbound->this_pos();    // this is the new position
-        upbound = _reglim.upper_bound(*lowbound);
-
-        // the lowbound/upbound pair corresponds to the STL range
-        // of all RegLimit objects in _reglim
-        // that were at position pos
-        // count all "first" and "last" limits to figure out by what amount
-        // the overlap count needs to jump
-        for (reglim_t::const_iterator rmiter = lowbound;
-                rmiter != upbound; ++rmiter)
-        {
-#ifdef MULTOVL_DEBUG
-            std::cerr << "** pos = " << rmiter->this_pos() << 
-                ": track = " << rmiter->track_id() << " isfirst = " << 
-                rmiter->is_first() << std::endl;
-#endif
-            if (rmiter->is_first())
-                ++ocount;   // region starts here, increase the count
-            else
-                --ocount;   // region ends here, decrease the count
-#ifdef MULTOVL_DEBUG
-            std::cerr << "** ocount = " << ocount << std::endl;
-#endif
-        }
-            
-        ovlapcounts.push_back(std::make_pair(pos, static_cast<unsigned int>(ocount)));
-        ++pos;  // move on
-    }
-    
-    return ovlapcounts;
-}
-
 } // namespace multovl
 
 #endif  // MULTOVL_MULTIOVERLAP_IMPL

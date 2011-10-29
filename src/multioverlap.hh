@@ -261,8 +261,6 @@ class MultiOverlap
     
     private:
             
-    uintpairvec_t overlap_counts() const;
-    
     // -- data 
     
     reglim_t _reglim;
