@@ -37,7 +37,7 @@ project(MULTOVL CXX)
 
 # Version string for the project
 set(MULTOVL_VERSION_MAJOR 1)
-set(MULTOVL_VERSION_MINOR 1)
+set(MULTOVL_VERSION_MINOR 2)
 
 # the source directory
 # The top-level dir will be CMAKE_SOURCE_DIR because this CMakeLists.txt is there
@@ -51,9 +51,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 # the installation directory 
 set(MULTOVL_DESTDIR "multovl-${MULTOVL_VERSION_MAJOR}.${MULTOVL_VERSION_MINOR}")
 
-# SVN revision number
-include("${CMAKE_SOURCE_DIR}/cmake/SVNrevision.cmake")
-message(STATUS "SVN revision = ${SUBVERSION_REVISION}")
+# Git revision string
+include("${CMAKE_SOURCE_DIR}/cmake/gitrevision.cmake")
+message(STATUS "Git revision = ${GITREVISION}")
 
 # make sure my DEBUG macro is defined if not release (don't rely on NDEBUG)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
@@ -170,7 +170,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_PACKAGE_VERSION_MAJOR "${MULTOVL_VERSION_MAJOR}")
     set(CPACK_PACKAGE_VERSION_MINOR "${MULTOVL_VERSION_MINOR}")
     if(NOT ${SUBVERSION_REVISION} STREQUAL "0")
-        set(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
+        set(CPACK_PACKAGE_VERSION_PATCH "${GITREVISION}")
     endif()
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Multiple Overlaps of Genomic Regions")

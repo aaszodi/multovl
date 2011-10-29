@@ -200,8 +200,7 @@ bool PgPipeline::write_output()
     }
     
     // Some general stats etc. will just be written to stdout as usual
-    std::cout << "# PgMultovl version " << MULTOVL_VER() << " (" << __DATE__ 
-        << "), " << MULTOVL_BUILD() << std::endl
+    std::cout << "# PgMultovl version " << MULTOVL_VER() << MULTOVL_BUILD() << std::endl
         << "# Built with libpqxx version " << PQXX_VERSION << std::endl;
     std::cout << "# Parameters = " << _optp->param_str() << std::endl;
     std::cout << "# Input tracks = " << _inputs.size() << std::endl;

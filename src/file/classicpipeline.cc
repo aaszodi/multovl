@@ -124,8 +124,8 @@ bool ClassicPipeline::write_gff_output()
     std::cout << "##date " << boost::gregorian::to_iso_extended_string(d) << std::endl;
 
     // version information, GFF style
-    std::cout << "##source-version Multovl version " << MULTOVL_VER() << " (" << __DATE__ 
-        << "), " << MULTOVL_BUILD() << std::endl;
+    std::cout << "##source-version Multovl version " << MULTOVL_VER() 
+        << MULTOVL_BUILD() << std::endl;
     
     // MultOvl standard comments
     write_comments();

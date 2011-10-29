@@ -93,7 +93,7 @@ std::ostream& MultovlOptbase::print_version(std::ostream& out) const
 
 std::ostream& MultovlOptbase::version_info(std::ostream& out) const
 {
-	out << "Multovl version " << MULTOVL_VER() << " (" << __DATE__ << ")" << std::endl;
+	out << "Multovl version " << MULTOVL_VER() << std::endl;
     out << MULTOVL_BUILD() << std::endl;
 	return out;
 }
