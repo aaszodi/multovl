@@ -5,7 +5,7 @@
 
 # Boost-serializable movl lib
 set(movl_wbsrc 
-    wbregion.cc
+    serial.cc
 )
 if (BAMTOOLS_FOUND)
     include_directories(

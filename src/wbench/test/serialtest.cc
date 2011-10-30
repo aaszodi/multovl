@@ -3,7 +3,8 @@
 
 // -- Own headers --
 
-#include "wbench/wbregion.hh"
+#include "wbench/serial.hh"
+#include "region.hh"
 using namespace multovl;
 
 // -- Standard headers --
@@ -51,7 +52,7 @@ struct SerialFixture
     }
     
     boost::filesystem::path tmpfilepath;
-    WbRegion r15;
+    Region r15;
 };
 
 static
@@ -65,7 +66,7 @@ std::string reg_tostr(const Region& reg)
 
 BOOST_FIXTURE_TEST_SUITE(serialsuite, SerialFixture)
 
-BOOST_AUTO_TEST_CASE(wbregion_test)
+BOOST_AUTO_TEST_CASE(regionser_test)
 {
     {
         std::ofstream ofs(tmpfilepath.string().c_str());
@@ -76,7 +77,7 @@ BOOST_AUTO_TEST_CASE(wbregion_test)
     {
         std::ifstream ifs(tmpfilepath.string().c_str());
         boost::archive::IARCHIVE ia(ifs);
-        WbRegion inr;
+        Region inr;
         ia >> inr;
         BOOST_CHECK_EQUAL(reg_tostr(inr), reg_tostr(r15));
     }
