@@ -72,11 +72,14 @@ set(BOOST_ROOT "/usr/local/boost" CACHE PATH "Top-level Boost directory")
 # set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 find_package( Boost COMPONENTS regex date_time filesystem system 
-	unit_test_framework program_options REQUIRED)
+	unit_test_framework program_options serialization REQUIRED)
 	
 # list of Boost libraries needed by apps
-set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} 
-	${Boost_SYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
+set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} 
+    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+    ${Boost_REGEX_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY}
+	${Boost_SERIALIZATION_LIBRARY}
+)
 
 # we always need the Boost headers
 # and the binary dir for config.hh
@@ -139,9 +142,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
     add_subdirectory(${SRCDIR}/test test)
     add_subdirectory(${SRCDIR}/file/test test/file)
-    if (PQXX_FOUND)
-        ## add_subdirectory(${SRCDIR}/db/test test/db)
-    endif()
+    add_subdirectory(${SRCDIR}/wbench/test test/wbench)
     add_custom_target(unit_tests DEPENDS ${unit_test_targets})
 endif()
 

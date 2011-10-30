@@ -70,19 +70,19 @@ class Region:
     // -- Getters --
     
     /// Returns the first coordinate.
-    unsigned int first() const { return _first; }
+    const unsigned int& first() const { return _first; }
     
     /// Returns the last coordinate.
-    unsigned int last() const { return _last; }
+    const unsigned int& last() const { return _last; }
     
     /// Returns the length.
-    unsigned int length() const { return _length; }
+    const unsigned int& length() const { return _length; }
     
     /// Zero-length regions are considered empty.
     bool is_empty() const { return (_length == 0); }
     
     /// Returns the strand information.
-    char strand() const { return _strand; }
+    const char& strand() const { return _strand; }
     
     /// Returns the name of the region.
     const std::string& name() const { return _name; }
