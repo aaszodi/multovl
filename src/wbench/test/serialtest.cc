@@ -39,7 +39,8 @@ using namespace multovl;
 struct SerialFixture
 {
     SerialFixture():
-        r15(1, 5, '+', "r15")
+        r15(1, 5, '+', "r15"),
+        a2(4, 6, '-', "a46", 9)
     {
         // some temp file
         tmpfilepath = boost::filesystem::temp_directory_path() /
@@ -53,6 +54,7 @@ struct SerialFixture
     
     boost::filesystem::path tmpfilepath;
     Region r15;
+    AncestorRegion a2;
 };
 
 static
@@ -80,6 +82,24 @@ BOOST_AUTO_TEST_CASE(regionser_test)
         Region inr;
         ia >> inr;
         BOOST_CHECK_EQUAL(reg_tostr(inr), reg_tostr(r15));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(ancregionser_test)
+{
+    {
+        std::ofstream ofs(tmpfilepath.string().c_str());
+        boost::archive::OARCHIVE oa(ofs);
+        oa << a2;
+    }
+    
+    {
+        std::ifstream ifs(tmpfilepath.string().c_str());
+        boost::archive::IARCHIVE ia(ifs);
+        AncestorRegion inar;
+        ia >> inar;
+        std::string out = inar.to_attrstring();
+        BOOST_CHECK_EQUAL(out, "9:a46:-:4-6");
     }
 }
 

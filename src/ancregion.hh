@@ -53,7 +53,7 @@ class AncestorRegion: public Region,
         Region(f, l, s, nm), _trackid(trackid) {}
     
     /// Returns the current track ID.
-    unsigned int track_id() const { return _trackid; }
+    const unsigned int& track_id() const { return _trackid; }
     
     /// Sets the track ID to /trackid/. Returns old track ID.
     unsigned int track_id(unsigned int trackid);
