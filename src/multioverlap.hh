@@ -20,13 +20,12 @@
 
 // -- Boost headers --
 
-#include "boost/shared_ptr.hpp"
 #include "boost/operators.hpp"
 
 // -- Own headers --
 
+#include "reglimit.hh"
 #include "multiregion.hh"
-#include "multovlopts.hh"
 
 // == Classes ==
 
@@ -48,58 +47,6 @@ class MultiOverlap
 	
 	private:
 	
-    // Each ancestor region to be overlapped is stored twice in MultiRegion's lookup;
-    // once as a "first pos", and once as a "last pos".
-    // The RegLimit class implements these "region limit" objects.
-    class RegLimit
-    {
-        public:
-        
-        RegLimit(const boost::shared_ptr<AncestorRegion>& regp, 
-            bool isfirst=true)
-        : _regp(regp), _isfirst(isfirst) {}
-        
-        const AncestorRegion& region() const
-        {
-            return *_regp;
-        }
-        
-        bool is_first() const
-        {
-            return _isfirst;
-        }
-        
-        unsigned int track_id() const
-        {
-            return _regp->track_id();   // convenience function
-        }
-        
-        unsigned int this_pos() const
-        {
-            return (is_first()? _regp->first(): _regp->last());
-        }
-        
-        unsigned int other_pos() const
-        {
-            return (is_first()? _regp->last(): _regp->first());
-        }
-        
-        bool operator<(const RegLimit& other) const
-        {
-            if (this->this_pos() < other.this_pos())
-                return true;
-            else if (this->this_pos() == other.this_pos())
-                return (this->is_first() && !(other.is_first()));
-            else
-                return false;
-        }
-        
-        private:
-        
-        boost::shared_ptr<AncestorRegion> _regp;
-        bool _isfirst;
-    };  // class RegLimit
-    
     typedef std::multiset<RegLimit> reglim_t;
     
     typedef std::pair<unsigned int, unsigned int> uintpair_t;

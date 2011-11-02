@@ -9,7 +9,7 @@ endif()
 
 # Convenience library for 'multovl' and variants
 set(movlsrc
-    region.cc ancregion.cc errors.cc
+    region.cc ancregion.cc errors.cc reglimit.cc
     polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc pipeline.cc
 )
 add_library(movl STATIC ${movlsrc})

@@ -7,6 +7,10 @@
 
 #include "multioverlap.hh"
 
+// -- Boost headers --
+
+#include "boost/lexical_cast.hpp"
+
 // -- System headers --
 
 #include <sstream>

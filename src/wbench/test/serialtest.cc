@@ -3,8 +3,8 @@
 
 // -- Own headers --
 
-#include "wbench/serial.hh"
-#include "region.hh"
+#include "wbench/serial.hh" // pulls in [anc]region.hh
+#include "reglimit.hh"
 using namespace multovl;
 
 // -- Standard headers --
@@ -18,9 +18,11 @@ using namespace multovl;
 
 #include "boost/lexical_cast.hpp"
 #include "boost/filesystem.hpp"
+#include "boost/make_shared.hpp"
 
-// play with the archive type (1 -> text, 0 -> binary)
-#if 0
+// play with the archive type
+#define USE_TEXT_ARCHIVE
+#if defined(USE_TEXT_ARCHIVE)
 #define IARCHIVE text_iarchive
 #define OARCHIVE text_oarchive
 #include "boost/archive/text_iarchive.hpp"
@@ -47,6 +49,17 @@ struct SerialFixture
             boost::filesystem::unique_path();
     }
     
+    #if defined(USE_TEXT_ARCHIVE)
+    void print_text_archive()
+    {
+        std::cout << "** RegLimit text archive:" << std::endl;
+        std::ifstream ifs(tmpfilepath.string().c_str());
+        std::string buf;
+        while (std::getline(ifs, buf))
+            std::cout << buf << std::endl;
+    }
+    #endif
+
     ~SerialFixture()
     {
         boost::filesystem::remove(tmpfilepath);
@@ -100,6 +113,38 @@ BOOST_AUTO_TEST_CASE(ancregionser_test)
         ia >> inar;
         std::string out = inar.to_attrstring();
         BOOST_CHECK_EQUAL(out, "9:a46:-:4-6");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(reglimitser_test)
+{
+    {
+        // create 2 RegLimit objects referring to the same ancregion
+        boost::shared_ptr<AncestorRegion> a2p = boost::make_shared<AncestorRegion>(a2);
+        RegLimit rlf(a2p, true), rll(a2p, false);
+        std::ofstream ofs(tmpfilepath.string().c_str());
+        boost::archive::OARCHIVE oa(ofs);
+        oa << rlf << rll;
+    }
+    
+    #if defined(USE_TEXT_ARCHIVE)
+        print_text_archive();
+    #endif
+    
+    {
+        std::ifstream ifs(tmpfilepath.string().c_str());
+        boost::archive::IARCHIVE ia(ifs);
+        RegLimit inrlf, inrll;
+        ia >> inrlf >> inrll;
+        
+        // The raw pointers should be the same...
+        BOOST_CHECK_EQUAL(inrlf.raw_region_ptr(), inrll.raw_region_ptr());
+        
+        // first & last
+        BOOST_CHECK_EQUAL(inrlf.region().to_attrstring(), "9:a46:-:4-6");
+        BOOST_CHECK(inrlf.is_first());
+        BOOST_CHECK_EQUAL(inrll.region().to_attrstring(), "9:a46:-:4-6");
+        BOOST_CHECK(!inrll.is_first());
     }
 }
 
