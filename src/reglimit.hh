@@ -11,14 +11,6 @@
 
 // -- System headers --
     
-#include <string>
-#include <map>
-#include <set>
-#include <vector>
-#include <iostream>
-#include <algorithm>
-#include <iterator>
-
 // -- Boost headers --
 
 #include "boost/serialization/shared_ptr.hpp"
