@@ -4,7 +4,7 @@
 // -- Own headers --
 
 #include "wbench/serial.hh" // pulls in [anc]region.hh
-#include "reglimit.hh"
+#include "multireglimit.hh" // pulls in reglimit.hh
 using namespace multovl;
 
 // -- Standard headers --
@@ -145,6 +145,32 @@ BOOST_AUTO_TEST_CASE(reglimitser_test)
         BOOST_CHECK(inrlf.is_first());
         BOOST_CHECK_EQUAL(inrll.region().to_attrstring(), "9:a46:-:4-6");
         BOOST_CHECK(!inrll.is_first());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(multireglimitser_test)
+{
+    {
+        MultiRegLimit mrl(r15, 9);
+        std::ofstream ofs(tmpfilepath.string().c_str());
+        boost::archive::OARCHIVE oa(ofs);
+        oa << mrl;
+    }
+    
+    {
+        std::ifstream ifs(tmpfilepath.string().c_str());
+        boost::archive::IARCHIVE ia(ifs);
+        MultiRegLimit inmrl;
+        ia >> inmrl;
+        
+        MultiRegLimit::reglim_t reglim = inmrl.reglim();
+        BOOST_CHECK_EQUAL(reglim.size(), 2);
+        MultiRegLimit::reglim_t::const_iterator rlit = reglim.begin();
+        BOOST_CHECK_EQUAL(rlit->region().to_attrstring(), "9:a46:-:4-6");
+        BOOST_CHECK(rlit->is_first());
+        ++rlit;
+        BOOST_CHECK_EQUAL(rlit->region().to_attrstring(), "9:a46:-:4-6");
+        BOOST_CHECK(!rlit->is_first());
     }
 }
 
