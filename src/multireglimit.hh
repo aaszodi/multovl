@@ -56,6 +56,11 @@ class MultiRegLimit
     /// \return const access to the RegLimit multiset inside
     const reglim_t& reglim() const { return _reglim; }
     
+    /// Merges another MultiRegLimit object into the calling object.
+    /// \param rhs the other MultiRegLimit object.
+    /// \return the calling object
+    MultiRegLimit& operator+=(const MultiRegLimit& rhs);
+    
     private:
             
     // data 

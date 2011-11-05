@@ -166,10 +166,10 @@ BOOST_AUTO_TEST_CASE(multireglimitser_test)
         MultiRegLimit::reglim_t reglim = inmrl.reglim();
         BOOST_CHECK_EQUAL(reglim.size(), 2);
         MultiRegLimit::reglim_t::const_iterator rlit = reglim.begin();
-        BOOST_CHECK_EQUAL(rlit->region().to_attrstring(), "9:a46:-:4-6");
+        BOOST_CHECK_EQUAL(rlit->region().to_attrstring(), "9:r15:+:1-5");
         BOOST_CHECK(rlit->is_first());
         ++rlit;
-        BOOST_CHECK_EQUAL(rlit->region().to_attrstring(), "9:a46:-:4-6");
+        BOOST_CHECK_EQUAL(rlit->region().to_attrstring(), "9:r15:+:1-5");
         BOOST_CHECK(!rlit->is_first());
     }
 }
