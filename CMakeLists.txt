@@ -158,8 +158,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(DOCDIR "${PROJECT_SOURCE_DIR}/doc")
     install(FILES "${DOCDIR}/README.txt" "${DOCDIR}/license.txt" 
         DESTINATION ${MULTOVL_DESTDIR}/doc)
-    install(DIRECTORY "${DOCDIR}/html" DESTINATION ${MULTOVL_DESTDIR}/doc
-        PATTERN ".svn" EXCLUDE)
+    install(DIRECTORY "${DOCDIR}/html" DESTINATION ${MULTOVL_DESTDIR}/doc)
 
     # optional Postgres example config file
     if (PQXX_FOUND)
@@ -170,8 +169,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # packaging: common settings
     set(CPACK_PACKAGE_VERSION_MAJOR "${MULTOVL_VERSION_MAJOR}")
     set(CPACK_PACKAGE_VERSION_MINOR "${MULTOVL_VERSION_MINOR}")
-    if(NOT ${SUBVERSION_REVISION} STREQUAL "0")
-        set(CPACK_PACKAGE_VERSION_PATCH "${GITREVISION}")
+    if(NOT ${GITREVISION} STREQUAL "X")
+        set(CPACK_PACKAGE_VERSION_PATCH "${GITREVCNT}")
     endif()
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Multiple Overlaps of Genomic Regions")
@@ -181,11 +180,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     
     # executable package (no source)
     set(CPACK_GENERATOR "TGZ")
-    set(CPACK_IGNORE_FILES "cmake/;src/;debug/;release/;
-        "/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store;/\\\\.svn/")
+    set(CPACK_IGNORE_FILES "cmake/;src/;debug/;release/;\\\\.git;
+        "/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store")
     
     # source package
     set(CPACK_SOURCE_GENERATOR "TGZ")
-    set(CPACK_SOURCE_IGNORE_FILES "debug/;release/;\\\\.DS_Store;/\\\\.svn/")
+    set(CPACK_SOURCE_IGNORE_FILES "debug/;release/;\\\\.DS_Store;\\\\.git")
     include(CPack)
 endif()

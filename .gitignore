@@ -1,0 +1,7 @@
+# The revision string file should be ignored
+gitrevision.txt
+
+# Build directories
+debug
+release
+
