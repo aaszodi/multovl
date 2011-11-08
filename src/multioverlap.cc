@@ -1,6 +1,3 @@
-#ifndef MULTOVL_MULTIOVERLAP_IMPL
-#define MULTOVL_MULTIOVERLAP_IMPL
-
 // == Module multioverlap.cc ==
 
 // -- Own header --
@@ -24,21 +21,6 @@
 
 namespace multovl {
 
-// -- MultiOverlap
-
-void MultiOverlap::add(const Region& region, unsigned int trackid)
-{
-    // Store /region/ twice in the region limit map /_reglim/
-    // through smart pointers
-    boost::shared_ptr<AncestorRegion> regp(new AncestorRegion(region, trackid));
-    // once as a "first position"
-    RegLimit limfirst(regp, true);
-    _reglim.insert(limfirst);
-    // ... and then as "last position"
-    RegLimit limlast(regp, false);
-    _reglim.insert(limlast);
-}
-
 unsigned int MultiOverlap::find_overlaps(
         unsigned int ovlen, unsigned int minmult, unsigned int maxmult, bool intrack)
 {
@@ -51,14 +33,14 @@ unsigned int MultiOverlap::find_overlaps(
     _multiregions.clear();
     
     // iterate over the region limit multimap
-    reglim_t::const_iterator lowbound = _reglim.begin(), upbound;
-    while (_reglim.end() != lowbound)
+    reglim_t::const_iterator lowbound = reglim().begin(), upbound;
+    while (reglim().end() != lowbound)
     {
         pos = lowbound->this_pos(); // current region limit position
-        upbound = _reglim.upper_bound(*lowbound);
+        upbound = reglim().upper_bound(*lowbound);
 
         // the lowbound/upbound pair corresponds to the STL range
-        // of all RegLimit objects in _reglim
+        // of all RegLimit objects in reglim()
         // that were at position pos        
         // iterate over them all
         for (reglim_t::const_iterator rmiter = lowbound;
@@ -143,14 +125,14 @@ unsigned int MultiOverlap::find_unionoverlaps(
     _multiregions.clear();
     
     // iterate over the region limit multimap
-    reglim_t::const_iterator lowbound = _reglim.begin(), upbound;
-    while (_reglim.end() != lowbound )
+    reglim_t::const_iterator lowbound = reglim().begin(), upbound;
+    while (reglim().end() != lowbound )
     {
         pos = lowbound->this_pos();    // this is the new position
-        upbound = _reglim.upper_bound(*lowbound);
+        upbound = reglim().upper_bound(*lowbound);
 
         // the lowbound/upbound pair corresponds to the STL range
-        // of all RegLimit objects in _reglim
+        // of all RegLimit objects in reglim()
         // that were at position pos
         // iterate over them all
         for (reglim_t::const_iterator rmiter = lowbound;
@@ -219,7 +201,6 @@ void MultiOverlap::overlap_stats(Counter& counter) const
         counter.count(*mrit);
     }
 }
-
 
 // == Private ==
 
@@ -375,5 +356,3 @@ std::string MultiOverlap::Counter::get_key(
 }
 
 } // namespace multovl
-
-#endif  // MULTOVL_MULTIOVERLAP_IMPL

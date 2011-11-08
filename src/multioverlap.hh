@@ -24,7 +24,7 @@
 
 // -- Own headers --
 
-#include "reglimit.hh"
+#include "multireglimit.hh"
 #include "multiregion.hh"
 
 // == Classes ==
@@ -32,23 +32,17 @@
 namespace multovl {
 
 /**
- * Objects of the MultiOverlap class keep track of multiple overlaps of genomic regions.
- * The idea is that for each region we keep track where the region begins or ends.
- * Internally, this is implemented by a multimap that is keyed with the limits
- * (first or last position) of the regions, and the stored value is an internal class
- * that remembers which track it came from and whether it was a first (ie. beginning of region)
- * or a non-first=last (ie. end of the region). Because the multimap is sorted on its keys,
- * after all regions from all tracks are added, it stores all positions where a region began
- * or ended. One just needs to iterate along and look where a change occurred.
+ * Objects of the MultiOverlap class generate and store multiple overlaps of genomic regions.
+ * The class is derived from MultiRegLimit which is responsible for keeping track
+ * of where the ancestor regions begin or end.
+ * The MultiOverlap::find_* methods iterate along the limits and detect the overlaps.
  */
-class MultiOverlap
+class MultiOverlap: public MultiRegLimit
 {
 	// -- internal classes --
 	
 	private:
 	
-    typedef std::multiset<RegLimit> reglim_t;
-    
     typedef std::pair<unsigned int, unsigned int> uintpair_t;
     typedef std::vector<uintpair_t> uintpairvec_t;
     
@@ -148,22 +142,13 @@ class MultiOverlap
 	// -- methods --
            
     /// Init to empty 
-    MultiOverlap(): _reglim(), _multiregions() {}
+    MultiOverlap(): MultiRegLimit(), _multiregions() {}
     
     /// Init to contain a region and trackid 
     MultiOverlap(const Region& region, unsigned int trackid): 
-        _reglim(), _multiregions()
-    {
-        add(region, trackid);
-    }
+        MultiRegLimit(region, trackid), _multiregions()
+    {}
     
-    /**
-     * Adds a region /region/ identified by /trackid/
-     * to the calling object. Invoke this method for all regions
-     * in all the tracks that are to be overlapped.
-     */
-    void add(const Region& region, unsigned int trackid);
-
     /**
      * Finds multiple overlaps. Whenever the multiplicity of the overlap
      * changes, there will be a new MultiRegion in the returned vector.
@@ -209,8 +194,6 @@ class MultiOverlap
     private:
             
     // -- data 
-    
-    reglim_t _reglim;
     multiregvec_t _multiregions;
 };
 
