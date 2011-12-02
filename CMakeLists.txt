@@ -142,7 +142,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
     add_subdirectory(${SRCDIR}/test test)
     add_subdirectory(${SRCDIR}/file/test test/file)
-    add_subdirectory(${SRCDIR}/wbench/test test/wbench)
     add_custom_target(unit_tests DEPENDS ${unit_test_targets})
 endif()
 

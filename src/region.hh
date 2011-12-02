@@ -17,6 +17,10 @@
 // -- Boost headers --
 
 #include "boost/operators.hpp"
+#include "boost/serialization/access.hpp"
+#include "boost/serialization/string.hpp"
+#include "boost/serialization/version.hpp"
+#include "boost/serialization/split_member.hpp"
 
 namespace multovl {
 
@@ -115,7 +119,26 @@ class Region:
     unsigned int _first, _last, _length;
     char _strand;
     std::string _name;
+
+    // "split" serialization
+    friend class boost::serialization::access;
+    template <class Archive>
+    void save(Archive& ar, const unsigned int version) const
+    {
+        ar << _first << _last 
+            << _strand << _name;
+    }
     
+    template <class Archive>
+    void load(Archive& ar, const unsigned int version)
+    {
+        unsigned int first, last;
+        ar >> first >> last;
+        this->set_coords(first, last);  // sets _length, too
+        ar >> _strand;
+        ar >> _name;
+    }
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
 };  // class Region
 
 }   // namespace multovl

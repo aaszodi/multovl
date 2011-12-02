@@ -1,20 +1,29 @@
 # == src/test/CMakeLists.txt for Multovl testing ==
 
-include_directories(${SRCDIR})
+include_directories(${SRCDIR} ${SRCDIR}/test)
 
 # -- Unit tests --
+
+# test helper library
+# currently serialization tools only
+add_library(testhelper STATIC tempfile.cc)
 
 # libraries needed by the unit tests
 # not all of them need all this of course
 set(utestlibs
+    testhelper
     movl
     ${Boost_DATE_TIME_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_REGEX_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SERIALIZATION_LIBRARY}
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 )
+if (BAMTOOLS_FOUND)
+    list(APPEND utestlibs ${BAMTOOLS_LIBRARIES})
+endif()
 
 # the test framework needs a #define when linked dynamically
 if (NOT Boost_USE_STATIC_LIBS)

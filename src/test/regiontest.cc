@@ -5,17 +5,21 @@
 
 #include "region.hh"
 using namespace multovl;
+#include "tempfile.hh"  // temporary file utility
 
 // -- Standard headers --
 
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <fstream>
 
 // -- other Boost headers --
 
 #include "boost/assign/list_inserter.hpp"   // for insert() ()()()...()
 #include "boost/lexical_cast.hpp"
+#include "boost/archive/text_iarchive.hpp"
+#include "boost/archive/text_oarchive.hpp"
 
 // -- Fixture
 
@@ -84,6 +88,24 @@ BOOST_AUTO_TEST_CASE(name_test)
     std::string oldname = r15.name("newr15");
     BOOST_CHECK_EQUAL(oldname, "r15");
     BOOST_CHECK_EQUAL("newr15", r15.name());
+}
+
+BOOST_AUTO_TEST_CASE(regionser_test)
+{
+    Tempfile tempfile;
+    {
+        std::ofstream ofs(tempfile.name());
+        boost::archive::text_oarchive oa(ofs);
+        oa << r15;
+    }
+    
+    {
+        std::ifstream ifs(tempfile.name());
+        boost::archive::text_iarchive ia(ifs);
+        Region inr;
+        ia >> inr;
+        BOOST_CHECK_EQUAL(reg_tostr(inr), reg_tostr(r15));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

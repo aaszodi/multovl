@@ -12,6 +12,10 @@
 
 #include "ancregion.hh"     // pulls in region.hh 
 
+// -- Boost headers --
+
+#include "boost/serialization/set.hpp"  // other serialization headers come from [anc]region.hh
+
 // == CLASSES ==
 
 namespace multovl {
@@ -77,6 +81,15 @@ class MultiRegion: public Region
     ancregset_t _ancestors; // ancestors
     bool _solitary;
     unsigned int _mult;
+    
+    // serialization
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar & boost::serialization::base_object<Region>(*this);
+        ar & _ancestors & _solitary & _mult;
+    }
     
 };  // class MultiRegion
 	

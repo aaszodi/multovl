@@ -17,7 +17,7 @@
 
 // -- Boost headers --
 
-#include "boost/operators.hpp"
+#include <boost/serialization/base_object.hpp>
 
 // -- Library headers --
 
@@ -74,6 +74,24 @@ class AncestorRegion: public Region,
     private:
     
     unsigned int _trackid;
+    
+    // "split" serialization
+    friend class boost::serialization::access;
+    template <class Archive>
+    void save(Archive& ar, const unsigned int version) const
+    {
+        ar << boost::serialization::base_object<Region>(*this); 
+        ar << _trackid;
+    }
+    
+    template <class Archive>
+    void load(Archive& ar, const unsigned int version)
+    {
+        ar >> boost::serialization::base_object<Region>(*this);
+        ar >> _trackid;
+    }
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+    
 };  // class AncestorRegion
 
 /// Collection of ancestors for a descendant region.

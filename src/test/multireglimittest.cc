@@ -5,17 +5,21 @@
 
 #include "multireglimit.hh"
 using namespace multovl;
-
-// -- Standard headers --
-
-#include <list>
+#include "tempfile.hh"  // temporary file utility
 
 // -- Boost headers --
 
+#include "boost/archive/text_iarchive.hpp"
+#include "boost/archive/text_oarchive.hpp"
 #include "boost/shared_ptr.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/assign/list_of.hpp"
 using namespace boost::assign;
+
+// -- Standard headers --
+
+#include <list>
+#include <fstream>
 
 // -- Fixture
 
@@ -102,7 +106,33 @@ BOOST_AUTO_TEST_CASE(multireglimit_merge_test)
     checker(mrl);
 }
 
-// NOTE: serialization is tested elsewhere
+BOOST_AUTO_TEST_CASE(multireglimitser_test)
+{
+    Tempfile tempfile;
+    {
+        Region r(1, 5, '+', "r15");
+        MultiRegLimit mrl(r, 9);
+        std::ofstream ofs(tempfile.name());
+        boost::archive::text_oarchive oa(ofs);
+        oa << mrl;
+    }
+    
+    {
+        std::ifstream ifs(tempfile.name());
+        boost::archive::text_iarchive ia(ifs);
+        MultiRegLimit inmrl;
+        ia >> inmrl;
+        
+        MultiRegLimit::reglim_t reglim = inmrl.reglim();
+        BOOST_CHECK_EQUAL(reglim.size(), 2);
+        MultiRegLimit::reglim_t::const_iterator rlit = reglim.begin();
+        BOOST_CHECK_EQUAL(rlit->region().to_attrstring(), "9:r15:+:1-5");
+        BOOST_CHECK(rlit->is_first());
+        ++rlit;
+        BOOST_CHECK_EQUAL(rlit->region().to_attrstring(), "9:r15:+:1-5");
+        BOOST_CHECK(!rlit->is_first());
+    }
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

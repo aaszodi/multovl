@@ -21,6 +21,7 @@
 // -- Boost headers --
 
 #include "boost/operators.hpp"
+#include "boost/serialization/vector.hpp"
 
 // -- Own headers --
 
@@ -195,6 +196,16 @@ class MultiOverlap: public MultiRegLimit
             
     // -- data 
     multiregvec_t _multiregions;
+    
+    // serialization
+    friend class boost::serialization::access;
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
+    {
+        ar & boost::serialization::base_object<multovl::MultiRegLimit>(*this);
+        ar & _multiregions;
+    }
+    
 };
 
 } // namespace multovl

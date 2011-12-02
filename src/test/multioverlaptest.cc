@@ -6,11 +6,40 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <fstream>
 using namespace std;
+
+// -- Own headers --
 
 #include "multioverlap.hh"
 #include "multiregion.hh"
 using namespace multovl;
+
+#include "boost/archive/text_iarchive.hpp"
+#include "boost/archive/text_oarchive.hpp"
+#include "tempfile.hh"  // for serialization
+
+// -- Fixture --
+
+// ad-hoc storage for expected results
+// basically a string vector and a method to fill it up
+struct ExpectedResult
+{
+    // poor man's MultiRegion->string conversion
+    static
+    std::string to_str(unsigned int first, unsigned int last, unsigned int mult, const string& ancstr)
+    {
+        ostringstream s;
+        s << first << ',' << last << ',' << mult
+            << ',' << ancstr;
+        return s.str();
+    }
+    void add(unsigned int first, unsigned int last, unsigned int mult, const string& ancstr)
+    {
+        result.push_back(to_str(first, last, mult, ancstr));
+    }
+    vector<string> result;
+};
 
 struct MultovlFixture
 {
@@ -35,6 +64,16 @@ struct MultovlFixture
         mo2.add(Region(420, 430, '-', "REGb"), 2);
         mo2.add(Region(440, 500, '-', "REGb"), 2);
         
+        // expected results for pairwise overlaps
+        // this will be used more than once
+        exp2.add(100, 150, 2, "1:REGa:+:100-200|2:REGb:-:50-150");
+        exp2.add(250, 300, 2, "1:REGa:+:250-300|2:REGb:-:250-300");
+        exp2.add(340, 340, 2, "1:REGa:+:340-340|2:REGb:-:340-340");
+        exp2.add(400, 410, 2, "1:REGb:+:350-450|2:REGb:-:400-410");
+        exp2.add(415, 415, 2, "1:REGb:+:350-450|2:REGb:-:415-415");
+        exp2.add(420, 430, 2, "1:REGb:+:350-450|2:REGb:-:420-430");
+        exp2.add(440, 450, 2, "1:REGb:+:350-450|2:REGb:-:440-500");
+        
         // regions for triple overlaps (hence mo3)
         mo3.add(Region(100, 600, '+', "REGa"), 1);
         mo3.add(Region(200, 500, '+', "REGb"), 2); 
@@ -50,26 +89,7 @@ struct MultovlFixture
     }
     
     MultiOverlap mo2, mo3;
-};
-
-// ad-hoc storage for expected results
-// basically a string vector and a method to fill it up
-struct ExpectedResult
-{
-    // poor man's MultiRegion->string conversion
-    static
-    std::string to_str(unsigned int first, unsigned int last, unsigned int mult, const string& ancstr)
-    {
-        ostringstream s;
-        s << first << ',' << last << ',' << mult
-            << ',' << ancstr;
-        return s.str();
-    }
-    void add(unsigned int first, unsigned int last, unsigned int mult, const string& ancstr)
-    {
-        result.push_back(to_str(first, last, mult, ancstr));
-    }
-    vector<string> result;
+    ExpectedResult exp2;    // for the "basic" pairwise tests
 };
 
 // little utility function for result checking using the GFF output string format
@@ -114,19 +134,53 @@ BOOST_AUTO_TEST_CASE(solitary_test)
 
 BOOST_AUTO_TEST_CASE(multioverlap2_test)
 {
-    
-    // multioverlap
-    ExpectedResult exp;
-    exp.add(100, 150, 2, "1:REGa:+:100-200|2:REGb:-:50-150");
-    exp.add(250, 300, 2, "1:REGa:+:250-300|2:REGb:-:250-300");
-    exp.add(340, 340, 2, "1:REGa:+:340-340|2:REGb:-:340-340");
-    exp.add(400, 410, 2, "1:REGb:+:350-450|2:REGb:-:400-410");
-    exp.add(415, 415, 2, "1:REGb:+:350-450|2:REGb:-:415-415");
-    exp.add(420, 430, 2, "1:REGb:+:350-450|2:REGb:-:420-430");
-    exp.add(440, 450, 2, "1:REGb:+:350-450|2:REGb:-:440-500");
-    
+    // pairwise overlaps
     unsigned int regcnt = mo2.find_overlaps(1, 2, 2); // checks minmult/maxmult correction
-    check_results(regcnt, exp, mo2.overlaps());
+    check_results(regcnt, exp2, mo2.overlaps());
+}
+
+BOOST_AUTO_TEST_CASE(mo2_noresults_serialization_test)
+{
+    Tempfile tempfile;
+    
+    // save mo2 without the results, then load it, find overlaps, check
+    {
+        std::ofstream ofs(tempfile.name());
+        boost::archive::text_oarchive oa(ofs);
+        oa << mo2;
+    }
+    //// std::cout << "## MultiOverlap archive w/o results ##" << std::endl;
+    //// tempfile.print();
+    {
+        std::ifstream ifs(tempfile.name());
+        boost::archive::text_iarchive ia(ifs);
+        MultiOverlap inmo2;
+        ia >> inmo2;
+        unsigned int regcnt = inmo2.find_overlaps(1, 2, 2);
+        check_results(regcnt, exp2, inmo2.overlaps());
+    }
+}
+
+BOOST_AUTO_TEST_CASE(mo2_withresults_serialization_test)
+{
+    Tempfile tempfile;
+    
+    // do the overlaps first, then save/load
+    unsigned int regcnt = mo2.find_overlaps(1, 2, 2);
+    {
+        std::ofstream ofs(tempfile.name());
+        boost::archive::text_oarchive oa(ofs);
+        oa << mo2;
+    }
+    //// std::cout << "## MultiOverlap archive with results ##" << std::endl;
+    //// tempfile.print();
+    {
+        std::ifstream ifs(tempfile.name());
+        boost::archive::text_iarchive ia(ifs);
+        MultiOverlap inmo2;
+        ia >> inmo2;
+        check_results(regcnt, exp2, inmo2.overlaps());
+    }    
 }
 
 BOOST_AUTO_TEST_CASE(unionoverlap2_test)

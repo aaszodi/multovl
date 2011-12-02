@@ -21,9 +21,6 @@ set(MULTOVLIBS movl ${MULTOVL_BOOST_LIBS})   # library order does matter in Linu
 # multovl (the file-based variant) is always built
 add_subdirectory(file)
 
-# wbmultovl (the "workbench" variant)
-add_subdirectory(wbench)
-
 # PQXX_FOUND implies that Postgres has also been found
 if (PQXX_FOUND)
     add_subdirectory(db)
