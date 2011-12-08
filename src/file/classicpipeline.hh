@@ -47,11 +47,18 @@ class ClassicPipeline: public Pipeline
     virtual
     bool write_output();
     
+    /// Base-class sliced access to the option-handling object
+    /// which is of type ClassicOpts.
+    virtual
+    MultovlOptbase* opt_ptr() { return _optp; }
+    
     private:
     
     bool write_gff_output();
     bool write_bed_output();
     void write_comments();
+    
+    ClassicOpts* _optp;
 };
 
 }   // namespace multovl

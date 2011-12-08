@@ -3,7 +3,6 @@
 // -- Own headers --
 
 #include "pgpipeline.hh"
-#include "pgmultovlopts.hh"
 #include "multioverlap.hh"
 #include "region.hh"
 #include "multovl_config.hh"
@@ -54,7 +53,7 @@ bool PgPipeline::read_config()
         ptree pt;
         
         // throws if input did not work for some reason
-        read_json(dynamic_cast<PgMultovlOpts*>(_optp)->config_file(), pt);
+        read_json(_optp->config_file(), pt);
         
         // fetch the connection information, construct Postgres connection strings
         std::string hostdb = "host=" + pt.get("conn.hostname", "localhost")
@@ -98,7 +97,7 @@ unsigned int PgPipeline::read_input()
     unsigned int trackid = 0;   // current ID, will be equal to the number of OK tracks on return
     try {
         const str_vec& tracknames = 
-            dynamic_cast<PgMultovlOpts*>(_optp)->input_tracks();
+            _optp->input_tracks();
         _inputs.reserve(tracknames.size());
         
         // connect to the DB
@@ -250,7 +249,7 @@ bool PgPipeline::write_output()
         pqxx::work ta(conn);
         
         // create result track in DB
-        std::string outputtrack = dynamic_cast<PgMultovlOpts*>(_optp)->output_track();
+        std::string outputtrack = _optp->output_track();
         pqxx::result trackupres = 
             ta.prepared("trackupload_stmt")
             (login_name())

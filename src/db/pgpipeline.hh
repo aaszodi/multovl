@@ -6,7 +6,7 @@
 // -- Own headers --
 
 #include "pipeline.hh"
-#include "multovlopts.hh"
+#include "pgmultovlopts.hh"
 
 namespace multovl {
 
@@ -47,6 +47,11 @@ class PgPipeline: public Pipeline
     virtual
     bool write_output();
     
+    /// Base-class sliced access to the option-handling object
+    /// which is of type PgMultovlOpts.
+    virtual
+    MultovlOptbase* opt_ptr() { return _optp; }
+
     private:
     
     bool read_config();
@@ -57,6 +62,7 @@ class PgPipeline: public Pipeline
     std::string login_name();
     
     // data
+    PgMultovlOpts* _optp;
     std::string _rconnstr, _wconnstr,   // read-only and read-write connection strings
         _download_sql, _trackupload_sql, _regionupload_sql;
 };

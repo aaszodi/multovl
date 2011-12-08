@@ -23,20 +23,20 @@ bool Pipeline::run()
     unsigned int trackcnt = read_input();
     if (trackcnt == 0 || !errors().ok())
         return false;
-    if (_optp->timing())
+    if (opt_ptr()->timing())
         timer.add_timepoint();  // [1]-st time point is the end of input
     
     // detect overlaps
     unsigned int totalcounts = detect_overlaps();
     if (!errors().ok())
         return false;
-    if (_optp->timing())
+    if (opt_ptr()->timing())
     {
         timer.add_timepoint();  // [2]-nd timepoint is the end of the multioverlap calc
 
         // no overlap output is produced, just the
         // timing results are printed to stdout
-        std::cout << "Parameters: " << _optp->param_str() 
+        std::cout << "Parameters: " << opt_ptr()->param_str() 
             << ", Timing: input = " << timer.interval(1) 
             << ", multovl = " << timer.interval(2,1)
             << ", total = " << timer.interval(2) << std::endl;
@@ -63,15 +63,15 @@ unsigned int Pipeline::detect_overlaps()
         MultiOverlap& movl = cmit->second;      // "current overlap"
         
         // generate and store overlaps
-        if (_optp->uniregion())
+        if (opt_ptr()->uniregion())
         {
-            totalcounts += movl.find_unionoverlaps(_optp->ovlen(), 
-                _optp->minmult(), _optp->maxmult());
+            totalcounts += movl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), opt_ptr()->maxmult());
         }
         else
         {
-            totalcounts += movl.find_overlaps(_optp->ovlen(), 
-                _optp->minmult(), _optp->maxmult(), !_optp->nointrack());
+            totalcounts += movl.find_overlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), opt_ptr()->maxmult(), !opt_ptr()->nointrack());
         }
     }
     return totalcounts;

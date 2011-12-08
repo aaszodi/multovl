@@ -32,7 +32,7 @@ ClassicPipeline::~ClassicPipeline()
 unsigned int ClassicPipeline::read_input()
 {
     typedef std::vector<std::string> str_vec;
-    const str_vec& inputfiles = dynamic_cast<ClassicOpts*>(_optp)->input_files();
+    const str_vec& inputfiles = _optp->input_files();
     unsigned int filecnt = inputfiles.size();
     _inputs.reserve(filecnt);
     unsigned int trackid = 0;   // current ID, will be equal to the number of OK tracks on return
@@ -106,7 +106,7 @@ bool ClassicPipeline::write_output()
 {
     // output format
     // we may very well downcast _optp...
-    if (dynamic_cast< ClassicOpts* >(_optp)->outformat() == "BED")
+    if (_optp->outformat() == "BED")
     {
         // write BED output
         return write_bed_output();
@@ -135,7 +135,7 @@ bool ClassicPipeline::write_gff_output()
         cmit != _cmovl.end(); ++cmit)
     {
         io::GffLinewriter lw(
-            dynamic_cast<ClassicOpts*>(_optp)->source(), 
+            _optp->source(), 
             2, cmit->first
         );    // init with chromosome
         const MultiOverlap::multiregvec_t& mregs = cmit->second.overlaps();

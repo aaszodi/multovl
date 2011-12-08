@@ -28,9 +28,6 @@ class Pipeline: private boost::noncopyable
 {
     public:
     
-    /// Init to default
-    Pipeline(): _optp(NULL) {}  // _optp should be inited appropriately by derived classes
-    
     /// Go through the whole analysis.
     /// \return true on success, false if something went wrong.
     bool run();
@@ -81,10 +78,15 @@ class Pipeline: private boost::noncopyable
     virtual
     bool write_output() = 0;
     
+    /// Base-class sliced access to an option-handling object.
+    /// Derived classes will use their own option-handling,
+    /// it should be derived from MultovlOptbase.
+    virtual
+    MultovlOptbase* opt_ptr() = 0;
+    
     // data which should be accessible
     // to derived classes without too much bureaucracy
     input_vec _inputs;      ///< vector of input track descriptors
-    MultovlOptbase* _optp;  ///< option handling base class
     chrom_multovl_map _cmovl;   ///< chromosome ==> MultiOverlap map
     Errors _errors; ///< collect error messages here
 };
