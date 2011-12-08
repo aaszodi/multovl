@@ -32,8 +32,11 @@ class ClassicPipeline: public Pipeline
     
     protected:
     
-    /// Reads the input tracks from files.
-    /// The file names are supplied from the command line when the constructor runs.
+    /// Reads the input tracks from files if no --load option was specified.
+    /// The file names are parsed from the command line when the constructor runs.
+    /// If the --load <archfile> option was specified, then the complete status
+    /// of the program including all input details is read from a binary archive <archfile>.
+    /// In this case the input track file name arguments are ignored.
     /// \return the number of tracks successfully read, 0 on error.
     virtual
     unsigned int read_input();
@@ -42,8 +45,9 @@ class ClassicPipeline: public Pipeline
     // virtual
     // unsigned int detect_overlaps();
     
-    /// Writes the results to standard output.
-    /// Format will be decided based on the options.
+    /// Writes the results to standard output. Format will be decided based on the options.
+    /// If the --save <archfile> option was specified, then the complete status of the program
+    /// except the results will be serialized to a binary archive <archfile> as well.
     virtual
     bool write_output();
     
@@ -53,6 +57,8 @@ class ClassicPipeline: public Pipeline
     MultovlOptbase* opt_ptr() { return _optp; }
     
     private:
+    
+    unsigned int read_tracks();
     
     bool write_gff_output();
     bool write_bed_output();

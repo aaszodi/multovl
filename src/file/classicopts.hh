@@ -25,9 +25,24 @@ class ClassicOpts : public MultovlOptbase
 	
 	ClassicOpts();
 	
+	/// \return the definition for the "source" column in the GFF output.
 	const std::string& source() const { return _source; }
+	
+	/// \return the desired output format. May be {BED,GFF}, case-insensitive, default GFF
 	const std::string& outformat() const { return _outformat; }
 	
+	/// \return the archive file name to save (serialize) the status of the program to.
+	/// Empty string by default meaning no status is to be saved.
+	const std::string& save_to() const { return _saveto; }
+	
+	/// \return the archive file name to load (deserialize) the status of the program from.
+	/// The file is to be created by a previous saving operation.
+	/// If this option is chosen, then no track input files are read.
+	/// Empty string by default, meaning tracks are read from files 
+	/// given as positional arguments on the command line.
+	const std::string& load_from() const { return _loadfrom; }
+	
+	/// \return a vector of input file names provided as positional arguments on the command line.
 	std::vector<std::string> input_files() const { return pos_opts(); }
 	
 	virtual
@@ -46,7 +61,8 @@ class ClassicOpts : public MultovlOptbase
 
 	private:
 	
-	std::string _source, _outformat;
+	std::string _source, _outformat,
+	    _saveto, _loadfrom;
 };
 
 } // namespace multovl

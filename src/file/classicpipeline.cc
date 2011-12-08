@@ -12,8 +12,35 @@
 // -- Boost headers --
 
 #include "boost/date_time/gregorian/gregorian.hpp"  // needed by GFF output header
+#include <boost/archive/binary_oarchive.hpp>    // serialization
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/archive_exception.hpp>
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+
+// -- Standard headers --
+
+#include <fstream>
 
 // == Implementation ==
+
+// -- Serialization --
+
+namespace boost {
+namespace serialization {
+
+// Non-intrusive serialization for the Input struct
+template<class Archive>
+void serialize(Archive& ar, multovl::Pipeline::Input& inp, const unsigned int version)
+{
+    ar & inp.name & inp.trackid & inp.regcnt;
+}
+
+}   // namespace serialization
+}   // namespace boost
+
+// -- ClassicPipeline methods --
 
 namespace multovl {
 
@@ -29,7 +56,33 @@ ClassicPipeline::~ClassicPipeline()
     delete _optp;
 }
 
+// -- Pipeline virtual method implementations
+
 unsigned int ClassicPipeline::read_input()
+{
+    unsigned int trackcnt = 0;
+    if (_optp->load_from() != "")
+    {
+        // read input data from a previously saved archive
+        try {
+            std::ifstream ifs(_optp->load_from().c_str());
+            boost::archive::binary_iarchive ia(ifs);
+            ia >> _inputs >> _cmovl;
+            trackcnt = _inputs.size();
+        } catch (const boost::archive::archive_exception& aex)
+        {
+            _errors.add_error("Cannot load archive: " + std::string(aex.what()));
+            return 0;
+        }
+    } else {
+        // read tracks from cmdline arg files
+        trackcnt = read_tracks();
+    }
+    return trackcnt;
+}
+
+// Read tracks from separate files specified as pos args on the command line (private)
+unsigned int ClassicPipeline::read_tracks()
 {
     typedef std::vector<std::string> str_vec;
     const str_vec& inputfiles = _optp->input_files();
@@ -104,8 +157,26 @@ unsigned int ClassicPipeline::read_input()
 
 bool ClassicPipeline::write_output()
 {
-    // output format
-    // we may very well downcast _optp...
+    // save current status in archive if asked to do so
+    if (_optp->save_to() != "")
+    {
+        // write status data to archive file
+        try {
+            std::ofstream ofs(_optp->save_to().c_str());
+            boost::archive::binary_oarchive oa(ofs);
+            
+            // Note that only the input data and the chrom=>MultiOverlap map is saved
+            // neither the results nor the parameter settings are.
+            // The idea is to load these again and re-run with possibly different settings.
+            oa << _inputs << _cmovl;
+        } catch (const boost::archive::archive_exception& aex)
+        {
+            _errors.add_error("Cannot save archive: " + std::string(aex.what()));
+            return false;
+        }
+    }
+    
+    // output the result in the selected format to stdout
     if (_optp->outformat() == "BED")
     {
         // write BED output
@@ -115,6 +186,8 @@ bool ClassicPipeline::write_output()
         return write_gff_output();
     }
 }
+
+// -- Result output methods --
 
 bool ClassicPipeline::write_gff_output()
 {
@@ -190,6 +263,11 @@ void ClassicPipeline::write_comments()
     std::cout << "# Parameters = " << _optp->param_str() << std::endl;
     
     // add the input file names as comments
+    if (_optp->load_from() != "")
+    {
+        std::cout << "# Input data loaded from archive = " 
+            << _optp->load_from() << std::endl;
+    }
     std::cout << "# Input files = " << _inputs.size() << std::endl;
     for (input_vec::const_iterator it = _inputs.begin();
         it != _inputs.end(); ++it)

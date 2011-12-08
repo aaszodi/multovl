@@ -6,7 +6,7 @@
 <body>
 <h1 style="color:navy">MULTOVL: Multiple Region Overlap Guide</h1>
 
-<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.1, Summer 2011</em></center></p>
+<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.2, Winter 2011</em></center></p>
 
 <h2>Table of contents</h2>
 
@@ -84,7 +84,7 @@ Linux (Ubuntu, Debian, OpenSUSE), Solaris, and sometimes even IRIX.</li>
 compilers and 
 <a href= 'http://www.oracle.com/technetwork/server-storage/solarisstudio/downloads/studio12-update1-136165.html' _target='blank'>SunStudio 12u1</a>
 under Solaris.</li>
-<li>The <a href='www.boost.org' target='_blank'>Boost C++ library</a>, at least V1.45.
+<li>The <a href='www.boost.org' target='_blank'>Boost C++ libraries</a>, at least V1.45.
 Note that Debian distros contain antediluvian versions
 of Boost, which may lead to problems. You have to remove them fully and then compile your own from source,
 because CMake will link the system Boost libraries if it can find them, leading to all sorts of
@@ -164,7 +164,7 @@ make doc
 make install
 </code></pre>
 
-<p>The tools will be installed in <tt>/path/to/installdir/multovl-1.1/bin</tt>.</p>
+<p>The tools will be installed in <tt>/path/to/installdir/multovl-1.2/bin</tt>.</p>
 
 <p>Alternatively you can configure a debug build by specifying
 <tt>-DCMAKE_BUILD_TYPE=Debug</tt> and omitting the
@@ -238,7 +238,9 @@ should not use this (all the more so because no output will be generated).</p>
 <h3>"Classic" serial MULTOVL using text files</h3>
 
 <pre><code>Multiple Chromosome / Multiple Region Overlaps
-Usage: multovl [options] regfile1 [ regfile2 ... ]
+Usage: multovl [options] [&lt;infile1&gt; [ &lt;infile2&gt; ... ]]
+Accepted input file formats: BED, GFF/GTF, BAM (detected from extension)
+&lt;infileX&gt; arguments are ignored if --load is set
 Output goes to stdout, select format with the -f option
 Options:
   -h [ --help ]            Print this help and exit
@@ -258,13 +260,27 @@ Options:
   -s [ --source ] arg      Source field in GFF output
   -f [ --outformat ] arg   Output format {BED,GFF}, case-insensitive, 
                            default GFF
+  --save arg               Save program data to archive file, default: do not save
+  --load arg               Load program data from archive file, default: do not load
 </code></pre>
 
-<p>You should supply at least one input file in BED or GFF format. The output
+<p>You should supply at least one input file in BED or GFF format unless <tt>--load</tt> is
+specified (see below). The output
 will be written to the standard output in 
 <a href='#outfile'>GFF2 or BED format with ancestry annotations</a> (it is a good idea to pipe it to a file).
 The second column ("source") will be set to "multovl" by default but you can change this
 using the <tt>-s sourcestr</tt> option.</p>
+
+<p>It is possible to save the internal data structures of MULTOVL to a binary archive file
+using the <tt>--save</tt> option. Note that this does not save the results themselves
+or any other command-line option settings. The saved
+status can be read from the archive by another invocation of MULTOVL with the 
+<tt>--load</tt> option. The idea is to save time on input parsing and internal data setup
+when examining multiple overlaps of the same set of tracks using different parameters.</p>
+
+<p>The <tt>--save</tt> and <tt>--load</tt> options write and read binary archives using the
+Boost::Serialization library. These are optimized for speed and are not portable between
+different architectures.</p>
 
 <h3>MULTOVL talking to a relational database</h3>
 

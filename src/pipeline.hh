@@ -38,8 +38,6 @@ class Pipeline: private boost::noncopyable
     virtual
     ~Pipeline() {}
     
-    protected:
-    
     /// The Input structure stores the name of the input (a filename 
     /// or track name in a database), an ID assigned by Multovl,
     /// and the number of regions that could be read from it.
@@ -48,10 +46,12 @@ class Pipeline: private boost::noncopyable
         std::string name;
         unsigned int trackid, regcnt;
         
-        explicit Input(const std::string& nm): 
+        explicit Input(const std::string& nm = ""): 
             name(nm), trackid(0), regcnt(0)
         {}
     };
+    
+    protected:
     
     typedef std::vector<Input> input_vec;
     typedef std::map<std::string, MultiOverlap> chrom_multovl_map;
