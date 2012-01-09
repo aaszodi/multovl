@@ -145,6 +145,8 @@ bool Linereader::empty_white(const string& str)
 unsigned int Linereader::str_to_uint(std::string& str) throw (Linereader::Exception)
 {
     boost::trim(str);   // "100" is OK, " 100 " is not...
+    if (str[0] == '-')
+        throw Exception(str, "coordinates must not be negative");
     try
     {
         return boost::lexical_cast<unsigned int>(str);
