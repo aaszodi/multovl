@@ -53,7 +53,7 @@ class FileReader: private boost::noncopyable
         Fileformat::Kind format = Fileformat::UNKNOWN);
     
     /// Attempts to read from the wrapped input file into a region.
-    /// Precondition: state() must be NO_ERROR when this method is invoked.
+    /// We keep reading the file so that the user gets all problems in one go.
     /// \param chrom string to store the chromosome name for /reg/
     /// \param reg the region this method tries to read into.
     /// \return /true/ if all went well, /false/ on errors.
@@ -63,15 +63,16 @@ class FileReader: private boost::noncopyable
     /// \return true if all input has been squeezed out of the input file.
     bool finished() const { return _finished; }
     
-    /// \return const access to the internal error collecting object
-    const Errors& errors() const { return _errors; }
+    /// \return const access to the reader implementation's error collection object
+    const Errors& errors() const;
     
     ~FileReader();
     
     private:
     
+    void add_error(const std::string& msg);
+    
     TrackReader* _reader;   // pimpl
-    Errors _errors;
     bool _finished;
     FileReader();   // no default ctor
     

@@ -51,8 +51,6 @@ TextReader::TextReader(
 
 std::string TextReader::read_into(std::string& chrom, Region& reg)
 {
-    if (!errors().ok())
-        return errors().last_error();   // already in bad shape...
     if (!_inf)
         return "Input file not open";
         
@@ -60,11 +58,10 @@ std::string TextReader::read_into(std::string& chrom, Region& reg)
     {
         ++_linecount;
         Linereader::Status status = _lrp->parse(_line);
-        
         if (status & Linereader::ERROR)
         {
             add_error(_lrp->error_msg());
-            break;
+            return errors().last_error();
         }
         if (status & Linereader::DATA)
         {
@@ -78,13 +75,12 @@ std::string TextReader::read_into(std::string& chrom, Region& reg)
             {
                 // shouldn't really happen...
                 add_error(_lrp->error_msg());
-                break;
+                return errors().last_error();
             }
         }
         // anything else (comments etc.) get ignored, keep reading...
     }
-    if (errors().ok()) return "EOF";
-    else return errors().last_error();
+    return "EOF";
 }
 
 TextReader::~TextReader()
@@ -94,7 +90,7 @@ TextReader::~TextReader()
         delete _lrp;
 }
 
-// Adds an error message to _errors, nicely decorated with linecount etc. Private
+// Adds an error message to _errors, nicely decorated with linecount etc. Protected
 void TextReader::add_error(const std::string& msg)
 {
     std::string err = 

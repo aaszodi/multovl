@@ -53,6 +53,11 @@ class BamReader: public TrackReader
 
     ~BamReader();
     
+    protected:
+    
+    virtual
+    void add_error(const std::string& msg);
+    
     private:
     
     BamTools::BamReader _bamreader;

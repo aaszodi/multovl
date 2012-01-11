@@ -112,7 +112,10 @@ unsigned int ClassicPipeline::read_tracks()
             if (reader.finished())
                 break;
             if (!ok)
+            {
+                ++problemcnt;
                 continue;
+            }
 
             chrom_multovl_map::iterator cmit = _cmovl.find(chrom);
             if (cmit != _cmovl.end())
@@ -131,6 +134,8 @@ unsigned int ClassicPipeline::read_tracks()
         }
         if (problemcnt > 0)
         {
+            std::cerr << "NOTE: Problems while parsing file " << currinp.name << std::endl;
+            reader.errors().print(std::cerr);    // print errors & warnings
             _errors.add_warning(
                 boost::lexical_cast<std::string>(problemcnt) +
                 "x problem reading from file " + currinp.name

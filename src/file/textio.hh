@@ -54,9 +54,12 @@ class TextReader: public TrackReader
 
     ~TextReader();
     
-    private:
+    protected:
     
+    virtual
     void add_error(const std::string& msg);
+    
+    private:
     
     Linereader* _lrp;   // can be BedLinereader or GffLinereader
     std::ifstream _inf; // input file stream

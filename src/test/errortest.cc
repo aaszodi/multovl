@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(error_test)
     err.print(outs);
     BOOST_CHECK_EQUAL(
         outs.str(),
-        "ERROR: to err is human\nError count: 1\nWARNING: warned\nWARNING: twice\nWarning count: 2\n"
+        "ERROR: to err is human\nERROR: total = 1\nWARNING: warned\nWARNING: twice\nWARNING: total = 2\n"
     );
 }
 
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(append_error_test)
     err1.print(outs);
     BOOST_CHECK_EQUAL(
         outs.str(),
-        "ERROR: mistake\nERROR: problem\nError count: 2\nWARNING: careful\nWARNING: beware\nWarning count: 2\n"
+        "ERROR: mistake\nERROR: problem\nERROR: total = 2\nWARNING: careful\nWARNING: beware\nWARNING: total = 2\n"
     );
 }
 BOOST_AUTO_TEST_SUITE_END()

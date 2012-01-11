@@ -51,6 +51,10 @@ class TrackReader: private boost::noncopyable
     /// \return const access to the internal error collecting object.
     const Errors& errors() const { return _errors; }
     
+    /// Add an error
+    virtual
+    void add_error(const std::string& msg) = 0;
+    
     virtual
     ~TrackReader() {}
     

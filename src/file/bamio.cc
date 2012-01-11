@@ -21,7 +21,7 @@ BamReader::BamReader(const std::string& infname):
     // open the BAM reader
     if (!_bamreader.Open(infname))  // could not open
     {
-        _errors.add_error("Cannot open input file: " + infname);
+        add_error("Cannot open input file: " + infname);
     }
     
     // get the reference sequence data (i.e. the chromosomes)
@@ -30,8 +30,6 @@ BamReader::BamReader(const std::string& infname):
 
 std::string BamReader::read_into(std::string& chrom, Region& reg)
 {
-    if (!errors().ok())
-        return errors().last_error();   // already in bad shape...
     if (!_bamreader.IsOpen())
         return "Input file not open";
         
@@ -56,6 +54,12 @@ std::string BamReader::read_into(std::string& chrom, Region& reg)
 BamReader::~BamReader()
 {
     _bamreader.Close();
+}
+
+// Adds a simple error message to _errors. Protected
+void BamReader::add_error(const std::string& msg)
+{
+    _errors.add_error(msg);
 }
 
 }   // namespace io

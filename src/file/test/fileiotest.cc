@@ -29,8 +29,8 @@ struct FileioFixture
 {
     FileioFixture(): exps()
     {
-        // NOTE:
-        // I wrote BED files, converted to BAM using BedTools, then
+        // This is the expected content of the "good" files.
+        // NOTE: I wrote BED files, converted to BAM using BedTools, then
         // converted back to BED using BamTools. Somewhere along the line
         // the 1-long regions got expanded... so I took them out.
         // No idea whether BamTools had problems or BedTools.
@@ -72,12 +72,12 @@ struct FileioFixture
         }
     }
     
-    // Runs the complete test by opening /filename/ and reading regions from it.
-    // It assumes that /filename/ is a file living in $MULTOVL_ROOT/src/test/data
-    // and that the build directory is $MULTOVL_ROOT/debug.
-    void run_test(const std::string& filename)
+    // figure out the Multovl root, based on the assumption
+    // that /filename/ is a file living in $MULTOVL_ROOT/src/test/data
+    // and that the build directory is $MULTOVL_ROOT/debug
+    // and then generate the full path to /filename/
+    std::string locate_testfile(const std::string& filename)
     {
-        // figure out the Multovl root, based on some assumptions
         boost::filesystem::path curpath = boost::filesystem::current_path();     
         while (curpath != "/")
         {
@@ -90,14 +90,21 @@ struct FileioFixture
         }
         if (curpath == "/")
         {
-            std::cerr << "! Got lost in file system" << std::endl;
-            return;
+            BOOST_ERROR("! Got lost in file system");
+            // ...won't return...
         }
         boost::filesystem::path inputpath = 
             curpath / "src" / "test" / "data" / filename;
-
+        return inputpath.string();
+    }
+    
+    // Runs the complete test by opening /filename/ and reading regions from it.
+    // It assumes that the input file is syntactically correct.
+    void test_goodfile(const std::string& filename)
+    {
+        std::string inputname = locate_testfile(filename);
         bool ok = false;
-        io::FileReader fr(inputpath.string());
+        io::FileReader fr(inputname);   // noncopyable, must make here...
         ok = fr.errors().ok();
         BOOST_CHECK(ok);
         if (!ok)
@@ -106,7 +113,7 @@ struct FileioFixture
             return; // just don't bother
         }
         
-        // read the first 8 records, they are all chr1
+        // read the first 5 records, they are all chr1
         unsigned int i;
         std::string chrom;
         Region reg;
@@ -149,19 +156,63 @@ BOOST_FIXTURE_TEST_SUITE(fileiosuite, FileioFixture)
 
 // NOTE: only reading from a correct BED file is tested
 // due to time constraints ( ==laziness)
+// ...but see below, 2012-01-11...
 BOOST_AUTO_TEST_CASE(fromtextfile_test)
 {
-    BOOST_TEST_MESSAGE("Running BED file input test");
-    run_test("rega12.bed"); // hard-coded input file name!
+    BOOST_TEST_MESSAGE("Running good BED file input test");
+    test_goodfile("rega12.bed"); // hard-coded input file name!
 }
 
 #if USE_BAMTOOLS
 BOOST_AUTO_TEST_CASE(frombamfile_test)
 {
-    BOOST_TEST_MESSAGE("Running BAM file input test");
+    BOOST_TEST_MESSAGE("Running BAM file input test");  // these are expected to be OK
     change_region_names("bam");
-    run_test("rega12.bam"); // hard-coded input file name!
+    test_goodfile("rega12.bam"); // hard-coded input file name!
 }
 #endif
+
+// NOTE: Johanna was right (again)
+// the bad BED file needs to be tested, too!
+BOOST_AUTO_TEST_CASE(badbed_test)
+{
+    BOOST_TEST_MESSAGE("Running bad BED file input test");
+        std::string inputname = locate_testfile("bad.bed");
+        bool ok = false;
+        io::FileReader fr(inputname);   // noncopyable, must make here...
+        ok = fr.errors().ok();
+        BOOST_CHECK(ok);
+        if (!ok)
+        {
+            fr.errors().print(std::cerr);
+            return; // just don't bother
+        }
+        
+        std::string chrom;
+        Region reg;
+        // the errors tested here must correspond to bad.bed's content
+        std::vector<std::string> experrs;
+        boost::assign::push_back( experrs )
+            ("ERROR: At line 2: \"-100\": must not be negative")
+            ("ERROR: At line 3: \"-220\": must not be negative")
+            ("ERROR: At line 4: \"foo\": cannot parse to unsigned int")
+            ("ERROR: At line 5: Too few fields: 2");
+            
+        for (unsigned int i = 0; i < 4; ++i)
+        {
+            ok = fr.read_into(chrom, reg);
+            BOOST_CHECK(!ok);
+            BOOST_CHECK_EQUAL(fr.errors().last_error(), experrs[i]);
+        }
+        
+        // the last line is correct
+        ok = fr.read_into(chrom, reg);
+        BOOST_CHECK(ok);
+        
+        // ...and the whole thing should be finished by now
+        ok = fr.read_into(chrom, reg);
+        BOOST_CHECK(ok);
+        BOOST_CHECK(fr.finished());
+}
 
 BOOST_AUTO_TEST_SUITE_END()

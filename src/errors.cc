@@ -51,14 +51,14 @@ std::ostream& Errors::print(std::ostream& outf, bool warnings) const
     for (it = _errors.begin(); it != _errors.end(); ++it)
         outf << (*it) << std::endl;
     if (error_count() > 0)
-        outf << "Error count: " << error_count() << std::endl;
+        outf << _errprefix << "total = " << error_count() << std::endl;
     
     if (warnings)
     {
         for (it = _warnings.begin(); it != _warnings.end(); ++it)
             outf << (*it) << std::endl;
         if (warning_count() > 0)
-            outf << "Warning count: " << warning_count() << std::endl;
+            outf << _warnprefix << "total = " << warning_count() << std::endl;
     }
     return outf;
 }

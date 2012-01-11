@@ -22,7 +22,6 @@ FileReader::FileReader(
     Fileformat::Kind format
 ):
     _reader(NULL),
-    _errors(),
     _finished(false)
 {
     // figure out the file format
@@ -31,7 +30,7 @@ FileReader::FileReader(
          fmt = Fileformat::from_filename(infname);
     if (fmt == Fileformat::UNKNOWN)
     {
-        _errors.add_error("Cannot deduce format of file " + infname);
+        add_error("Cannot deduce format of file " + infname);
         _finished = true;
         return;
     }
@@ -45,11 +44,8 @@ FileReader::FileReader(
         _reader = new TextReader(infname, fmt);
 
     // maybe something went wrong...
-    if (!_reader->errors().ok())
-    {
-        _errors += _reader->errors();
+    if (!errors().ok())
         _finished = true;
-    }
 }
 
 FileReader::~FileReader()
@@ -60,8 +56,7 @@ FileReader::~FileReader()
 
 bool FileReader::read_into(std::string& chrom, Region& reg)
 {
-    if (finished() || !errors().ok())
-        return false;   // already in bad shape...
+    if (finished()) return true;
     
     std::string msg = _reader->read_into(chrom, reg);
     if (msg != "")
@@ -71,11 +66,13 @@ bool FileReader::read_into(std::string& chrom, Region& reg)
             _finished = true;
             return true;
         }
-        _errors.add_error(msg);
         return false;
     }
     return true;
 }
+
+const Errors& FileReader::errors() const { return _reader->errors(); }
+void FileReader::add_error(const std::string& msg) { _reader->add_error(msg); }
 
 }   // namespace io
 }   // namespace multovl
