@@ -73,17 +73,16 @@ struct FileioFixture
     }
     
     // figure out the Multovl root, based on the assumption
-    // that /filename/ is a file living in $MULTOVL_ROOT/src/test/data
-    // and that the build directory is $MULTOVL_ROOT/debug
+    // that /filename/ is a file living in multovl/src/test/data
+    // and that the build directory is somewhere below multovl as well
     // and then generate the full path to /filename/
     std::string locate_testfile(const std::string& filename)
     {
         boost::filesystem::path curpath = boost::filesystem::current_path();     
         while (curpath != "/")
         {
-            if (curpath.filename() == "debug")
+            if (curpath.filename() == "multovl")
             {
-                curpath = curpath.parent_path();
                 break;
             }
             curpath = curpath.parent_path();

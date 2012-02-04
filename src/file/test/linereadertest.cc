@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(bedreader_test)
     // some parsing errors
     // these are the same for GFF, tested only here
     status = blr.parse("chr1\tFOO\t20\tregion\t0.8\t+");
-    BOOST_CHECK(status == io::Linereader::ERROR | io::Linereader::DATA);
+    BOOST_CHECK(status == (io::Linereader::ERROR | io::Linereader::DATA));
     BOOST_CHECK_EQUAL(blr.error_msg(), "\"FOO\": cannot parse to unsigned int");
     
     status = blr.parse("chr1\t-99\t20\tregion\t0.8\t+");
