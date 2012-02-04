@@ -59,7 +59,6 @@ unsigned int Pipeline::detect_overlaps()
     for (chrom_multovl_map::iterator cmit = _cmovl.begin();
         cmit != _cmovl.end(); ++cmit)
     {
-        const std::string& chrom = cmit->first;    // "current chromosome"
         MultiOverlap& movl = cmit->second;      // "current overlap"
         
         // generate and store overlaps
