@@ -1,7 +1,9 @@
 # The revision string file should be ignored
 gitrevision.txt
 
-# Build directories
+# Build and project directories
+# By convention 'build' contains 'debug' and 'release'
+build
 debug
 release
-
+xcode
