@@ -211,6 +211,9 @@ class Copt: public Aopt, public Bopt
     int _c;
 };  // class Copt
 
+// gets rid of annoying "deprecated conversion from string constant blah blah" warning (StackOverflow tip)
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
 BOOST_AUTO_TEST_CASE(simple_test)
 {
     const int ARGC = 4;
@@ -300,3 +303,5 @@ BOOST_AUTO_TEST_CASE(parse_test)
     BOOST_CHECK_EQUAL(roopts.password(), "rpass");
 }
 #endif
+#pragma GCC diagnostic pop
+

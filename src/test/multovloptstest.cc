@@ -16,6 +16,9 @@ using namespace std;
 #include "multovlopts.hh"
 using namespace multovl;
 
+// gets rid of annoying "deprecated conversion from string constant blah blah" warning
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
 // -c option
 BOOST_AUTO_TEST_CASE(c_test)
 {
@@ -90,3 +93,5 @@ BOOST_AUTO_TEST_CASE(bad_mM_test)
         "ERROR: The combination -m 7 -M 3 makes no sense\n"
     );
 }
+
+#pragma GCC diagnostic pop
