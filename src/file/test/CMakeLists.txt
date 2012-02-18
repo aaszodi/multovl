@@ -32,10 +32,15 @@ endif()
 set(testprogs
     fileformattest fileiotest
     linereadertest linewritertest
+    empirdistrtest
 )
 
 foreach(testprog ${testprogs})
-    add_executable(${testprog} EXCLUDE_FROM_ALL ${testprog}.cc)
+    if (${testprog} MATCHES "empirdistrtest")
+        add_executable(empirdistrtest EXCLUDE_FROM_ALL empirdistrtest.cc ../empirdistr.cc)
+    else()
+        add_executable(${testprog} EXCLUDE_FROM_ALL ${testprog}.cc)
+    endif()
     target_link_libraries(${testprog} ${utestlibs})
 	flag_fix(${testprog})
 	add_test(${testprog} ${testdir}/${testprog})
