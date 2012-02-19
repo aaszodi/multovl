@@ -5,15 +5,14 @@
 // -- own headers --
 
 #include "empirdistr.hh"
+#include "randomgen.hh" // note: this is implicitly tested here
 using namespace multovl;
 using namespace prob;
 
 // -- Boost headers --
 
-#include "boost/random/mersenne_twister.hpp"
-#include "boost/random/uniform_real.hpp"
+// we test with normal random deviates in addition to what is provided in "randomgen.hh"
 #include "boost/random/normal_distribution.hpp"
-#include "boost/random/variate_generator.hpp"
 
 // -- standard headers --
 
@@ -22,10 +21,6 @@ using namespace prob;
 #include <string>
 
 // -- Fixtures... --
-
-typedef boost::random::mt19937 rng_t;    // or another...
-typedef boost::uniform_real<> unidistr_t;  // distribution types  
-typedef boost::normal_distribution<double> normdistr_t;
 
 // NOTE: these tolerances have been titrated manually, they are quite generous,
 // but there's no exact way of testing random sampling...
@@ -78,14 +73,13 @@ BOOST_AUTO_TEST_CASE(dice_test)
 }
 
 // uniform distribution coming from a random number generator
-// this is a really approximate test...
+// this is a really approximate test... 
+// note that it tests the uniform Rng in randomgen.hh as well
 BOOST_AUTO_TEST_CASE(unirnd_test)
 {
     // set up the RNG
-    rng_t rng(42u);
     const double UNIMIN = 7.0, UNIMAX = 12.0, UNIWIDTH = UNIMAX-UNIMIN;
-    unidistr_t unidistr(UNIMIN, UNIMAX);
-    boost::variate_generator<rng_t&, unidistr_t > uni(rng, unidistr);
+    UniformGen uni(42u, UNIMIN, UNIMAX);
 
     const double BINWIDTH = 0.1;
     EmpirDistr ed(BINWIDTH);
@@ -125,7 +119,9 @@ BOOST_AUTO_TEST_CASE(unirnd_test)
 
 BOOST_AUTO_TEST_CASE(normrnd_test)
 {
-    // set up the RNG
+    // set up the RNG: spell out everything
+    typedef boost::random::mt19937 rng_t;
+    typedef boost::normal_distribution<double> normdistr_t;
     rng_t rng(42u);
     const double EMEAN=3.2, EDEV=1.7;
     normdistr_t normdistr(EMEAN, EDEV);
