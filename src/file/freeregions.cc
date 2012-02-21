@@ -33,7 +33,7 @@ FreeRegions::FreeRegions(const std::vector<Region>& frees)
     {
         unsigned int flen = _frees[i].length();
         #ifdef DEBUGG
-        cerr << "_freelengths[" << i << "] = " << flen << endl;
+        std::cerr << "_freelengths[" << i << "] = " << flen << std::endl;
         #endif
         flensum += flen;
         _roulette_sectors.push_back(flensum);
@@ -43,7 +43,7 @@ FreeRegions::FreeRegions(const std::vector<Region>& frees)
     {
         _roulette_sectors[i] /= flensum;
         #ifdef DEBUGG
-        cerr << "_roulette_sectors[" << i << "] = " << _roulette_sectors[i] << endl;
+        std::cerr << "_roulette_sectors[" << i << "] = " << _roulette_sectors[i] << std::endl;
         #endif
     }
     // looks like 0, 0.15, 0.27, ... , 1.0 sorted
@@ -59,7 +59,7 @@ const Region& FreeRegions::select_free_region(UniformGen& rng, unsigned int minl
         idx = (roulit - _roulette_sectors.begin());
         if (idx > 0) --idx; // N free regions, N+1 sector elems
         #ifdef DEBUGG
-        cerr << "Roulette selector: rnd = " << rnd << ", idx = " << idx << endl;
+        std::cerr << "Roulette selector: rnd = " << rnd << ", idx = " << idx << std::endl;
         #endif
     } while(_frees[idx].length() < minlen);
     return _frees[idx];

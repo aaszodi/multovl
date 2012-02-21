@@ -32,14 +32,17 @@ endif()
 set(testprogs
     fileformattest fileiotest
     linereadertest linewritertest
-    empirdistrtest freeregionstest
+    empirdistrtest freeregionstest randomplacertest
 )
 
+# NOTE: we will later have a "prob" library, until then there's a slight mess with the tests
 foreach(testprog ${testprogs})
     if (${testprog} MATCHES "empirdistrtest")
         add_executable(empirdistrtest EXCLUDE_FROM_ALL empirdistrtest.cc ../empirdistr.cc)
     elseif(${testprog} MATCHES "freeregionstest")
         add_executable(freeregionstest EXCLUDE_FROM_ALL freeregionstest.cc ../freeregions.cc)
+    elseif(${testprog} MATCHES "randomplacertest")
+        add_executable(randomplacertest EXCLUDE_FROM_ALL randomplacertest.cc ../freeregions.cc ../randomplacer.cc)
     else()
         add_executable(${testprog} EXCLUDE_FROM_ALL ${testprog}.cc)
     endif()
