@@ -32,12 +32,14 @@ endif()
 set(testprogs
     fileformattest fileiotest
     linereadertest linewritertest
-    empirdistrtest
+    empirdistrtest freeregionstest
 )
 
 foreach(testprog ${testprogs})
     if (${testprog} MATCHES "empirdistrtest")
         add_executable(empirdistrtest EXCLUDE_FROM_ALL empirdistrtest.cc ../empirdistr.cc)
+    elseif(${testprog} MATCHES "freeregionstest")
+        add_executable(freeregionstest EXCLUDE_FROM_ALL freeregionstest.cc ../freeregions.cc)
     else()
         add_executable(${testprog} EXCLUDE_FROM_ALL ${testprog}.cc)
     endif()

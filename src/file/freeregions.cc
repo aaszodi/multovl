@@ -17,6 +17,9 @@
 
 // == Implementation ==
 
+namespace multovl {
+namespace prob {
+
 FreeRegions::FreeRegions(const std::vector<Region>& frees)
     : _frees(frees), _roulette_sectors()
 {
@@ -51,7 +54,7 @@ const Region& FreeRegions::select_free_region(UniformGen& rng, unsigned int minl
     unsigned int idx;
     do {
         float rnd = rng(); // 0.0 .. 1.0
-        vector<float>::const_iterator roulit = 
+        std::vector<float>::const_iterator roulit = 
             lower_bound(_roulette_sectors.begin(), _roulette_sectors.end(), rnd);
         idx = (roulit - _roulette_sectors.begin());
         if (idx > 0) --idx; // N free regions, N+1 sector elems
@@ -61,3 +64,6 @@ const Region& FreeRegions::select_free_region(UniformGen& rng, unsigned int minl
     } while(_frees[idx].length() < minlen);
     return _frees[idx];
 }
+
+}   // namespace prob
+}   // namespace multovl

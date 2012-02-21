@@ -11,7 +11,7 @@
 
 // -- Own headers --
 
-#include "regions.hh"
+#include "region.hh"
 #include "randomgen.hh"
 
 // -- System headers --
