@@ -2,7 +2,7 @@
 
 include_directories(${SRCDIR} ${SRCDIR}/file)
 
-# -- Unit tests --
+# == Unit tests ==
 
 # libraries needed by the unit tests
 # not all of them need all this of course
@@ -28,39 +28,48 @@ if (NOT Boost_USE_STATIC_LIBS)
     add_definitions(-DBOOST_TEST_DYN_LINK)
 endif()
 
-# Test programs
-set(testprogs
+# -- File I/O tests --
+
+# File test programs
+set(filetestprogs
     fileformattest fileiotest
     linereadertest linewritertest
+)
+
+foreach(filetestprog ${filetestprogs})
+    add_executable(${filetestprog} EXCLUDE_FROM_ALL ${filetestprog}.cc)
+    target_link_libraries(${filetestprog} ${utestlibs})
+	flag_fix(${filetestprog})
+	add_test(${filetestprog} ${testdir}/${filetestprog})
+endforeach(filetestprog)
+
+# -- Prob tests --
+
+# NOTE: these may go later somewhere else
+
+set(probtestprogs
     empirdistrtest freeregionstest randomplacertest
 )
 
-# NOTE: we will later have a "prob" library, until then there's a slight mess with the tests
-foreach(testprog ${testprogs})
-    if (${testprog} MATCHES "empirdistrtest")
-        add_executable(empirdistrtest EXCLUDE_FROM_ALL empirdistrtest.cc ../empirdistr.cc)
-    elseif(${testprog} MATCHES "freeregionstest")
-        add_executable(freeregionstest EXCLUDE_FROM_ALL freeregionstest.cc ../freeregions.cc)
-    elseif(${testprog} MATCHES "randomplacertest")
-        add_executable(randomplacertest EXCLUDE_FROM_ALL randomplacertest.cc ../freeregions.cc ../randomplacer.cc)
-    else()
-        add_executable(${testprog} EXCLUDE_FROM_ALL ${testprog}.cc)
-    endif()
-    target_link_libraries(${testprog} ${utestlibs})
-	flag_fix(${testprog})
-	add_test(${testprog} ${testdir}/${testprog})
-endforeach(testprog)
+foreach(probtestprog ${probtestprogs})
+    add_executable(${probtestprog} EXCLUDE_FROM_ALL ${probtestprog}.cc)
+    target_link_libraries(${probtestprog} movl_prob ${utestlibs})
+	flag_fix(${probtestprog})
+	add_test(${probtestprog} ${testdir}/${probtestprog})
+endforeach(probtestprog)
 
-# add to global unit test target list
+# ---
+
+# update global unit test target list
 set(unit_test_targets 
     ${unit_test_targets}
-    ${testprogs}
+    ${filetestprogs} ${probtestprogs}
     CACHE INTERNAL "unit test targets"
 )
 
-# -- "Exerciser" --
+# == "Exerciser" ==
 
-# These things are for stress testing, timing etc.
+# These are for stress testing, timing etc. and they are not part of the unit tests.
 
 set(EXERCISELIBS 
     movl_fileio movl 
