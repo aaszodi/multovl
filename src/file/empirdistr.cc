@@ -7,6 +7,7 @@
 // -- System headers --
 
 #include <algorithm>
+#include <functional>
 
 #ifdef DEBUGG
 #include <iostream>
@@ -47,9 +48,31 @@ double EmpirDistr::cdf(double x) const throw(DirtyException)
     if (x < _low) return 0.0;
     if (x > _high) return 1.0;
     
-    // find the index for x
-    // TODO
-    return 0.5; // BS!
+    // find the histogram bins around x
+    // hit will point to the first bin with abscissa >= x
+    histogram_iter_t hit = std::lower_bound(_histogram.begin(), _histogram.end(), x, HistogramComp());
+    double xlow, xhigh, ylow, yhigh;
+    if (hit == _histogram.begin())
+    {
+        xlow = _low; ylow = 0.0;
+        xhigh = hit->first; yhigh = hit->second;
+    }
+    else if (hit == _histogram.end())
+    {
+        xlow = hit->first; ylow = hit->second;
+        xhigh = _high; yhigh = 1.0;
+    }
+    else
+    {
+        histogram_iter_t lit = hit--;
+        xlow = lit->first; ylow = lit->second;
+        xhigh = hit->first; yhigh = hit->second;
+    }
+    
+    // simple linear interpolation btw the two bins
+    double xdelta = xhigh - xlow, ydelta = yhigh - ylow;
+    double y = ylow + (ydelta*(x - xlow))/xdelta;
+    return y;
 }
 
 }   // namespace prob

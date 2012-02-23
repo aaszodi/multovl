@@ -120,9 +120,19 @@ class EmpirDistr
             stats<tag::p_square_cumulative_distribution>
         >
     > acc_t;
-    typedef boost::iterator_range<std::vector<std::pair<double, double> >::iterator > histogram_t;
+    typedef std::pair<double, double> histogram_bin_t;
+    typedef std::vector<histogram_bin_t>::iterator histogram_iter_t;
+    typedef boost::iterator_range<histogram_iter_t> histogram_t;
 
-    
+    // Histogram object comparison class
+    struct HistogramComp
+    {
+        bool operator()(const histogram_bin_t& it, double x)
+        {
+            return (it.first < x);
+        }
+    };
+
     // data
     acc_t _acc;
     histogram_t _histogram;
