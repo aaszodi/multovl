@@ -16,6 +16,8 @@ using namespace std;
 #include "multovlopts.hh"
 using namespace multovl;
 
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
 // -c option
 BOOST_AUTO_TEST_CASE(c_test)
 {

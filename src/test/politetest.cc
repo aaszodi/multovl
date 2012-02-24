@@ -211,6 +211,8 @@ class Copt: public Aopt, public Bopt
     int _c;
 };  // class Copt
 
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
 BOOST_AUTO_TEST_CASE(simple_test)
 {
     const int ARGC = 4;
