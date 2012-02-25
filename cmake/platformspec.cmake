@@ -10,8 +10,9 @@
 if(CMAKE_CXX_COMPILER_ID STREQUAL "SunPro" AND ${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
     # [Open]Solaris, SunPro compiler (V>=5.10)
     # use STLport (also when compiling Boost!)
+    # multithreading support has to be enabled explicitly
     macro(flag_fix targ)
-        set(SUNFLAGS "-library=stlport4")
+        set(SUNFLAGS "-library=stlport4 -mt")
         set_target_properties(${targ} PROPERTIES COMPILE_FLAGS ${SUNFLAGS} LINK_FLAGS ${SUNFLAGS})
     endmacro(flag_fix)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MIPSpro" AND ${CMAKE_SYSTEM_NAME} MATCHES "IRIX")

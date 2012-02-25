@@ -7,6 +7,7 @@ include_directories(${SRCDIR} ${SRCDIR}/test)
 # test helper library
 # currently serialization tools only
 add_library(testhelper STATIC tempfile.cc)
+flag_fix(testhelper)
 
 # libraries that may be needed by the unit tests
 set (genericlibs
