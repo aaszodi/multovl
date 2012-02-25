@@ -52,7 +52,7 @@ void RandomPlacer::random_placement(const FreeRegions& frees, UniformGen& rng)
         unsigned int free1 = free.first(),
             freeN = free.last() - reglen;
         double rnd = rng();
-        unsigned int beg = static_cast<unsigned int>(floor((freeN-free1)*rnd)) + free1;
+        unsigned int beg = static_cast<unsigned int>(std::floor((freeN-free1)*rnd)) + free1;
         #ifdef DEBUGG
         std::cerr << "free1=" << free1 << ", freeN=" << freeN
             << ", rnd=" << rnd << ", beg=" << beg << ", end=" << (beg + reglen - 1) << std::endl;

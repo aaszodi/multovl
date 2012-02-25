@@ -10,6 +10,10 @@
 
 #include "boost/filesystem.hpp"
 
+// -- Standard headers --
+
+#include <iostream>
+
 // == Classes ==
 
 class Tempfile

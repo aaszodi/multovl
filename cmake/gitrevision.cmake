@@ -20,7 +20,7 @@ if(GIT_SCM)
         execute_process(
             COMMAND ${GIT_SCM} rev-list --all
             COMMAND wc -l
-            COMMAND sed -E -e "s/^[[:blank:]]+//"
+            COMMAND sed -e "s/ //g"
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             OUTPUT_VARIABLE GITREVCNT
             ERROR_VARIABLE GITREVCNT_error

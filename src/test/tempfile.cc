@@ -6,6 +6,7 @@
 
 // -- Standard headers --
 
+#include <string>
 #include <fstream>
 
 // == Implementation --

@@ -55,7 +55,7 @@ const Region& FreeRegions::select_free_region(UniformGen& rng, unsigned int minl
     do {
         float rnd = rng(); // 0.0 .. 1.0
         std::vector<float>::const_iterator roulit = 
-            lower_bound(_roulette_sectors.begin(), _roulette_sectors.end(), rnd);
+            std::lower_bound(_roulette_sectors.begin(), _roulette_sectors.end(), rnd);
         idx = (roulit - _roulette_sectors.begin());
         if (idx > 0) --idx; // N free regions, N+1 sector elems
         #ifdef DEBUGG

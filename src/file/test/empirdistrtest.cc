@@ -18,6 +18,9 @@ using namespace prob;
 
 // NOTE: we boldly assume <cmath> provides the erf() function as per ISO/IEC 9899:1999(E).
 #include <cmath>
+#ifdef __SUNPRO_CC
+#include <math.h>
+#endif
 #include <iostream>
 #include <string>
 
@@ -36,7 +39,7 @@ const unsigned int NCELL=50,    // number of approximation cells in an EmpirDist
 
 static double norm_cdf(double m, double s, double x)
 {
-    static const double SQRT2 = sqrt(2.0);
+    static const double SQRT2 = std::sqrt(2.0);
     double t = (x - m)/(SQRT2*s);
     return ((1.0+erf(t))/2.0);
 }
