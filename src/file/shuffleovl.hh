@@ -27,6 +27,17 @@ namespace prob {
 class ShuffleOvl: public MultiOverlap 
 {
     public:
+        
+    /// Init with free regions
+    /// \param frees a vector of free regions into which all fixed and shufflable regions must fall
+    explicit ShuffleOvl(const std::vector<Region>& frees);
+    
+    void add_shufflable(unsigned int trackid, const RandomPlacer& rp);
+    
+    /// Shuffle the "shufflable" tracks
+    /// \param rng a uniform[0,1) random number generator
+    /// \return the new shuffle count
+    unsigned int shuffle(UniformGen& rng);
     
     private:
     
@@ -34,6 +45,7 @@ class ShuffleOvl: public MultiOverlap
     FreeRegions _freeregions;
     typedef std::map<unsigned int, RandomPlacer> rpm_t; // track ID => RandomPlacer for the "shufflable tracks"
     rpm_t _rpm;
+    unsigned int _shufflecount;
 
     // serialization TODO???
 #if 0
