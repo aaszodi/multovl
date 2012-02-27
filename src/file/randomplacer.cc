@@ -35,6 +35,14 @@ RandomPlacer::RandomPlacer(const std::vector<Region>& Regions):
     }
 }
 
+bool RandomPlacer::add(unsigned int len)
+{
+    if (len == 0)
+        return false;
+    _lengths.push_back(len);
+    return true;
+}
+
 void RandomPlacer::random_placement(const FreeRegions& frees, UniformGen& rng)
 {
     unsigned int i, N = _lengths.size();

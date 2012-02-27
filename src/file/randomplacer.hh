@@ -28,10 +28,21 @@ namespace prob {
 class RandomPlacer
 {
     public:
-            
+    
+    /// Init to empty
+    RandomPlacer():
+        _placed(),
+        _lengths()
+    {}
+    
     /// Inits with regions to be placed randomly within free regions.
-    /// \param Regions the regions to be shuffled.
+    /// \param Regions the regions to be shuffled. Note that only the lengths of the regions will be used.
     explicit RandomPlacer(const std::vector<Region>& Regions);
+    
+    /// Adds the length of a region to the calling object.
+    /// \param len the region length, should be > 0
+    /// \return true on success, false if /len/ == 0 (which will not be added)
+    bool add(unsigned int len);
     
     /// Performs a shuffling.
     /// \param frees a FreeRegions object containing the free regions

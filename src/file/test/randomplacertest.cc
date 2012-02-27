@@ -24,6 +24,7 @@ const unsigned int NTRIAL=100000;
 // NOTE: this could have been derived from FreeRegionsFixture
 struct RandomPlacerFixture
 {
+    // ctor
     RandomPlacerFixture():
         rng(42u),    // uniform [0,1)
         total(0)
@@ -44,6 +45,7 @@ struct RandomPlacerFixture
         regs.push_back(Region(600, 634, '+', "reg35"));
     }
     
+    // count in which free region a given region /reg/ falls
     void count(const Region& reg)
     {
         unsigned int rf = reg.first(), rl = reg.last();
@@ -63,12 +65,32 @@ struct RandomPlacerFixture
         BOOST_CHECK_MESSAGE(found, "rf=" << rf << ",rl=" << rl);
     }
     
+    // calculate the fraction of region counts relative to the total
     double frac(const std::string& regname) const
     {
         double cnt = static_cast<double>(counts.find(regname)->second);
         return cnt/total;
     }
     
+    // tester function
+    void tester(const FreeRegions& fr, RandomPlacer& rp)
+    {
+        for (unsigned int i=0; i<NTRIAL; ++i)
+        {
+            rp.random_placement(fr, rng);
+            BOOST_FOREACH(Region r, rp.get_regions())
+            {
+                count(r);
+            }
+        }
+        BOOST_CHECK_EQUAL(total, 2*NTRIAL);   // make sure all shuffled regions fell in one of the frees...
+        BOOST_CHECK_CLOSE(frac("free100"), 2.0/3.0, PCT_TOL);
+        BOOST_CHECK_CLOSE(frac("free50"), 1.0/3.0, PCT_TOL);
+        BOOST_CHECK_CLOSE(frac("free30"), 0.0, PCT_TOL);     // these are too short now...
+        BOOST_CHECK_CLOSE(frac("free20"), 0.0, PCT_TOL);
+    }
+    
+    // data
     UniformGen rng;
     std::vector<Region> frees, regs;
     std::map<std::string, unsigned int> counts;
@@ -77,23 +99,26 @@ struct RandomPlacerFixture
 
 BOOST_FIXTURE_TEST_SUITE(randomplacersuite, RandomPlacerFixture)
 
-BOOST_AUTO_TEST_CASE(randomplacer_test)
+BOOST_AUTO_TEST_CASE(randomplacer1_test)
 {
     FreeRegions fr(frees);
-    RandomPlacer rp(regs);
-    for (unsigned int i=0; i<NTRIAL; ++i)
+    RandomPlacer rp;  // default init...
+    
+    // ...and then add the regions one by one
+    BOOST_FOREACH(Region r, regs)
     {
-        rp.random_placement(fr, rng);
-        BOOST_FOREACH(Region r, rp.get_regions())
-        {
-            count(r);
-        }
+        rp.add(r.length());
     }
-    BOOST_CHECK_EQUAL(total, 2*NTRIAL);   // make sure all shuffled regions fell in one of the frees...
-    BOOST_CHECK_CLOSE(frac("free100"), 2.0/3.0, PCT_TOL);
-    BOOST_CHECK_CLOSE(frac("free50"), 1.0/3.0, PCT_TOL);
-    BOOST_CHECK_CLOSE(frac("free30"), 0.0, PCT_TOL);     // these are too short now...
-    BOOST_CHECK_CLOSE(frac("free20"), 0.0, PCT_TOL);
+    
+    tester(fr, rp);
+}
+
+BOOST_AUTO_TEST_CASE(randomplacer2_test)
+{
+    FreeRegions fr(frees);
+    RandomPlacer rp(regs);  // init with an array of regions
+    
+    tester(fr, rp);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
