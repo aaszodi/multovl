@@ -34,12 +34,19 @@ class ProbOpts : public MultovlOptbase
     
 	/// \return a vector of input file names that are to be held "fixed" (no shuffling).
 	const filenames_t& fixed_files() const { return _fixedfiles; }
+    
+    /// Convenience method to see whether fixed files have been defined at all.
+    /// \return the number of fixed files, 0 if none has been specified
+    unsigned int fixed_filecnt() const { return _fixedfiles.size(); }
 	
 	/// \return a vector of input file names that are to be reshuffled.
 	const filenames_t& shuffle_files() const { return pos_opts(); }
     
     /// \return the number of reshufflings requested
     unsigned int reshufflings() const { return _reshufflings; }
+    
+    /// \return the random number generator seed
+    unsigned int random_seed() const { return _randomseed; }
 	
 	virtual
     std::string param_str() const;
@@ -57,11 +64,11 @@ class ProbOpts : public MultovlOptbase
 
 	private:
 	
-    static const unsigned int DEFAULT_RESHUFFLINGS;
+    static const unsigned int DEFAULT_RESHUFFLINGS, DEFAULT_RANDOMSEED;
 
 	std::string _freefile;
 	filenames_t _fixedfiles;
-    unsigned int _reshufflings;
+    unsigned int _reshufflings, _randomseed;
 };
 
 } // namespace prob

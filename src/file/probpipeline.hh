@@ -5,8 +5,9 @@
 
 // -- Own headers --
 
-#include "pipeline.hh"
+#include "basepipeline.hh"
 #include "multovlopts.hh"
+#include "empirdistr.hh"
 
 namespace multovl {
 namespace prob {
@@ -20,7 +21,7 @@ class ProbOpts;
 /// the overlap calculations are serial/single core,
 /// which are repeated after reshuffling (some) tracks to estimate the probability
 /// of overlaps by chance.
-class ProbPipeline: public Pipeline
+class ProbPipeline: public BasePipeline
 {
     public:
     
@@ -33,6 +34,9 @@ class ProbPipeline: public Pipeline
     ~ProbPipeline();
     
     protected:
+    
+    /// There is one ShuffleOvl object for each chromosome
+    typedef std::map<std::string, ShuffleOvl> chrom_shufovl_map;
     
     /// Reads the input tracks. 
     /// In addition to the "shufflable" tracks specified as positional arguments,
@@ -60,13 +64,18 @@ class ProbPipeline: public Pipeline
     virtual
     MultovlOptbase* opt_ptr() { return _optp; }
     
+    // data which should be accessible
+    // to derived classes without too much bureaucracy
+    chrom_shufovl_map _csovl;   ///< chromosome ==> ShuffleOvl map
+    UniformRng _rng;
+    EmpirDistr _nulldistr; ///< null distribution. NOTE: THIS IS FOR TESTING ONLY!!!
+    
     private:
     
-    unsigned int read_tracks();
-    
-    bool write_gff_output();
-    bool write_bed_output();
-    void write_comments();
+    unsigned int read_tracks(
+        const ProbOpts::filenames_t& inputfiles,
+        unsigned int& trackid,
+        bool shuffle);
     
     ProbOpts* _optp;
 };

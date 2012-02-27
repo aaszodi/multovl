@@ -1,28 +1,17 @@
 // == MODULE probpipeline.cc ==
 
-
-
-
-// !!!!!!!!!!!!!!!!!!!!
-#error I_AM_NOT_IMPLEMENTED_YET!!!
-// !!!!!!!!!!!!!!!!!!!!!
-
-
-
-
-
 // -- Own headers --
 
 #include "probpipeline.hh"
 #include "fileio.hh"
-#include "multioverlap.hh"
-#include "region.hh"
+#include "shuffleovl.hh"
 #include "multovl_config.hh"
 
 // -- Boost headers --
 
 // -- Standard headers --
 
+#include <utility>
 #include <fstream>
 
 // == Implementation ==
@@ -30,9 +19,12 @@
 // -- ProbPipeline methods --
 
 namespace multovl {
+namespace prob {
 
 ProbPipeline::ProbPipeline(int argc, char* argv[]):
-    Pipeline()
+    BasePipeline(),
+    _csovl(),
+    _nulldistr() // NOTE: this will change!
 {
     _optp = new ProbOpts();
     _optp->process_commandline(argc, argv); // exits on error or help request
@@ -43,37 +35,118 @@ ProbPipeline::~ProbPipeline()
     delete _optp;
 }
 
-// -- Pipeline virtual method implementations
+// -- Virtual method implementations
 
 unsigned int ProbPipeline::read_input()
 {
-    unsigned int trackcnt = 0;
+    unsigned int trackcnt = 0, regcnt = 0;
     
     // first read the free regions
-    bool freeok = read_regions(_optp->free_file(), _free);  // ???
+    // if successful, then _csovl is set up, no more chromosomes will be accepted
+    regcnt = read_free_regions(_optp->free_file());
+    if (regcnt == 0)
+        return 0;
     
-    // then read the optional fixed
-    unisgned int fixedtrackcnt = read_fixed(_optp->fixednames());   /// ???
+    // then read the optional fixed regions
+    if (_optp->fixed_filecnt() > 0)
+    {
+        read_tracks(_optp->fixednames(), trackcnt, false);
+    }
     
     // read shufflable tracks from cmdline arg files
-    // these go both into the parent class _cmovl, their lengths into the RandomPlacer objects
-    trackcnt = read_tracks();
+    regcnt = read_tracks(_optp->shuffle_files(), trackcnt, true);
+    if (regcnt == 0)
+        return 0;
+    
+    // all went well
     return trackcnt;
 }
 
-// Read tracks from separate files specified as pos args on the command line (private)
-unsigned int ProbPipeline::read_tracks()
+// Reads the free regions file, separates the regions by chromosome,
+// sets up the chrom => ShuffleOvl map.
+// Private
+// \param freefile the filename of the free regions
+// \return the number of free regions successfully read (0 on error)
+unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
 {
-    typedef std::vector<std::string> str_vec;
-    const str_vec& inputfiles = _optp->input_files();
-    unsigned int filecnt = inputfiles.size();
-    _inputs.reserve(filecnt);
-    unsigned int trackid = 0;   // current ID, will be equal to the number of OK tracks on return
-    
-    for (str_vec::const_iterator ifit = inputfiles.begin();
-        ifit != inputfiles.end(); ++ifit)
+    io::FileReader reader(freefile);    // automatic format detection
+    if (!reader.errors().ok())
     {
-        Input currinp(*ifit);
+        // make a note
+        _errors += reader.errors();
+        return 0;
+    }
+    
+    std::string chrom;
+    Region reg; // temp input
+    crv_t crv; // collect free regions per chromosome here
+    typedef std::vector<Region> rv_t;
+    typedef map<std::string, rv_t> crv_t;
+    unsigned int regcnt = 0, problemcnt = 0;
+    while (true)
+    {
+        bool ok = reader.read_into(chrom, reg);
+        if (reader.finished())
+            break;
+        if (!ok)
+        {
+            ++problemcnt;
+            continue;
+        }
+        
+        crv_t::iterator crvit = crv.find(chrom);
+        if (crvit != crv.end())
+        {
+            // this chromosome has been seen already
+            crvit->second.push_back(reg);
+        }
+        else
+        {
+            // new chromosome
+            crv.insert(std::make_pair<std::string, rv_t>(chrom, rv_t(1, reg)));
+        }
+        ++regcnt;
+    }
+    if (problemcnt > 0)
+    {
+        std::cerr << "NOTE: Problems while parsing free region file " << freefile << std::endl;
+        reader.errors().print(std::cerr);    // print errors & warnings
+        _errors.add_warning(
+                            boost::lexical_cast<std::string>(problemcnt) +
+                            "x problem reading from free region file " + freefile
+                            );
+    }
+    if (regcnt == 0)
+    {
+        _errors.add_warning("Could not read valid regions from free region file " + freefile);
+        return 0;
+    }
+    
+    // set up _csovl map
+    for (crv_t::const_iterator crvcit = crv.begin(); crvcit != crv.end(); ++crvcit)
+    {
+        const std::string& chrom = crvcit->first;
+        const rv_t& regs = crvcit->second;
+        _csovl[chrom] = ShuffleOvl(regs);
+    }
+    return regcnt;
+}
+
+// Read tracks from separate files. Private
+// \param inputfiles a string vector holding the input file names
+// \param shuffle true (default) if the input tracks are to be reshuffled. false for fixed tracks
+// \return the number of regions successfully read
+unsigned int ProbPipeline::read_tracks(
+    const ProbOpts::filenames_t& inputfiles,
+    unsigned int& trackid,
+    bool shuffle
+)
+{
+    unsigned int i, filecnt = inputfiles.size(), totalregcnt = 0;
+    
+    for (i = 0; i < filecnt; ++i)
+    {
+        Input currinp(inputfiles[i]);
         io::FileReader reader(currinp.name);    // automatic format detection
         if (!reader.errors().ok())
         {
@@ -83,6 +156,7 @@ unsigned int ProbPipeline::read_tracks()
             continue;
         }
         
+        const std::string ERRPREFIX = "While parsing file " + currinp.name;
         std::string chrom;
         Region reg;
         unsigned int regcnt = 0, problemcnt = 0;
@@ -96,20 +170,30 @@ unsigned int ProbPipeline::read_tracks()
                 ++problemcnt;
                 continue;
             }
-
-            chrom_multovl_map::iterator cmit = _cmovl.find(chrom);
-            if (cmit != _cmovl.end())
+            
+            // /chrom/, /reg/ now contain a chromosome and a successfully parsed region
+            // check if /reg/ fits into the free regions previously defined for /chrom/
+            chrom_shufovl_map::iterator csit = _csovl.find(chrom);
+            if (csit == _csovl.end())
             {
-                // this chromosome has been seen already
-                // add current region to the corresponding MultiOverlap object
-                cmit->second.add(reg, trackid+1);
+                _errors.add_warning(ERRPREFIX + ": Chromosome '" + chrom + "' not in free regions");
+                ++problemcnt;
+                continue;
             }
-            else
+            if (! csit->second.fit_into_frees(reg))
             {
-                // new chromosome with new MultiOverlap object
-                MultiOverlap mo(reg, trackid+1);
-                _cmovl[chrom] = mo;
+                _errors.add_warning(ERRPREFIX + ": Region " + chrom + ":[" + 
+                                    boost::lexical_cast<std::string>(reg.first()) + "-" +
+                                    boost::lexical_cast<std::string>(reg.last()) +
+                                    "] not in free regions");
+                ++problemcnt;
+                continue;
             }
+            
+            // OK, add the region
+            csit->second.add(reg, trackid+1);
+            if (shuffle)
+                csit->second.add_randomplacer(reg.length(), trackid+1);
             ++regcnt;
         }
         if (problemcnt > 0)
@@ -127,135 +211,102 @@ unsigned int ProbPipeline::read_tracks()
             currinp.trackid = ++trackid;
             currinp.regcnt = regcnt;
             _inputs.push_back(currinp);
+            totalregcnt += regcnt;
             continue;
         }
-        _inputs.push_back(currinp);  // bad input, with trackid,regcnt still 0
+        _inputs.push_back(currinp);  // bad input, with regcnt still 0
         if (!reader.errors().ok())
         {
             _errors.add_warning("Could not read valid regions from file " + currinp.name);
         }
     }
-    return trackid; // number of tracks from which at least 1 region could be read
+    return totalregcnt;
 }
 
 unsigned int ProbPipeline::detect_overlaps()
 {
-    // TODO
+    
+    // first calculate the actual overlaps without shuffling
+    unsigned int actcounts = 0;
+    MultiOverlap::Counter actcounter;
+    for (chrom_shufovl_map::iterator csit = _csovl.begin();
+         csit != _csovl.end(); ++csit)
+    {
+        MultiOverlap& movl = csit->second;      // "current overlap"
+        
+        // generate and store overlaps
+        if (opt_ptr()->uniregion())
+        {
+            actcounts += movl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                                                 opt_ptr()->minmult(), 
+                                                 opt_ptr()->maxmult());
+        }
+        else
+        {
+            actcounts += movl.find_overlaps(opt_ptr()->ovlen(), 
+                                            opt_ptr()->minmult(), 
+                                            opt_ptr()->maxmult(), 
+                                            !opt_ptr()->nointrack());
+        }
+        movl.overlap_stats(actcounter); // update actual counts
+    }
+    
+    // now estimate the null distribution by reshuffling the shufflable tracks, 
+    // and re-doing the overlaps with the same settings
+    UniformGen rng(_optp->random_seed());
+    for (unsigned int r = 0; r < _optp->reshufflings(); ++r)
+    {
+        unsigned int rndcounts = 0;
+        MultiOverlap::Counter rndcounter;
+        for (chrom_shufovl_map::iterator csit = _csovl.begin();
+             csit != _csovl.end(); ++csit)
+        {
+            ShuffleOvl& sovl = csit->second;
+            sovl.shuffle(rng);
+            
+            // generate and store overlaps
+            if (opt_ptr()->uniregion())
+            {
+                rndcounts += sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                                                     opt_ptr()->minmult(), 
+                                                     opt_ptr()->maxmult());
+            }
+            else
+            {
+                rndcounts += sovl.find_overlaps(opt_ptr()->ovlen(), 
+                                                opt_ptr()->minmult(), 
+                                                opt_ptr()->maxmult(), 
+                                                !opt_ptr()->nointrack());
+            }
+            movl.overlap_stats(rndcounter); // update actual counts
+        }
+        
+        // update the empirical distributions
+        _nulldistr.add(rndcounts); // NOTE: FOR TESTING ONLY!
+    }
+    _nulldistr.evaluate();
+    
+    return actcounts;
 }
 
 bool ProbPipeline::write_output()
 {
-    // save current status in archive if asked to do so
-    if (_optp->save_to() != "")
-    {
-        // write status data to archive file
-        try {
-            std::ofstream ofs(_optp->save_to().c_str());
-            boost::archive::binary_oarchive oa(ofs);
-            
-            // Note that only the input data and the chrom=>MultiOverlap map is saved
-            // neither the results nor the parameter settings are.
-            // The idea is to load these again and re-run with possibly different settings.
-            oa << _inputs << _cmovl;
-        } catch (const boost::archive::archive_exception& aex)
-        {
-            _errors.add_error("Cannot save archive: " + std::string(aex.what()));
-            return false;
-        }
-    }
-    
     // output the result in the selected format to stdout
-    if (_optp->outformat() == "BED")
-    {
-        // write BED output
-        return write_bed_output();
-    } else {
-        // default GFF2
-        return write_gff_output();
-    }
+    // TODO
 }
 
 // -- Result output methods --
 
-bool ProbPipeline::write_gff_output()
-{
-    // GFF2 metainfo
-    std::cout << "##gff-version 2" << std::endl;
-    boost::gregorian::date d(boost::gregorian::day_clock::local_day());
-    std::cout << "##date " << boost::gregorian::to_iso_extended_string(d) << std::endl;
-
-    // version information, GFF style
-    std::cout << "##source-version Multovl version " << MULTOVL_VER() << " "
-        << MULTOVL_BUILD() << std::endl;
-    
-    // MultOvl standard comments
-    write_comments();
-    
-    // process each chromosome in turn
-    for (chrom_multovl_map::const_iterator cmit = _cmovl.begin();
-        cmit != _cmovl.end(); ++cmit)
-    {
-        io::GffLinewriter lw(
-            _optp->source(), 
-            2, cmit->first
-        );    // init with chromosome
-        const MultiOverlap::multiregvec_t& mregs = cmit->second.overlaps();
-        
-        // simply write the regions
-        for (MultiOverlap::multiregvec_t::const_iterator mregit = mregs.begin();
-            mregit != mregs.end(); ++mregit)
-        {
-            std::cout << lw.write(*mregit) << std::endl;
-        }
-    }
-    return true;    // cannot really go wrong
-}
-
-bool ProbPipeline::write_bed_output()
-{
-    // MultOvl standard comments
-    write_comments();
-    
-    // process each chromosome in turn
-    for (chrom_multovl_map::const_iterator cmit = _cmovl.begin();
-        cmit != _cmovl.end(); ++cmit)
-    {
-        io::BedLinewriter lw(cmit->first); // init with chromosome
-        const MultiOverlap::multiregvec_t& mregs = cmit->second.overlaps();
-        
-        // simply write the regions
-        for (MultiOverlap::multiregvec_t::const_iterator mregit = mregs.begin();
-            mregit != mregs.end(); ++mregit)
-        {
-            std::cout << lw.write(*mregit) << std::endl;
-        }
-    }
-    return true;    // cannot really go wrong
-}
-
 // Writes the standard MultOvl comments to stdout.
 // Since the comments have the same syntax for BED and GFF,
 // this could be factored out.
-// Lists the parameters, the input files, multiplicity statistics. Private
+// Lists the parameters, the input files, ... Private
 void ProbPipeline::write_comments()
 {
-    // count "histograms": overlap combinations
-    MultiOverlap::Counter counter;
-    for (chrom_multovl_map::iterator cmit = _cmovl.begin();
-        cmit != _cmovl.end(); ++cmit)
-    {
-        cmit->second.overlap_stats(counter);      // "current overlap"
-    }
-    
     // the command-line parameters
     std::cout << "# Parameters = " << _optp->param_str() << std::endl;
     
     // add the input file names as comments
-    if (_optp->load_from() != "")
-    {
-        std::cout << "# Input data loaded from archive = " 
-            << _optp->load_from() << std::endl;
-    }
     std::cout << "# Input files = " << _inputs.size() << std::endl;
     for (input_vec::const_iterator it = _inputs.begin();
         it != _inputs.end(); ++it)
@@ -271,10 +322,8 @@ void ProbPipeline::write_comments()
         }
         std::cout << std::endl;
     }
-    
-    // list multiplicity information
-    std::cout << "# Overlap count = " << counter.total() << std::endl;
-    std::cout << "# Multiplicity counts = " << counter.to_string() << std::endl;
+    // TODO modify as necessary
 }
 
+}   // namespace prob
 }   // namespace multovl

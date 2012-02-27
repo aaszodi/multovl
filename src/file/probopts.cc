@@ -18,18 +18,22 @@
 namespace multovl {
 namespace prob {
 
-const unsigned int ProbOpts::DEFAULT_RESHUFFLINGS = 100;
+const unsigned int ProbOpts::DEFAULT_RESHUFFLINGS = 100,
+    ProbOpts::DEFAULT_RANDOMSEED = 42u;
 
 ProbOpts::ProbOpts():
 	MultovlOptbase(),
     _freefile(""),
     _fixedfiles(),
-    _reshufflings(DEFAULT_RESHUFFLINGS)
+    _reshufflings(DEFAULT_RESHUFFLINGS),
+    _randomseed(DEFAULT_RANDOMSEED)
 {
     add_mandatory_option<std::string>("free", "Free regions", 'F');
     add_option<filenames_t>("fixed", &_fixedfiles, filenames_t(), "Filenames of fixed tracks", 'f');
 	add_option<unsigned int>("reshufflings", &_reshufflings, DEFAULT_RESHUFFLINGS, 
 		"Number of reshufflings", 'r');
+	add_option<unsigned int>("seed", &_randomseed, DEFAULT_RANDOMSEED, 
+                             "Random number generator seed", 's');
 }
 
 bool ProbOpts::check_variables()
@@ -60,7 +64,9 @@ bool ProbOpts::check_variables()
 std::string ProbOpts::param_str() const 
 {
     std::string outstr = MultovlOptbase::param_str();
-    outstr += " -F " + _freefile + " -r " + boost::lexical_cast<std::string>(_reshufflings);
+    outstr += " -F " + _freefile + 
+            " -r " + boost::lexical_cast<std::string>(_reshufflings) +
+            " -s " + boost::lexical_cast<std::string>(_randomseed);
     for (unsigned int i = 0; i < _fixedfiles.size(); ++i)
     {
         outstr += " -f " + _fixedfiles[i];

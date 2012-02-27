@@ -21,8 +21,29 @@ ShuffleOvl::ShuffleOvl(const std::vector<Region>& frees):
     _freeregions(frees),
     _rpm(),
     _shufflecount(0)
+{}
+
+bool ShuffleOvl::add_randomplacer(unsigned int reglen, unsigned int trackid)
 {
+    if (reglen == 0)
+        return false;
+    bool ok = false;
     
+    // have we seen this track ID before?
+    _rpm_t::iterator rit = _rpm.find(trackid);
+    if (rit != _rpm.end())
+    {
+        // track ID already there
+        ok = rit->second.add(reglen);
+    }
+    else
+    {
+        // set up for this track ID
+        RandomPlacer rp;
+        ok = rp.add(reglen);
+        _rpm[trackid] = rp;
+    }
+    return ok;
 }
 
 unsigned int ShuffleOvl::shuffle(UniformGen& rng)
@@ -34,7 +55,7 @@ unsigned int ShuffleOvl::shuffle(UniformGen& rng)
         for (reglim_t::iterator rlit = reglim().begin(); rlit != reglim().end(); ++rlit)
         {
             if (rtid == rlit->track_id())
-                reglim().erase(rtid);
+                nonconst_reglim().erase(rtid);
         }
     }
     
