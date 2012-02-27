@@ -10,7 +10,8 @@ endif()
 # Convenience library for 'multovl' and variants
 set(movlsrc
     region.cc ancregion.cc errors.cc reglimit.cc multireglimit.cc
-    polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc pipeline.cc
+    polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc
+    basepipeline.cc pipeline.cc
 )
 add_library(movl STATIC ${movlsrc})
 flag_fix(movl)

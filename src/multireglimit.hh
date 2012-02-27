@@ -64,7 +64,7 @@ class MultiRegLimit
     protected:
     
     /// \return non-const access to the RegLimit multiset inside
-    reglim_t& reglim() { return _reglim; }
+    reglim_t& nonconst_reglim() { return _reglim; }
     
     private:
             
