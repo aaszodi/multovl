@@ -54,6 +54,22 @@ struct FreeRegionsFixture
 
 BOOST_FIXTURE_TEST_SUITE(freeregionssuite, FreeRegionsFixture)
 
+BOOST_AUTO_TEST_CASE(fit_test)
+{
+    FreeRegions fr(frees);
+    BOOST_CHECK(fr.fit(Region(110, 120, '+', "fit1")));
+    BOOST_CHECK(fr.fit(Region(230, 240, '+', "fit2")));
+    BOOST_CHECK(fr.fit(Region(300, 329, '+', "xfit3")));  // "exact" fit, i.e. equality
+    BOOST_CHECK(fr.fit(Region(401, 410, '+', "fit4")));
+
+    BOOST_CHECK(!fr.fit(Region(10, 20, '+', "before")));
+    BOOST_CHECK(!fr.fit(Region(50, 120, '+', "beforeovl")));
+    BOOST_CHECK(!fr.fit(Region(130, 220, '+', "twoovl")));
+    BOOST_CHECK(!fr.fit(Region(270, 280, '+', "between")));
+    BOOST_CHECK(!fr.fit(Region(410, 430, '+', "afterovl")));
+    BOOST_CHECK(!fr.fit(Region(500, 600, '+', "after")));
+}
+
 BOOST_AUTO_TEST_CASE(nominlen_test)
 {
     FreeRegions fr(frees);

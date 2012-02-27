@@ -40,6 +40,11 @@ class FreeRegions
     /// \param frees vector of free regions
     explicit FreeRegions(const std::vector<Region>& frees);
     
+    /// Checks if a given region fits into one of the free regions.
+    /// \param reg the region to be tested
+    /// \return true if /reg/ fits, false if not.
+    bool fit(const Region& reg) const;
+    
     /// Picks one of the free regions randomly with a probability
     /// corresponding to the regions' lengths
     /// \param rng A uniform random number generator

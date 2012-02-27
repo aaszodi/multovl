@@ -49,6 +49,17 @@ FreeRegions::FreeRegions(const std::vector<Region>& frees)
     // looks like 0, 0.15, 0.27, ... , 1.0 sorted
 }
 
+bool FreeRegions::fit(const Region& reg) const
+{
+    // very simple linear algorithm
+    for (unsigned int i = 0; i < _frees.size(); ++i)
+    {
+        if (_frees[i].first() <= reg.first() && reg.last() <= _frees[i].last())
+            return true; // yes, it fits
+    }
+    return false;
+}
+
 const Region& FreeRegions::select_free_region(UniformGen& rng, unsigned int minlen) const
 {
     unsigned int idx;
