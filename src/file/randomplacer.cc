@@ -21,7 +21,7 @@ namespace prob {
 // -- RandomPlacer implementation --
 
 RandomPlacer::RandomPlacer(const std::vector<Region>& Regions):
-    _lengths(), _placed()
+    _placed(), _lengths() 
 {
     const unsigned int REGSIZE = Regions.size();
     _lengths.reserve(REGSIZE);
@@ -53,7 +53,6 @@ void RandomPlacer::random_placement(const FreeRegions& frees, UniformGen& rng)
     {
         unsigned int reglen = _lengths[i];
         const Region& free = frees.select_free_region(rng, reglen);
-        unsigned int freelen = free.length();
         
         // place current region within selected free region
         // generate a random offset from free region begin

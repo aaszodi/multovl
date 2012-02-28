@@ -26,7 +26,7 @@ bool BasePipeline::run()
         timer.add_timepoint();  // [1]-st time point is the end of input
     
     // detect overlaps
-    unsigned int totalcounts = detect_overlaps();
+    detect_overlaps();
     if (!errors().ok())
         return false;
     if (opt_ptr()->timing())
