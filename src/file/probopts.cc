@@ -98,4 +98,5 @@ std::ostream& ProbOpts::version_info(std::ostream& out) const
 	return out;
 }
 
+}   // namespace prob
 }   // namespace multovl

@@ -8,6 +8,7 @@
 #include "basepipeline.hh"
 #include "multovlopts.hh"
 #include "empirdistr.hh"
+#include "shuffleovl.hh"
 
 namespace multovl {
 namespace prob {
@@ -67,15 +68,16 @@ class ProbPipeline: public BasePipeline
     // data which should be accessible
     // to derived classes without too much bureaucracy
     chrom_shufovl_map _csovl;   ///< chromosome ==> ShuffleOvl map
-    UniformRng _rng;
     EmpirDistr _nulldistr; ///< null distribution. NOTE: THIS IS FOR TESTING ONLY!!!
     
     private:
     
     unsigned int read_tracks(
-        const ProbOpts::filenames_t& inputfiles,
+        const std::vector<std::string>& inputfiles,
         unsigned int& trackid,
         bool shuffle);
+    unsigned int read_free_regions(const std::string& freefile);
+    void write_comments() const;
     
     ProbOpts* _optp;
 };

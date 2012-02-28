@@ -3,8 +3,8 @@
 // -- Own headers --
 
 #include "probpipeline.hh"
+#include "probopts.hh"
 #include "fileio.hh"
-#include "shuffleovl.hh"
 #include "multovl_config.hh"
 
 // -- Boost headers --
@@ -50,7 +50,7 @@ unsigned int ProbPipeline::read_input()
     // then read the optional fixed regions
     if (_optp->fixed_filecnt() > 0)
     {
-        read_tracks(_optp->fixednames(), trackcnt, false);
+        read_tracks(_optp->fixed_files(), trackcnt, false);
     }
     
     // read shufflable tracks from cmdline arg files
@@ -79,9 +79,9 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
     
     std::string chrom;
     Region reg; // temp input
-    crv_t crv; // collect free regions per chromosome here
     typedef std::vector<Region> rv_t;
-    typedef map<std::string, rv_t> crv_t;
+    typedef std::map<std::string, rv_t> crv_t;
+    crv_t crv; // collect free regions per chromosome here
     unsigned int regcnt = 0, problemcnt = 0;
     while (true)
     {
@@ -137,7 +137,7 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
 // \param shuffle true (default) if the input tracks are to be reshuffled. false for fixed tracks
 // \return the number of regions successfully read
 unsigned int ProbPipeline::read_tracks(
-    const ProbOpts::filenames_t& inputfiles,
+    const std::vector<std::string>& inputfiles,
     unsigned int& trackid,
     bool shuffle
 )
@@ -278,7 +278,7 @@ unsigned int ProbPipeline::detect_overlaps()
                                                 opt_ptr()->maxmult(), 
                                                 !opt_ptr()->nointrack());
             }
-            movl.overlap_stats(rndcounter); // update actual counts
+            sovl.overlap_stats(rndcounter); // update actual counts
         }
         
         // update the empirical distributions
@@ -301,7 +301,7 @@ bool ProbPipeline::write_output()
 // Since the comments have the same syntax for BED and GFF,
 // this could be factored out.
 // Lists the parameters, the input files, ... Private
-void ProbPipeline::write_comments()
+void ProbPipeline::write_comments() const
 {
     // the command-line parameters
     std::cout << "# Parameters = " << _optp->param_str() << std::endl;
