@@ -17,7 +17,7 @@ flag_fix(movl_fileio)
 
 # overlap probability convenience library
 set(movl_probsrc
-    empirdistr.cc freeregions.cc randomplacer.cc
+    empirdistr.cc freeregions.cc randomplacer.cc shuffleovl.cc
 )
 add_library(movl_prob STATIC ${movl_probsrc})
 flag_fix(movl_prob)

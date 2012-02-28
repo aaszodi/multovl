@@ -30,7 +30,7 @@ bool ShuffleOvl::add_randomplacer(unsigned int reglen, unsigned int trackid)
     bool ok = false;
     
     // have we seen this track ID before?
-    _rpm_t::iterator rit = _rpm.find(trackid);
+    rpm_t::iterator rit = _rpm.find(trackid);
     if (rit != _rpm.end())
     {
         // track ID already there
@@ -55,7 +55,7 @@ unsigned int ShuffleOvl::shuffle(UniformGen& rng)
         for (reglim_t::iterator rlit = reglim().begin(); rlit != reglim().end(); ++rlit)
         {
             if (rtid == rlit->track_id())
-                nonconst_reglim().erase(rtid);
+                nonconst_reglim().erase(rlit);
         }
     }
     
