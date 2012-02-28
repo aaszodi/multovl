@@ -28,25 +28,26 @@ if (BAMTOOLS_FOUND)
     list(APPEND FILEMULTOVLIBS ${BAMTOOLS_LIBRARIES})
 endif()
 
+# "classic" Multovl, single-core variant
 add_executable(multovl multovl.cc classicpipeline.cc classicopts.cc)
 flag_fix(multovl)
 target_link_libraries(multovl ${FILEMULTOVLIBS})
 
-# NOTE: the application 'multovprob' is not there yet
+# Multiple overlap probabilities
 set(MULTOVPROBLIBS movl_prob ${FILEMULTOVLIBS})
-# add_executable(multovprob multovprob.cc ??? ??? ...)
-# flag_fix(multovprob)
-# target_link_libraries(multovprob ${MULTOVPROBLIBS})
+add_executable(multovlprob multovlprob.cc probpipeline.cc probopts.cc)
+flag_fix(multovlprob)
+target_link_libraries(multovlprob ${MULTOVPROBLIBS})
 
 # add to global app target list
 set(app_targets 
     ${app_targets}
-    multovl
+    multovl multovlprob
     CACHE INTERNAL "app targets"
 )
 
 # install won't find non-toplevel targets
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
-    install(TARGETS multovl RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
+    install(TARGETS multovl multovlprob RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
 endif()
