@@ -9,11 +9,10 @@
 #include "multovlopts.hh"
 #include "empirdistr.hh"
 #include "shuffleovl.hh"
+#include "probopts.hh"
 
 namespace multovl {
 namespace prob {
-
-class ProbOpts;
 
 // -- Classes --
 

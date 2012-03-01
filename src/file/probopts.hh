@@ -38,9 +38,9 @@ class ProbOpts : public MultovlOptbase
     /// Convenience method to see whether fixed files have been defined at all.
     /// \return the number of fixed files, 0 if none has been specified
     unsigned int fixed_filecnt() const { return _fixedfiles.size(); }
-	
-	/// \return a vector of input file names that are to be reshuffled.
-	const filenames_t& shuffle_files() const { return pos_opts(); }
+    
+    /// \return a vector of input file names that are to be reshuffled.
+    filenames_t shuffle_files() const { return pos_opts(); }
     
     /// \return the number of reshufflings requested
     unsigned int reshufflings() const { return _reshufflings; }

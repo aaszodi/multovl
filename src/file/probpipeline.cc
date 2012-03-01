@@ -127,7 +127,7 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
     {
         const std::string& chrom = crvcit->first;
         const rv_t& regs = crvcit->second;
-        _csovl[chrom] = ShuffleOvl(regs);
+        _csovl.insert(std::make_pair<std::string, ShuffleOvl>(chrom,ShuffleOvl(regs)));
     }
     return regcnt;
 }
