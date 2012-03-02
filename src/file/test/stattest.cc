@@ -57,9 +57,25 @@ BOOST_FIXTURE_TEST_SUITE(statsuite, StatFixture)
 
 BOOST_AUTO_TEST_CASE(actual_test)
 {
-    // TODO
+    Stat st;
+    
+    st.add(2, 17, true);
+    st.add(3, 112, true);
+    st.add(5, 18, true);
+    
+    const Stat::lendistrs_t& ld = st.lendistrs();
+    Stat::lendistrs_t::const_iterator ldit;
+    ldit = ld.find(2);
+    BOOST_CHECK_EQUAL(ldit->second.actual(), 17);
+    ldit = ld.find(3);
+    BOOST_CHECK_EQUAL(ldit->second.actual(), 112);
+    ldit = ld.find(4);
+    BOOST_CHECK(ldit == ld.end());  // no such multiplicity
+    ldit = ld.find(5);
+    BOOST_CHECK_EQUAL(ldit->second.actual(), 18);
 }
 
+#if 0
 BOOST_AUTO_TEST_CASE(normrnd_test)
 {
     // set up the RNG: spell out everything
@@ -92,5 +108,6 @@ BOOST_AUTO_TEST_CASE(normrnd_test)
         BOOST_WARN_CLOSE(ed.cdf(x), yexp, PCT_TOL);
     }
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
