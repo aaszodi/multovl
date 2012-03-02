@@ -11,6 +11,8 @@ using namespace boost::accumulators;
 
 // -- System headers --
 
+#include <cmath>
+
 namespace multovl {
 namespace prob {
 
@@ -111,6 +113,11 @@ class EmpirDistr
         return boost::accumulators::variance(_acc);
     }
     
+    double std_dev() const throw(DirtyException)
+	{
+		return std::sqrt(variance());
+	}
+
     private: 
     
     typedef accumulator_set<double, 

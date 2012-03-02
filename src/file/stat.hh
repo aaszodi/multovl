@@ -67,7 +67,8 @@ public:
         explicit LenDistr(unsigned int ncell = 0):
             _actual(0),
             _nulldistr(ncell),
-            _pvalue(0.0)
+            _pvalue(0.0),
+            _zscore(0.0)
         {}
         
         // Init straight away by invoking add(ovlen, is_actual)
@@ -94,17 +95,21 @@ public:
             _nulldistr.evaluate();
             double c = _nulldistr.cdf(_actual);
             _pvalue = (c >= 0.5)? 1.0 - c: c;
+            _zscore = (_actual - _nulldistr.mean())/_nulldistr.std_dev();
         }
         
+        // accessors
         unsigned int actual() const { return _actual; }
         const EmpirDistr& nulldistr() const { return _nulldistr; }
         double p_value() const { return _pvalue; }
+        double z_score() const { return _zscore; }
         
     private:
         // data
         unsigned int _actual;
         EmpirDistr _nulldistr;
         double _pvalue;
+        double _zscore;
     };
     
     /// Init to default (empty).

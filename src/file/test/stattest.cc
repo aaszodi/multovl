@@ -100,6 +100,9 @@ BOOST_AUTO_TEST_CASE(normrnd_test)
     BOOST_WARN_CLOSE(st.lendistr(3).p_value(), norm_cdf(EMEAN, EDEV, EMEAN-EDEV), PCT_TOL);
     BOOST_WARN_CLOSE(1.0 - st.lendistr(5).p_value(), norm_cdf(EMEAN, EDEV, EMEAN+EDEV), PCT_TOL);
    
+    // test "Z-scores"
+    BOOST_WARN_CLOSE(st.lendistr(3).z_score(), -1.0, PCT_TOL);
+    BOOST_WARN_CLOSE(st.lendistr(5).z_score(), +1.0, PCT_TOL);
  }
 
 BOOST_AUTO_TEST_SUITE_END()
