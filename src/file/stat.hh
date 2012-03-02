@@ -13,6 +13,8 @@
 
 // -- Boost headers --
 
+#include "boost/lexical_cast.hpp"
+
 // -- Standard headers --
 
 #include <map>
@@ -29,6 +31,31 @@ class Stat
 {
 public:
     
+    // -- Member classes --
+    
+    /// A NotfoundException is thrown if a method tries to access
+    /// a multiplicity that has not been seen before.
+    class NotfoundException
+    {
+    public:
+        explicit NotfoundException(
+            unsigned int multiplicity
+        ):
+        _msg("Multiplicity " + 
+            boost::lexical_cast<std::string>(multiplicity) +
+            " not found"
+        ) {}
+        const std::string error_message() const 
+        {
+            return _msg;
+        }
+        
+    private:
+        std::string _msg;
+        
+    };
+    // END of member class NotFoundException
+
     // utility to keep together the actual total overlap length
     // and the empirically estimated null distribution
     // for a given multiplicity
@@ -60,15 +87,13 @@ public:
             else _nulldistr.add(ovlen);
         }
         
-        // Calculates a "two-sided p-value" based on the 
-        // position of the internal actual value
-        // relative to the null distribution.
-        double calc_pvalue()
+        // Evaluates the nulldistr and the actual/nulldistr
+        // comparison quantities such as p-value, z-score...
+        void evaluate()
         {
             _nulldistr.evaluate();
             double c = _nulldistr.cdf(_actual);
             _pvalue = (c >= 0.5)? 1.0 - c: c;
-            return _pvalue;
         }
         
         unsigned int actual() const { return _actual; }
@@ -82,9 +107,6 @@ public:
         double _pvalue;
     };
     
-   // multiplicity => total overlap length distribution
-    typedef std::map<unsigned int, LenDistr> lendistrs_t;
-
     /// Init to default (empty).
     Stat():
         _lendistrs()
@@ -101,14 +123,19 @@ public:
              unsigned int ovlen, 
              bool is_actual = false);
 
-    /// Calculates the "two-sided p-values"
-    /// for all multiplicities.
-    void calc_pvalues();  
+    /// Evaluates the distributions inside
+    void evaluate();  
 
-    const lendistrs_t& lendistrs() const { return _lendistrs; }
+    /// Look up the Lendistr object belonging to a given multiplicity.
+    /// \param multiplicity is the multiplicity
+    /// \return the Lendistr object belonging to /multiplicity/
+    /// \throw Stat::NotfoundException if /multiplicity/ has not been seen
+    const LenDistr& lendistr(unsigned int multiplicity) const throw(NotfoundException);
     
 private:
     
+   // multiplicity => total overlap length distribution
+    typedef std::map<unsigned int, LenDistr> lendistrs_t;
     typedef lendistrs_t::iterator lditer_t;
     
     lendistrs_t _lendistrs;

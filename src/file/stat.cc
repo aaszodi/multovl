@@ -39,13 +39,21 @@ void Stat::add(unsigned int multiplicity,
     }
 }
 
-void Stat::calc_pvalues()
+void Stat::evaluate()
 {
     for (lditer_t ldit = _lendistrs.begin(); ldit != _lendistrs.end(); ++ldit)
     {
-        ldit->second.calc_pvalue();
+        ldit->second.evaluate();
     }
 }
-    
+
+const Stat::LenDistr& Stat::lendistr(unsigned int multiplicity) const throw(NotfoundException)
+{
+    lendistrs_t::const_iterator ldit = _lendistrs.find(multiplicity);
+    if (ldit == _lendistrs.end())
+        throw(NotfoundException(multiplicity));
+    return ldit->second;
+}
+
 }   // namespace prob
 }   // namespace multovl

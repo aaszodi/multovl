@@ -11,6 +11,8 @@ using namespace prob;
 // -- Boost headers --
 
 // we test with normal random deviates
+#include "boost/random/mersenne_twister.hpp"
+#include "boost/random/variate_generator.hpp"
 #include "boost/random/normal_distribution.hpp"
 
 // -- standard headers --
@@ -63,19 +65,12 @@ BOOST_AUTO_TEST_CASE(actual_test)
     st.add(3, 112, true);
     st.add(5, 18, true);
     
-    const Stat::lendistrs_t& ld = st.lendistrs();
-    Stat::lendistrs_t::const_iterator ldit;
-    ldit = ld.find(2);
-    BOOST_CHECK_EQUAL(ldit->second.actual(), 17);
-    ldit = ld.find(3);
-    BOOST_CHECK_EQUAL(ldit->second.actual(), 112);
-    ldit = ld.find(4);
-    BOOST_CHECK(ldit == ld.end());  // no such multiplicity
-    ldit = ld.find(5);
-    BOOST_CHECK_EQUAL(ldit->second.actual(), 18);
+    BOOST_CHECK_EQUAL(st.lendistr(2).actual(), 17);
+    BOOST_CHECK_EQUAL(st.lendistr(3).actual(), 112);
+    BOOST_CHECK_THROW(st.lendistr(4), Stat::NotfoundException);  // no such multiplicity
+    BOOST_CHECK_EQUAL(st.lendistr(5).actual(), 18);
 }
 
-#if 0
 BOOST_AUTO_TEST_CASE(normrnd_test)
 {
     // set up the RNG: spell out everything
@@ -87,27 +82,24 @@ BOOST_AUTO_TEST_CASE(normrnd_test)
     boost::variate_generator<rng_t&, normdistr_t > norm(rng, normdistr);
 
     Stat st;
+    // fill up nulldistr for multiplicities 3 and 5
     for (unsigned int i=0; i<NTRIAL; ++i)
     {
         double x;
         x = norm();
-        // TODO
-        st.add(x);
+        st.add(3, x, false);
+        x = norm();
+        st.add(5, x, false);
     }
-    ed.evaluate();
+    // add actuals -/+ 1 SD from mean
+    st.add(3, EMEAN-EDEV, true);
+    st.add(5, EMEAN+EDEV, true);
+    st.evaluate();
     
-    // cannot reliably test low() and high()
-    BOOST_WARN_CLOSE(ed.mean(), EMEAN, PCT_TOL);
-    BOOST_WARN_CLOSE(ed.variance(), EDEV*EDEV, PCT_TOL);
-    
-    // scan a range of +/- Z S.D of the CDF in 0.1 S.D. steps
-    const double Z = 2.0, XSTEP = 0.1*EDEV;
-    for (double x = EMEAN - Z*EDEV; x <= EMEAN + Z*EDEV; x+=XSTEP)
-    {
-        double yexp = norm_cdf(EMEAN, EDEV, x);
-        BOOST_WARN_CLOSE(ed.cdf(x), yexp, PCT_TOL);
-    }
-}
-#endif
+    // test "p-values" against the CDF
+    BOOST_WARN_CLOSE(st.lendistr(3).p_value(), norm_cdf(EMEAN, EDEV, EMEAN-EDEV), PCT_TOL);
+    BOOST_WARN_CLOSE(1.0 - st.lendistr(5).p_value(), norm_cdf(EMEAN, EDEV, EMEAN+EDEV), PCT_TOL);
+   
+ }
 
 BOOST_AUTO_TEST_SUITE_END()
