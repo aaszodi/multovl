@@ -3,7 +3,7 @@
 
 // == HEADER stat.hh ==
 
-/// \file Overlap length statistics collection.
+/// \file Overlap statistics collection.
 /// \date 2012-03-01
 /// \author Andras Aszodi
 
@@ -24,9 +24,11 @@
 namespace multovl {
 namespace prob {
 
-/// Utility to collect actual overlap lengths
-/// and the null distribution estimates (obtained by shuffling)
+/// Utility to collect actual overlap data
+/// and the corresponding null distribution estimates (obtained by shuffling)
 /// grouped by multiplicity.
+/// The values collected are of type double although in most cases
+/// they are actually integers, but let's stay generic.
 class Stat
 {
 public:
@@ -59,33 +61,33 @@ public:
     // utility to keep together the actual total overlap length
     // and the empirically estimated null distribution
     // for a given multiplicity
-    class LenDistr
+    class Distr
     {
     public:
         
         // Init. For the time being the default /ncell/ will be used
-        explicit LenDistr(unsigned int ncell = 0):
-            _actual(0),
+        explicit Distr(unsigned int ncell = 0):
+            _actual(0.0),
             _nulldistr(ncell),
             _pvalue(0.0),
             _zscore(0.0)
         {}
         
-        // Init straight away by invoking add(ovlen, is_actual)
-        LenDistr(unsigned int ovlen, bool is_actual)
+        // Init straight away by invoking add(val, is_actual)
+        Distr(double val, bool is_actual)
         {
-            add(ovlen, is_actual);
+            add(val, is_actual);
         }
         
-        // Adds an overlap length
-        // \param ovlen the overlap len to be added
+        // Adds a value
+        // \param val the value to be added
         // \param act if true, then the /actual/ member
-        // will be set to /ovlen/, otherwise it will be added
+        // will be set to /val/, otherwise it will be added
         // to the /nulldistr/ estimate
-        void add(unsigned int ovlen, bool is_actual)
+        void add(double val, bool is_actual)
         {
-            if (is_actual) _actual = ovlen;
-            else _nulldistr.add(ovlen);
+            if (is_actual) _actual = val;
+            else _nulldistr.add(val);
         }
         
         // Evaluates the nulldistr and the actual/nulldistr
@@ -99,14 +101,14 @@ public:
         }
         
         // accessors
-        unsigned int actual() const { return _actual; }
+        double actual() const { return _actual; }
         const EmpirDistr& nulldistr() const { return _nulldistr; }
         double p_value() const { return _pvalue; }
         double z_score() const { return _zscore; }
         
     private:
         // data
-        unsigned int _actual;
+        double _actual;
         EmpirDistr _nulldistr;
         double _pvalue;
         double _zscore;
@@ -114,36 +116,36 @@ public:
     
     /// Init to default (empty).
     Stat():
-        _lendistrs()
+        _distrs()
     {}
     
-    /// Adds a total overlap length to the calling object.
+    /// Adds a value to the calling object.
     /// \param multiplicity the multiplicity of the overlap for which
     /// the total overlap length is provided. Should be >= 2
-    /// \param ovlen the overlap length to be added. Should be >= 0
-    /// \param is_actual true if /ovlen/ is an actual overlap length,
-    /// ie. before shuffling. false (the default) if /ovlen/
-    /// is the total overlap length obtained in one of the shuffling rounds.
+    /// \param val the value to be added
+    /// \param is_actual true if /value/ is an actual value,
+    /// ie. before shuffling. false (the default) if /val/
+    /// is a value obtained in one of the shuffling rounds.
     void add(unsigned int multiplicity, 
-             unsigned int ovlen, 
+             double val, 
              bool is_actual = false);
 
     /// Evaluates the distributions inside
     void evaluate();  
 
-    /// Look up the Lendistr object belonging to a given multiplicity.
+    /// Look up the Distr object belonging to a given multiplicity.
     /// \param multiplicity is the multiplicity
-    /// \return the Lendistr object belonging to /multiplicity/
+    /// \return the Distr object belonging to /multiplicity/
     /// \throw Stat::NotfoundException if /multiplicity/ has not been seen
-    const LenDistr& lendistr(unsigned int multiplicity) const throw(NotfoundException);
+    const Distr& distr(unsigned int multiplicity) const throw(NotfoundException);
     
 private:
     
-   // multiplicity => total overlap length distribution
-    typedef std::map<unsigned int, LenDistr> lendistrs_t;
-    typedef lendistrs_t::iterator lditer_t;
+   // multiplicity => data distribution
+    typedef std::map<unsigned int, Distr> distrs_t;
+    typedef distrs_t::iterator diter_t;
     
-    lendistrs_t _lendistrs;
+    distrs_t _distrs;
 };
 
 } // namespace prob

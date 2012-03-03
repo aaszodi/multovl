@@ -137,6 +137,7 @@ BOOST_AUTO_TEST_CASE(normrnd_test)
     // cannot reliably test low() and high()
     BOOST_WARN_CLOSE(ed.mean(), EMEAN, PCT_TOL);
     BOOST_WARN_CLOSE(ed.variance(), EDEV*EDEV, PCT_TOL);
+    BOOST_WARN_CLOSE(ed.std_dev(), EDEV, PCT_TOL);
     
     // scan a range of +/- Z S.D of the CDF in 0.1 S.D. steps
     const double Z = 2.0, XSTEP = 0.1*EDEV;

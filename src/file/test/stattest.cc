@@ -65,10 +65,10 @@ BOOST_AUTO_TEST_CASE(actual_test)
     st.add(3, 112, true);
     st.add(5, 18, true);
     
-    BOOST_CHECK_EQUAL(st.lendistr(2).actual(), 17);
-    BOOST_CHECK_EQUAL(st.lendistr(3).actual(), 112);
-    BOOST_CHECK_THROW(st.lendistr(4), Stat::NotfoundException);  // no such multiplicity
-    BOOST_CHECK_EQUAL(st.lendistr(5).actual(), 18);
+    BOOST_CHECK_EQUAL(st.distr(2).actual(), 17);
+    BOOST_CHECK_EQUAL(st.distr(3).actual(), 112);
+    BOOST_CHECK_THROW(st.distr(4), Stat::NotfoundException);  // no such multiplicity
+    BOOST_CHECK_EQUAL(st.distr(5).actual(), 18);
 }
 
 BOOST_AUTO_TEST_CASE(normrnd_test)
@@ -97,12 +97,12 @@ BOOST_AUTO_TEST_CASE(normrnd_test)
     st.evaluate();
     
     // test "p-values" against the CDF
-    BOOST_WARN_CLOSE(st.lendistr(3).p_value(), norm_cdf(EMEAN, EDEV, EMEAN-EDEV), PCT_TOL);
-    BOOST_WARN_CLOSE(1.0 - st.lendistr(5).p_value(), norm_cdf(EMEAN, EDEV, EMEAN+EDEV), PCT_TOL);
+    BOOST_WARN_CLOSE(st.distr(3).p_value(), norm_cdf(EMEAN, EDEV, EMEAN-EDEV), PCT_TOL);
+    BOOST_WARN_CLOSE(1.0 - st.distr(5).p_value(), norm_cdf(EMEAN, EDEV, EMEAN+EDEV), PCT_TOL);
    
     // test "Z-scores"
-    BOOST_WARN_CLOSE(st.lendistr(3).z_score(), -1.0, PCT_TOL);
-    BOOST_WARN_CLOSE(st.lendistr(5).z_score(), +1.0, PCT_TOL);
+    BOOST_WARN_CLOSE(st.distr(3).z_score(), -1.0, PCT_TOL);
+    BOOST_WARN_CLOSE(st.distr(5).z_score(), +1.0, PCT_TOL);
  }
 
 BOOST_AUTO_TEST_SUITE_END()

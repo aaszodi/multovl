@@ -20,39 +20,39 @@ namespace multovl {
 namespace prob {
 
 void Stat::add(unsigned int multiplicity, 
-         unsigned int ovlen, 
+         double val, 
          bool is_actual)
 {
-    // which lendistr?
-    lditer_t ldit = _lendistrs.find(multiplicity);
-    if (ldit != _lendistrs.end())
+    // which distr?
+    diter_t dit = _distrs.find(multiplicity);
+    if (dit != _distrs.end())
     {
         // found, just update
-        ldit->second.add(ovlen, is_actual);
+        dit->second.add(val, is_actual);
     } else {
         // multiplicity hasn't been seen so far
-        LenDistr ld(ovlen, is_actual);
-        _lendistrs.insert(
-            std::make_pair<unsigned int, LenDistr>(
-                multiplicity, ld)
+        Distr distr(val, is_actual);
+        _distrs.insert(
+            std::make_pair<unsigned int, Distr>(
+                multiplicity, distr)
         );
     }
 }
 
 void Stat::evaluate()
 {
-    for (lditer_t ldit = _lendistrs.begin(); ldit != _lendistrs.end(); ++ldit)
+    for (diter_t dit = _distrs.begin(); dit != _distrs.end(); ++dit)
     {
-        ldit->second.evaluate();
+        dit->second.evaluate();
     }
 }
 
-const Stat::LenDistr& Stat::lendistr(unsigned int multiplicity) const throw(NotfoundException)
+const Stat::Distr& Stat::distr(unsigned int multiplicity) const throw(NotfoundException)
 {
-    lendistrs_t::const_iterator ldit = _lendistrs.find(multiplicity);
-    if (ldit == _lendistrs.end())
+    distrs_t::const_iterator dit = _distrs.find(multiplicity);
+    if (dit == _distrs.end())
         throw(NotfoundException(multiplicity));
-    return ldit->second;
+    return dit->second;
 }
 
 }   // namespace prob
