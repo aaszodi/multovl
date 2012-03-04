@@ -59,12 +59,35 @@ BOOST_FIXTURE_TEST_SUITE(empirdistrsuite, EmpirDistrFixture)
 
 BOOST_AUTO_TEST_CASE(empty_test)
 {
-    EmpirDistr ed; // dirty state
-    BOOST_CHECK_THROW(ed.low(), EmpirDistr::DirtyException);
-    BOOST_CHECK_THROW(ed.high(), EmpirDistr::DirtyException);
-    BOOST_CHECK_THROW(ed.mean(), EmpirDistr::DirtyException);
-    BOOST_CHECK_THROW(ed.variance(), EmpirDistr::DirtyException);
-    BOOST_CHECK_THROW(ed.cdf(0.5), EmpirDistr::DirtyException);
+    EmpirDistr ed; // dirty & empty state
+    BOOST_CHECK_THROW(ed.low(), EmpirDistr::Exception);
+    BOOST_CHECK_THROW(ed.high(), EmpirDistr::Exception);
+    BOOST_CHECK_THROW(ed.mean(), EmpirDistr::Exception);
+    BOOST_CHECK_THROW(ed.variance(), EmpirDistr::Exception);
+    BOOST_CHECK_THROW(ed.cdf(0.5), EmpirDistr::Exception);
+    
+    // clean but empty
+    ed.evaluate();
+    try {
+        ed.mean();
+    } catch (const EmpirDistr::Exception& exc) {
+        BOOST_CHECK_EQUAL(exc.error_message(), "mean(): empty");
+    }
+    
+    // adding one value is still not enough for variance calc
+    ed.add(3.14);
+    ed.evaluate();
+    BOOST_CHECK_NO_THROW(ed.mean());
+    try {
+        ed.variance();
+    } catch (const EmpirDistr::Exception& exc) {
+        BOOST_CHECK_EQUAL(exc.error_message(), "variance(): not enough data");
+    }
+    
+    // adding another is now OK
+    ed.add(2.71);
+    ed.evaluate();
+    BOOST_CHECK_NO_THROW(ed.variance());
 }
 
 // uniform distribution with values 1,2,..,6

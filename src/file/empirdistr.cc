@@ -40,10 +40,48 @@ void EmpirDistr::evaluate()
     _dirty = false;
 }
 
-double EmpirDistr::cdf(double x) const throw(DirtyException)
+double EmpirDistr::low() const throw(Exception)
 {
     if (_dirty)
-	    throw DirtyException("cdf(X)");
+        throw Exception("low(): dirty");
+    if (count(_acc) < 1)
+        throw Exception("low(): empty");
+    return _low;
+}
+
+double EmpirDistr::high() const throw(Exception)
+{
+    if (_dirty)
+        throw Exception("high(): dirty");
+    if (count(_acc) < 1)
+        throw Exception("high(): empty");
+    return _high;
+}
+    
+double EmpirDistr::mean() const throw(Exception)
+{
+    if (_dirty)
+        throw Exception("mean(): dirty");
+    if (count(_acc) < 1)
+        throw Exception("mean(): empty");
+    return boost::accumulators::mean(_acc);
+}
+
+double EmpirDistr::variance() const throw(Exception)
+{
+    if (_dirty)
+        throw Exception("variance(): dirty");
+    if (count(_acc) < 2)
+        throw Exception("variance(): not enough data");
+    return boost::accumulators::variance(_acc);
+}
+
+double EmpirDistr::cdf(double x) const throw(Exception)
+{
+    if (_dirty)
+	    throw Exception("cdf(X)");
+    if (count(_acc) < 1)
+        throw Exception("cdf(): empty");    // N=1 makes also little sense...
     
     if (x < _low) return 0.0;
     if (x > _high) return 1.0;

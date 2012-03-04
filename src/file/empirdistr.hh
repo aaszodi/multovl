@@ -23,28 +23,28 @@ class EmpirDistr
 {
     // -- member classes
     
-    public:
+public:
     
-    /// A DirtyException is thrown if one of the accessors
-    /// is invoked on a "dirty" EmpirDistr object.
-    class DirtyException
+    /// Exception class for the following situations:
+    /// if an accessor is invoked on a "dirty" EmpirDistr object
+    /// if an accessor is invoked on an empty EmpirDistr object,
+    /// or if variance() or std_dev() are invoked on an EmpirDistr object
+    /// containing less than 2 data points
+    class Exception
     {
-        public:
-        explicit DirtyException(const std::string& throwname):
-            _tnm(throwname) {}
-        const std::string error_message() const 
-        {
-            return _tnm + " invoked on dirty EmpirDistr";
-        }
+    public:
+        explicit Exception(const std::string& msg):
+            _message(msg) {}
         
-        private:
-        std::string _tnm;
+        const std::string error_message() const { return _message; }
+        
+    private:
+        std::string _message;
         
     };
-    // END of member class DirtyException
+    // END of member class Exception
     
-    // methods
-    public:
+    // -- methods
 	    
     /**
      * Constructs an object so that it is ready to do a CDF approximation
@@ -60,60 +60,36 @@ class EmpirDistr
     /// evaluate(): normalise the counts and make the CDF.
     void evaluate();
     
-    /**
-     * \return the lowest value covered by the approximation.
-     * \throw DirtyException if evaluate() was not invoked beforehand.
-     */
-    double low() const throw(DirtyException)
-    {
-    	if (_dirty)
-            throw DirtyException("low()");
-        return _low;
-    }
+    /// \return the lowest value covered by the approximation.
+    /// \throw Exception if evaluate() was not invoked beforehand
+    /// or if there were no data
+    double low() const throw(Exception);
     
-    /**
-     * \return the highest value covered by the approximation.
-     * \throw DirtyException if evaluate() was not invoked beforehand.
-     */
-    double high() const throw(DirtyException)
-    {
-        if (_dirty)
-            throw DirtyException("high()");
-        return _high;
-    }
+    /// \return the highest value covered by the approximation.
+    /// \throw Exception if evaluate() was not invoked beforehand
+    /// or if there were no data
+    double high() const throw(Exception);
     
-    /**
-     * Interpolates the CDF.
-     * \param x the value at which the CDF is to be approximated.
-     * \return an interpolated value for the CDF, or 0.0
-     * if /x/ lies outside [low()..high()].
-     * \throw DirtyException if evaluate() was not invoked beforehand.
-     */
-    double cdf(double x) const throw(DirtyException);
+    /// Interpolates the CDF.
+    /// \param x the value at which the CDF is to be approximated.
+    /// \return an interpolated value for the CDF, or 0.0
+    /// if /x/ lies outside [low()..high()].
+    /// \throw Exception if evaluate() was not invoked beforehand
+    /// or if there were no data.
+    double cdf(double x) const throw(Exception);
     
-    /**
-     * \return the (estimated) mean of the distribution.
-     * \throw DirtyException if evaluate() was not invoked beforehand.
-     */
-    double mean() const throw(DirtyException)
-    {
-        if (_dirty)
-            throw DirtyException("mean()");
-        return boost::accumulators::mean(_acc);
-    }
+    /// \return the (estimated) mean of the distribution.
+    /// \throw Exception if evaluate() was not invoked beforehand
+    /// or if there were no data.
+    double mean() const throw(Exception);
     
-    /**
-     * \return the (estimated) variance of the distribution.
-     * \throw DirtyException if evaluate() was not invoked beforehand.
-     */
-    double variance() const throw(DirtyException)
-    {
-        if (_dirty)
-            throw DirtyException("variance()");
-        return boost::accumulators::variance(_acc);
-    }
+    /// \return the (estimated) variance of the distribution.
+    /// \throw DirtyException if evaluate() was not invoked beforehand.
+    /// or if less than 2 data points have been added to the calling object.
+    double variance() const throw(Exception);
     
-    double std_dev() const throw(DirtyException)
+    /// \return the standard deviation (by taking the square root of variance()).
+    double std_dev() const throw(Exception)
 	{
 		return std::sqrt(variance());
 	}
@@ -122,7 +98,7 @@ class EmpirDistr
     
     typedef accumulator_set<double, 
         features< 
-            tag::min, tag::max, 
+            tag::count, tag::min, tag::max, 
             tag::mean, tag::lazy_variance, 
             stats<tag::p_square_cumulative_distribution>
         >
