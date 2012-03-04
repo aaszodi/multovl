@@ -26,7 +26,7 @@ namespace prob {
 /// Class for calculating multiple overlaps repeatedly after reshuffling some of the tracks.
 class ShuffleOvl: public MultiOverlap 
 {
-    public:
+public:
         
     /// Init with free regions
     /// \param frees a vector of free regions into which all fixed and shufflable regions must fall
@@ -51,7 +51,7 @@ class ShuffleOvl: public MultiOverlap
     /// \return the new shuffle count
     unsigned int shuffle(UniformGen& rng);
     
-    private:
+private:
     
     // data
     FreeRegions _freeregions;

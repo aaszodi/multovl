@@ -16,15 +16,28 @@
 
 // == Implementation ==
 
-// -- ProbPipeline methods --
-
 namespace multovl {
 namespace prob {
+
+// -- OvlenCounter methods --
+
+void ProbPipeline::OvlenCounter::update(const MultiOverlap::multiregvec_t& overlaps)
+{
+    for (MultiOverlap::multiregvec_t::const_iterator mrcit = overlaps.begin();
+        mrcit != overlaps.end(); ++mrcit)
+    {
+        unsigned int m = mrcit->multiplicity(),
+            len = mrcit->length();
+        _mtolen[m] += len;
+    }
+}
+
+// -- ProbPipeline methods --
 
 ProbPipeline::ProbPipeline(int argc, char* argv[]):
     BasePipeline(),
     _csovl(),
-    _nulldistr() // NOTE: this will change!
+    _stat()
 {
     _optp = new ProbOpts();
     _optp->process_commandline(argc, argv); // exits on error or help request
@@ -225,30 +238,36 @@ unsigned int ProbPipeline::read_tracks(
 
 unsigned int ProbPipeline::detect_overlaps()
 {
-    
     // first calculate the actual overlaps without shuffling
-    unsigned int actcounts = 0;
-    MultiOverlap::Counter actcounter;
+    OvlenCounter actcounter;
+    unsigned int acts = 0;
     for (chrom_shufovl_map::iterator csit = _csovl.begin();
          csit != _csovl.end(); ++csit)
     {
-        MultiOverlap& movl = csit->second;      // "current overlap"
+        ShuffleOvl& sovl = csit->second;      // "current overlap"
         
         // generate and store overlaps
         if (opt_ptr()->uniregion())
         {
-            actcounts += movl.find_unionoverlaps(opt_ptr()->ovlen(), 
-                                                 opt_ptr()->minmult(), 
-                                                 opt_ptr()->maxmult());
+            acts += sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), 
+                opt_ptr()->maxmult());
         }
         else
         {
-            actcounts += movl.find_overlaps(opt_ptr()->ovlen(), 
-                                            opt_ptr()->minmult(), 
-                                            opt_ptr()->maxmult(), 
-                                            !opt_ptr()->nointrack());
+            acts += sovl.find_overlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), 
+                opt_ptr()->maxmult(), 
+                !opt_ptr()->nointrack());
         }
-        movl.overlap_stats(actcounter); // update actual counts
+        actcounter.update(sovl.overlaps()); // update actual counts
+    }
+    
+    // add actual counts to statistics
+    for (OvlenCounter::mtolen_t::const_iterator mtcit = actcounter.mtolen().begin();
+        mtcit != actcounter.mtolen().end(); ++mtcit)
+    {
+        _stat.add(mtcit->first, mtcit->second, true);
     }
     
     // now estimate the null distribution by reshuffling the shufflable tracks, 
@@ -256,8 +275,7 @@ unsigned int ProbPipeline::detect_overlaps()
     UniformGen rng(_optp->random_seed());
     for (unsigned int r = 0; r < _optp->reshufflings(); ++r)
     {
-        unsigned int rndcounts = 0;
-        MultiOverlap::Counter rndcounter;
+        OvlenCounter rndcounter;
         for (chrom_shufovl_map::iterator csit = _csovl.begin();
              csit != _csovl.end(); ++csit)
         {
@@ -267,47 +285,41 @@ unsigned int ProbPipeline::detect_overlaps()
             // generate and store overlaps
             if (opt_ptr()->uniregion())
             {
-                rndcounts += sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
-                                                     opt_ptr()->minmult(), 
-                                                     opt_ptr()->maxmult());
+                sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                    opt_ptr()->minmult(), 
+                    opt_ptr()->maxmult());
             }
             else
             {
-                rndcounts += sovl.find_overlaps(opt_ptr()->ovlen(), 
-                                                opt_ptr()->minmult(), 
-                                                opt_ptr()->maxmult(), 
-                                                !opt_ptr()->nointrack());
+                sovl.find_overlaps(opt_ptr()->ovlen(), 
+                    opt_ptr()->minmult(), 
+                    opt_ptr()->maxmult(), 
+                    !opt_ptr()->nointrack());
             }
-            sovl.overlap_stats(rndcounter); // update actual counts
+            rndcounter.update(sovl.overlaps()); // update actual counts
         }
         
         // update the empirical distributions
-        _nulldistr.add(rndcounts); // NOTE: FOR TESTING ONLY!
+        for (OvlenCounter::mtolen_t::const_iterator mtcit = rndcounter.mtolen().begin();
+            mtcit != rndcounter.mtolen().end(); ++mtcit)
+        {
+            _stat.add(mtcit->first, mtcit->second, false);
+        }
     }
-    _nulldistr.evaluate();
     
-    return actcounts;
+    // evaluate the stats
+    _stat.evaluate();
+    
+    return acts;    // the NUMBER of actual overlaps
 }
 
 bool ProbPipeline::write_output()
 {
-    // output the result in the selected format to stdout
-    // TODO
-}
-
-// -- Result output methods --
-
-// Writes the standard MultOvl comments to stdout.
-// Since the comments have the same syntax for BED and GFF,
-// this could be factored out.
-// Lists the parameters, the input files, ... Private
-void ProbPipeline::write_comments() const
-{
-    // the command-line parameters
+    // Preamble: the command-line parameters
     std::cout << "# Parameters = " << _optp->param_str() << std::endl;
     
-    // add the input file names as comments
-    std::cout << "# Input files = " << _inputs.size() << std::endl;
+    // shuffled input file names (the fixed are listed in the parameters above)
+    std::cout << "# Shuffled input files = " << _inputs.size() << std::endl;
     for (input_vec::const_iterator it = _inputs.begin();
         it != _inputs.end(); ++it)
     {
@@ -322,7 +334,26 @@ void ProbPipeline::write_comments() const
         }
         std::cout << std::endl;
     }
-    // TODO modify as necessary
+
+    // output the result in the selected format to stdout as CSV
+    // for the whole range of multiplicities seen
+    std::cout << "# == Overlap length statistics ==" << std::endl
+        << "Multiplicity,Actual,Mean,SD,Pvalue,Zscore" << std::endl;
+    for (unsigned int m = _stat.min_mult(); m <= _stat.max_mult(); ++m)
+    {
+        try {
+            const Stat::Distr& distr = _stat.distr(m);
+            if (distr.is_valid())
+            {
+                const EmpirDistr& nd = distr.nulldistr();
+                std::cout << m << ',' << distr.actual() << ','
+                    << nd.mean() << ',' << nd.std_dev() << ','
+                    << distr.p_value() << ',' << distr.z_score() << std::endl;
+            }
+        } catch (const Stat::NotfoundException& ex) {
+            // skip this multiplicity
+        }
+    }
 }
 
 }   // namespace prob

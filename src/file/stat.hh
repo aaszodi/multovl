@@ -17,6 +17,7 @@
 
 // -- Standard headers --
 
+#include <limits>
 #include <map>
 
 // == CLASSES ==
@@ -70,11 +71,16 @@ public:
             _actual(0.0),
             _nulldistr(ncell),
             _pvalue(0.0),
-            _zscore(0.0)
+            _zscore(0.0),
+            _valid(false)
         {}
         
         // Init straight away by invoking add(val, is_actual)
-        Distr(double val, bool is_actual)
+        Distr(double val, bool is_actual):
+            _actual(0.0),
+            _nulldistr(),
+            _pvalue(0.0),
+            _zscore(0.0)
         {
             add(val, is_actual);
         }
@@ -88,19 +94,27 @@ public:
         {
             if (is_actual) _actual = val;
             else _nulldistr.add(val);
+            _valid = false;
         }
         
         // Evaluates the nulldistr and the actual/nulldistr
         // comparison quantities such as p-value, z-score...
+        // If there were enough data, then is_valid() will return /true/ afterwards
         void evaluate()
         {
             _nulldistr.evaluate();
-            double c = _nulldistr.cdf(_actual);
-            _pvalue = (c >= 0.5)? 1.0 - c: c;
-            _zscore = (_actual - _nulldistr.mean())/_nulldistr.std_dev();
+            try {
+                double c = _nulldistr.cdf(_actual);
+                _pvalue = (c >= 0.5)? 1.0 - c: c;
+                _zscore = (_actual - _nulldistr.mean())/_nulldistr.std_dev();
+                _valid = true;
+            } catch (const EmpirDistr::Exception& ex) {
+                _valid = false;
+            }
         }
         
         // accessors
+        bool is_valid() const { return _valid; }
         double actual() const { return _actual; }
         const EmpirDistr& nulldistr() const { return _nulldistr; }
         double p_value() const { return _pvalue; }
@@ -112,11 +126,14 @@ public:
         EmpirDistr _nulldistr;
         double _pvalue;
         double _zscore;
+        bool _valid;
     };
     
     /// Init to default (empty).
     Stat():
-        _distrs()
+        _distrs(),
+        _minmult(std::numeric_limits<unsigned int>::max()),
+        _maxmult(0)
     {}
     
     /// Adds a value to the calling object.
@@ -139,6 +156,12 @@ public:
     /// \throw Stat::NotfoundException if /multiplicity/ has not been seen
     const Distr& distr(unsigned int multiplicity) const throw(NotfoundException);
     
+    /// \return the minimal multiplicity seen so far
+    unsigned int min_mult() const { return _minmult; }
+    
+    /// \return the maximal multiplicity seen so far
+    unsigned int max_mult() const { return _maxmult; }
+    
 private:
     
    // multiplicity => data distribution
@@ -146,6 +169,7 @@ private:
     typedef distrs_t::iterator diter_t;
     
     distrs_t _distrs;
+    unsigned int _minmult, _maxmult;
 };
 
 } // namespace prob

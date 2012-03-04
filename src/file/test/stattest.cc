@@ -69,6 +69,16 @@ BOOST_AUTO_TEST_CASE(actual_test)
     BOOST_CHECK_EQUAL(st.distr(3).actual(), 112);
     BOOST_CHECK_THROW(st.distr(4), Stat::NotfoundException);  // no such multiplicity
     BOOST_CHECK_EQUAL(st.distr(5).actual(), 18);
+    
+    // if we evaluate now, the results will be invalid
+    st.evaluate();
+    BOOST_CHECK(!st.distr(2).is_valid());
+    BOOST_CHECK(!st.distr(3).is_valid());
+    BOOST_CHECK(!st.distr(5).is_valid());
+    
+    // multiplicity range
+    BOOST_CHECK_EQUAL(st.min_mult(), 2);
+    BOOST_CHECK_EQUAL(st.max_mult(), 5);
 }
 
 BOOST_AUTO_TEST_CASE(normrnd_test)
@@ -95,6 +105,10 @@ BOOST_AUTO_TEST_CASE(normrnd_test)
     st.add(3, EMEAN-EDEV, true);
     st.add(5, EMEAN+EDEV, true);
     st.evaluate();
+    
+    // enough data, Distr-s are valid
+    BOOST_CHECK(st.distr(3).is_valid());
+    BOOST_CHECK(st.distr(5).is_valid());
     
     // test "p-values" against the CDF
     BOOST_WARN_CLOSE(st.distr(3).p_value(), norm_cdf(EMEAN, EDEV, EMEAN-EDEV), PCT_TOL);

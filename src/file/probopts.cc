@@ -28,12 +28,12 @@ ProbOpts::ProbOpts():
     _reshufflings(DEFAULT_RESHUFFLINGS),
     _randomseed(DEFAULT_RANDOMSEED)
 {
-    add_mandatory_option<std::string>("free", "Free regions", 'F');
+    add_mandatory_option<std::string>("free", "Free regions (mandatory)", 'F');
     add_option<filenames_t>("fixed", &_fixedfiles, filenames_t(), "Filenames of fixed tracks", 'f');
 	add_option<unsigned int>("reshufflings", &_reshufflings, DEFAULT_RESHUFFLINGS, 
-		"Number of reshufflings", 'r');
+		"Number of reshufflings, default 100", 'r');
 	add_option<unsigned int>("seed", &_randomseed, DEFAULT_RANDOMSEED, 
-                             "Random number generator seed", 's');
+                             "Random number generator seed, default 42", 's');
 }
 
 bool ProbOpts::check_variables()

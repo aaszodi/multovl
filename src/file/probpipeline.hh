@@ -7,7 +7,7 @@
 
 #include "basepipeline.hh"
 #include "multovlopts.hh"
-#include "empirdistr.hh"
+#include "stat.hh"
 #include "shuffleovl.hh"
 #include "probopts.hh"
 
@@ -23,7 +23,7 @@ namespace prob {
 /// of overlaps by chance.
 class ProbPipeline: public BasePipeline
 {
-    public:
+public:
     
     /// Inits the pipeline with the command-line arguments.
     /// These will be parsed inside and the program exits with an error message
@@ -33,7 +33,33 @@ class ProbPipeline: public BasePipeline
     /// Destructor
     ~ProbPipeline();
     
-    protected:
+protected:
+    
+    /// Internal class to keep track of overlap lengths.
+    /// Basically a multiplicity => total overlap length map
+    class OvlenCounter
+    {
+    public:
+        
+        /// multiplicity => total overlap length map
+        typedef std::map<unsigned int, unsigned int> mtolen_t;
+        
+        /// Init to empty
+        OvlenCounter(): _mtolen() {}
+        
+        /// Sums the overlap lengths for each multiplicity
+        /// \param overlaps a vector of MultiRegion objects
+        /// which are the results of a multiple overlap calculation
+        void update(const MultiOverlap::multiregvec_t& overlaps);
+    
+        /// \return const access to the multiplicity => total overlap length map
+        const mtolen_t& mtolen() const { return _mtolen; }
+        
+    private:
+    
+         mtolen_t _mtolen;
+    
+    }; // end of class OvlenCounter
     
     /// There is one ShuffleOvl object for each chromosome
     typedef std::map<std::string, ShuffleOvl> chrom_shufovl_map;
@@ -67,9 +93,9 @@ class ProbPipeline: public BasePipeline
     // data which should be accessible
     // to derived classes without too much bureaucracy
     chrom_shufovl_map _csovl;   ///< chromosome ==> ShuffleOvl map
-    EmpirDistr _nulldistr; ///< null distribution. NOTE: THIS IS FOR TESTING ONLY!!!
+    Stat _stat; ///< overlap length statistics collection
     
-    private:
+private:
     
     unsigned int read_tracks(
         const std::vector<std::string>& inputfiles,

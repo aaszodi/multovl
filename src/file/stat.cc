@@ -37,6 +37,10 @@ void Stat::add(unsigned int multiplicity,
                 multiplicity, distr)
         );
     }
+    
+    // update min/max of multiplicities seen so far
+    if (multiplicity < _minmult) _minmult = multiplicity;
+    if (multiplicity > _maxmult) _maxmult = multiplicity;
 }
 
 void Stat::evaluate()
