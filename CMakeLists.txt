@@ -179,7 +179,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Multiple Overlaps of Genomic Regions")
     set(CPACK_PACKAGE_VENDOR "Andras Aszodi")
-    set(CPACK_PACKAGE_DESCRIPTION_FILE "${DOCDIR}/README.txt")
+    set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
     set(CPACK_RESOURCE_FILE_LICENSE "${DOCDIR}/license.txt")
     
     # executable package (no source)

@@ -318,8 +318,8 @@ bool ProbPipeline::write_output()
     // Preamble: the command-line parameters
     std::cout << "# Parameters = " << _optp->param_str() << std::endl;
     
-    // shuffled input file names (the fixed are listed in the parameters above)
-    std::cout << "# Shuffled input files = " << _inputs.size() << std::endl;
+    // input file names (the fixed are listed in the parameters above)
+    std::cout << "# Input files = " << _inputs.size() << std::endl;
     for (input_vec::const_iterator it = _inputs.begin();
         it != _inputs.end(); ++it)
     {
@@ -332,11 +332,17 @@ bool ProbPipeline::write_output()
         } else {
             std::cout << " : skipped";
         }
+        if (_optp->file_is_fixed(it->name))
+        	std::cout << " [fixed]";
+        else
+        	std::cout << " [shuffled]";
         std::cout << std::endl;
     }
 
     // output the result in the selected format to stdout as CSV
     // for the whole range of multiplicities seen
+    // we count how many multiplicities were properly analysed
+    unsigned int mcount = 0;
     std::cout << "# == Overlap length statistics ==" << std::endl
         << "Multiplicity,Actual,Mean,SD,Pvalue,Zscore" << std::endl;
     for (unsigned int m = _stat.min_mult(); m <= _stat.max_mult(); ++m)
@@ -349,11 +355,13 @@ bool ProbPipeline::write_output()
                 std::cout << m << ',' << distr.actual() << ','
                     << nd.mean() << ',' << nd.std_dev() << ','
                     << distr.p_value() << ',' << distr.z_score() << std::endl;
+                ++mcount;
             }
         } catch (const Stat::NotfoundException& ex) {
             // skip this multiplicity
         }
     }
+    return (mcount > 0);
 }
 
 }   // namespace prob

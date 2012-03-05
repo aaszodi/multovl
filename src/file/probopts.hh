@@ -39,6 +39,9 @@ class ProbOpts : public MultovlOptbase
     /// \return the number of fixed files, 0 if none has been specified
     unsigned int fixed_filecnt() const { return _fixedfiles.size(); }
     
+    /// \return true if /filename/ is a fixed file
+    bool file_is_fixed(const std::string& filename) const;
+
     /// \return a vector of input file names that are to be reshuffled.
     filenames_t shuffle_files() const { return pos_opts(); }
     

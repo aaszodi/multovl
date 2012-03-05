@@ -61,6 +61,12 @@ bool ProbOpts::check_variables()
 	return (!error_status());
 }
 
+bool ProbOpts::file_is_fixed(const std::string& filename) const
+{
+	filenames_t::const_iterator fit = std::find(_fixedfiles.begin(), _fixedfiles.end(), filename);
+	return (fit != _fixedfiles.end());
+}
+
 std::string ProbOpts::param_str() const 
 {
     std::string outstr = MultovlOptbase::param_str();

@@ -11,7 +11,8 @@ NetBeans
 --------
 
 NetBeans 6.8 and above can automatically import CMake-controlled projects.
-I tried NetBeans 7.1.1 on OS X 10.6.8.
+I tried NetBeans 7.1.1 on OS X 10.6.8 and SunStudio 12.3 on Solaris 11 (X86),
+which is essentially the same.
 
 0) In Preferences, specify the CMake location because NetBeans won't find it, even 
     if it is in your $PATH. Also prepare an empty build directory.
@@ -48,9 +49,6 @@ cmake -DCMAKE_BUILD_TYPE=Debug \
     ../../multovl/
 
 Then in Eclipse, click “File” –> “Import” –> “General” –> “Existing Projects into Workspace”.
-
-Problems:
-1) Connecting to Git remote repo caused some Java error.
 
 Xcode
 -----

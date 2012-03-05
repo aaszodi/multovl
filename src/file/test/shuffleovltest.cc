@@ -15,8 +15,6 @@ using namespace std;
 using namespace multovl;
 using namespace multovl::prob;
 
-// -- Test class --
-
 // -- Fixture --
 
 // ad-hoc storage for expected results
@@ -47,7 +45,7 @@ struct ShuffleOvlFixture
     	// free regions
     	frees.push_back(Region(50,650,'.',"free1"));
     	frees.push_back(Region(690,850,'.',"free2"));
-    	frees.push_back(Region(900,140,'.',"free3"));
+    	frees.push_back(Region(900,1400,'.',"free3"));
     }
     
     std::vector<Region> frees;	// free regions
@@ -115,8 +113,8 @@ bool is_present(const MultiRegLimit::reglim_t& reglims,
 
 BOOST_FIXTURE_TEST_SUITE(multioverlapsuite, ShuffleOvlFixture)
 
-// check the overlaps if no shuffles have been done yet
-BOOST_AUTO_TEST_CASE(noshuffle_test)
+// check the overlaps before shuffling and then does one shuffling
+BOOST_AUTO_TEST_CASE(shuffle_test)
 {
 	ShuffleOvl so3(frees);
 	UniformGen rng(42);		// fixed seed to be reproducible
