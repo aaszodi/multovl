@@ -48,7 +48,7 @@ endforeach(filetestprog)
 # NOTE: these may go later somewhere else
 
 set(probtestprogs
-    empirdistrtest freeregionstest randomplacertest stattest
+    empirdistrtest freeregionstest randomplacertest stattest shuffleovltest
 )
 
 foreach(probtestprog ${probtestprogs})
