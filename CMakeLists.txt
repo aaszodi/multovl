@@ -23,20 +23,21 @@ cmake_minimum_required(VERSION 2.8)
 project(multovl CXX)
 
 # Directory layout:-
-#    |-cmake
-#    |-doc
-#    | |-html
+#    |-cmake            <== CMake includes (finders, OS-specific hacks...)
+#    |-doc              <== Documentation
+#    | |-html           <== HTML docs, e.g. user guide
 #    |
-#    |-src
-#      |-file
-#      | |-test
+#    |-src              <== generic multovl components: genomic regions, overlap algorithm
+#      |-file           <== file-based: "classic" multovl
+#      | |-test         <== unit tests for file-based multovl components (mainly I/O)
+#      | |-prob         <== overlap probabilities: multovlprob
+#      |   |-test       <== unit tests for multovlprob components
+#      |-db             <== database-enabled: pgmultovl
+#      | |-test         <== unit tests for database-enabled pgmultovl components
 #      |
-#      |-db
-#      | |-test
-#      |
-#      |-test
-#      |-exercise
-#      |-scripts
+#      |-test           <== unit tests for generic multovl components
+#      |-exercise       <== timing tests
+#      |-scripts        <== helper scripts
 
 # Version string for the project
 set(MULTOVL_VERSION_MAJOR 1)
@@ -143,10 +144,13 @@ configure_file (
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     enable_testing()
     
-    # another "truly global" variable
+    # "truly global" variables
+    set(utestlibs CACHE INTERNAL "unit test libs" FORCE)
     set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
+    
     add_subdirectory(${SRCDIR}/test test)
     add_subdirectory(${SRCDIR}/file/test test/file)
+    add_subdirectory(${SRCDIR}/file/prob/test test/prob)
     add_custom_target(unit_tests DEPENDS ${unit_test_targets})
 endif()
 

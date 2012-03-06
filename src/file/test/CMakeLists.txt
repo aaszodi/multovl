@@ -4,21 +4,12 @@ include_directories(${SRCDIR} ${SRCDIR}/file)
 
 # == Unit tests ==
 
-# libraries needed by the unit tests
-# not all of them need all this of course
+# add the File I/O modules to the libraries needed for testing
 set(utestlibs
     movl_fileio
-    movl
-    ${Boost_DATE_TIME_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_REGEX_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    ${utestlibs}
+    CACHE INTERNAL "unit test libs"
 )
-if (BAMTOOLS_FOUND)
-    list(APPEND utestlibs ${BAMTOOLS_LIBRARIES})
-endif()
 
 # this is where the test executables are, needed for add_test() 
 set(testdir ${CMAKE_CURRENT_BINARY_DIR})
@@ -43,27 +34,12 @@ foreach(filetestprog ${filetestprogs})
 	add_test(${filetestprog} ${testdir}/${filetestprog})
 endforeach(filetestprog)
 
-# -- Prob tests --
-
-# NOTE: these may go later somewhere else
-
-set(probtestprogs
-    empirdistrtest freeregionstest randomplacertest stattest shuffleovltest
-)
-
-foreach(probtestprog ${probtestprogs})
-    add_executable(${probtestprog} EXCLUDE_FROM_ALL ${probtestprog}.cc)
-    target_link_libraries(${probtestprog} movl_prob ${utestlibs})
-	flag_fix(${probtestprog})
-	add_test(${probtestprog} ${testdir}/${probtestprog})
-endforeach(probtestprog)
-
 # ---
 
 # update global unit test target list
 set(unit_test_targets 
     ${unit_test_targets}
-    ${filetestprogs} ${probtestprogs}
+    ${filetestprogs}
     CACHE INTERNAL "unit test targets"
 )
 
