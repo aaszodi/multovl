@@ -164,7 +164,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${MULTOVL_DESTDIR}/bin)
     set(DOCDIR "${PROJECT_SOURCE_DIR}/doc")
-    install(FILES "${DOCDIR}/README.txt" "${DOCDIR}/license.txt" 
+    install(FILES "${PROJECT_SOURCE_DIR}/README.txt" "${DOCDIR}/license.txt" 
         DESTINATION ${MULTOVL_DESTDIR}/doc)
     install(DIRECTORY "${DOCDIR}/html" DESTINATION ${MULTOVL_DESTDIR}/doc)
 
