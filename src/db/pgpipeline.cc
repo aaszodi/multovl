@@ -17,6 +17,14 @@
 
 #include "pqxx/pqxx"
 
+// Starting with libpqxx 4.0, the terrible ("varchar", pqxx::prepare::treat_string)
+// syntax for prepared statement parameters is gone
+#if PQXX_VERSION_MAJOR <= 3
+#define OLD_PQXX_PARAMSPEC
+#else
+#undef OLD_PQXX_PARAMSPEC
+#endif
+
 // -- Standard headers --
 
 #include <unistd.h>     // for getlogin
@@ -111,7 +119,12 @@ unsigned int PgPipeline::read_input()
         conn.prepare(
             "download_stmt",
             _download_sql   // comes from the config file
-        )("varchar", pqxx::prepare::treat_string); // one string parameter
+        )
+        #ifdef OLD_PQXX_PARAMSPEC
+        ("varchar", pqxx::prepare::treat_string);
+        #else
+        ;
+        #endif
         
         // attempt to download each track in turn
         for (str_vec::const_iterator trkit = tracknames.begin();
@@ -229,21 +242,29 @@ bool PgPipeline::write_output()
             "trackupload_stmt",
             _trackupload_sql   // comes from the config file
         )
+        #ifdef OLD_PQXX_PARAMSPEC
         ("text", pqxx::prepare::treat_string)   // user login
         ("text", pqxx::prepare::treat_string)   // param_str
         ("text", pqxx::prepare::treat_string)   // ancestor tracks as Pg array '{foo,bar}'
         ("text", pqxx::prepare::treat_string);  // output track name
+        #else
+        ;
+        #endif
         
         // prepare the region upload statement
         conn.prepare(
             "regionupload_stmt",
             _regionupload_sql   // comes from the config file
         )
+        #ifdef OLD_PQXX_PARAMSPEC
         ("text", pqxx::prepare::treat_string)   // output track name
         ("text", pqxx::prepare::treat_string)   // chromosome name
         ("integer")("integer")   // region first,last coordinates
         ("text", pqxx::prepare::treat_string)  // strand
         ("text", pqxx::prepare::treat_string);   // ancestor IDs, Pg array '{3,4}'
+        #else
+        ;
+        #endif
     
         // start upload transaction
         pqxx::work ta(conn);
