@@ -24,6 +24,10 @@ set(app_targets
     CACHE INTERNAL "app targets"
 )
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(test)
+endif()
+
 # install won't find non-toplevel targets
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps

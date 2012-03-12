@@ -39,5 +39,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     install(TARGETS multovl RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
 endif()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(test)
+endif()
+
 # overlap probabilities
 add_subdirectory(prob)

@@ -125,10 +125,38 @@ include("${CMAKE_SOURCE_DIR}/cmake/platformspec.cmake")
 # thanks to Robert J Maynard,
 # http://stackoverflow.com/questions/4372512/global-variables-in-cmake-for-dependency-tracking
 set(app_targets CACHE INTERNAL "app targets" FORCE)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    include(CTest)
+    enable_testing()
+    
+    # "truly global" variables
+    set(utestlibs CACHE INTERNAL "unit test libs" FORCE)
+    set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
+    
+    # Code coverage
+    # GNU compiler + gcov
+    if(CMAKE_COMPILER_IS_GNUCXX)
+        find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
+        if (CTEST_COVERAGE_COMMAND)
+            set(COVFLAGS "-fprofile-arcs -ftest-coverage")
+            set(CMAKE_CXX_FLAGS "-g -O0 -Wall ${COVFLAGS}")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COVFLAGS} -lgcov")
+            message(STATUS "Coverage tests will be run.")
+        endif()
+    endif()
+endif()
+
+# Add the source directory and recursively everything under it
+# (see respective CMakeLists.txt files therein)
 add_subdirectory(${SRCDIR} bin)
 
 # custom target to make all apps at once
 add_custom_target(apps DEPENDS ${app_targets})
+# ... and the unit tests
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_custom_target(unit_tests DEPENDS ${unit_test_targets})
+endif()
 
 # we add a config header
 # this stores, among other things, the version and the revision
@@ -138,21 +166,6 @@ configure_file (
   "${SRCDIR}/config.hh.in"
   "${PROJECT_BINARY_DIR}/multovl_config.hh"
 )
-
-# -- UNIT TESTS --
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    enable_testing()
-    
-    # "truly global" variables
-    set(utestlibs CACHE INTERNAL "unit test libs" FORCE)
-    set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
-    
-    add_subdirectory(${SRCDIR}/test test)
-    add_subdirectory(${SRCDIR}/file/test test/file)
-    add_subdirectory(${SRCDIR}/file/prob/test test/prob)
-    add_custom_target(unit_tests DEPENDS ${unit_test_targets})
-endif()
 
 # -- INSTALLATION --
 
