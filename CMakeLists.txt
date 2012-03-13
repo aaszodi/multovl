@@ -135,13 +135,29 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
     
     # Code coverage
-    # GNU compiler + gcov
-    if(CMAKE_COMPILER_IS_GNUCXX)
+    # GNU compiler + gcov 
+    # you need clang++ with Apple's XCode 4.2 and above, standard LLVM g++ won't do coverage
+    # on older Apple OS's this might not be the case though...
+    set(GCOV_CAPABLE_COMPILER FALSE)
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        # may need other tests here
+        if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            set(GCOV_CAPABLE_COMPILER TRUE)
+        endif()
+    elseif(CMAKE_COMPILER_IS_GNUCXX)
+        # assumed to work on other platforms
+        set(GCOV_CAPABLE_COMPILER TRUE)
+    endif()
+    if(GCOV_CAPABLE_COMPILER)
         find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
         if (CTEST_COVERAGE_COMMAND)
-            set(COVFLAGS "-fprofile-arcs -ftest-coverage")
+            set(COVFLAGS "--coverage")
             set(CMAKE_CXX_FLAGS "-g -O0 -Wall ${COVFLAGS}")
-            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COVFLAGS} -lgcov")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COVFLAGS}")
+            set(utestlibs
+                gcov
+                CACHE INTERNAL "unit test libs"
+            )
             message(STATUS "Coverage tests will be run.")
         endif()
     endif()
