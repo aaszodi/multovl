@@ -65,3 +65,12 @@ straightforward way to reflect this in the XCode project setup. When pulling fro
 the new files do not get included in the source groups, you have to put them in manually.
 The XCode project file cannot be put under version control because it contains 
 absolute pathnames.
+
+COVERAGE TESTING
+----------------
+
+Currently 'gcov' with the Gnu compilers is supported. 
+Important note: For some strange reason Apple's default LLVM G++ compiler as supplied
+with Xcode 4 (tested with 4.2) does not produce the coverage files needed for analysis. 
+The workaround is to use the clang++ compiler. You get a warning when constructing
+a Debug build with CMake.
