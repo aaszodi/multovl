@@ -6,7 +6,7 @@
 <body>
 <h1 style="color:navy">MULTOVL: Multiple Region Overlap Guide</h1>
 
-<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.2, Winter 2011</em></center></p>
+<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.2, Spring 2012</em></center></p>
 
 <h2>Table of contents</h2>
 
@@ -282,6 +282,98 @@ when examining multiple overlaps of the same set of tracks using different param
 Boost::Serialization library. These are optimized for speed and are not portable between
 different architectures.</p>
 
+<h3>Multiple overlap probabilities</h3>
+
+<p>Sometimes you want to know whether the overlaps you detected are "significant".
+The <tt>multovlprob</tt> program helps here by offering the option of randomly
+reshuffling some of the tracks several times to approximate a null distribution
+of the overlap lengths. By comparing the actual overlap lengths to the null distribution,
+one can get a feeling of whether the actual overlaps could have been "caused by chance"
+or the overlaps occurred much more often (or much less often) than what could be expected.</p>
+
+<p>Region reshuffling is performed within "free regions". These represent genomic
+segments in which it is possible to detect enrichments at all (e.g. regions tiled in microarrays
+or regions visible to high-throughput sequencing). All input regions must fit within
+a free region, <tt>multovlprob</tt> checks this before the analysis.</p>
+
+<p><tt>multovlprob</tt> distinguishes between "fixed" and "shufflable" tracks.
+You can fix tracks where shuffling makes no sense, e.g. annotation tracks containing
+genes or transcripts. By default all input tracks are "shufflable".</p>
+
+<p>Overlap length statistics is generated for each possible multiplicity. It can happen
+that a given multiplicity was not present among the actual overlaps but detected during
+reshuffling.</p>
+
+<p>These are the options of <tt>multovlprob</tt>:</p>
+
+<pre><code>Multiple Region Overlap Probabilities
+Usage: multovlprob [options] file1 [file2...]
+file1, file2, ... will be reshuffled, there must be at least one
+Accepted input file formats: BED, GFF/GTF, BAM (detected from extension)
+Output goes to stdout
+Options:
+  -h [ --help ]             Print this help and exit
+  --version                 Print version information and exit
+  -c [ --common-mult ] arg  Find exactly arg-fold overlaps (default 2), -c 1 
+                            detects 'solitary regions', overrides -m, -M
+  -L [ --ovlen ] arg        Minimal overlap length (default 1), -c 1 forces -L 
+                            1
+  -m [ --minmult ] arg      Minimal multiplicity of the overlaps (default 2), 1
+                            detects solitary regions,too
+  -M [ --maxmult ] arg      Maximal multiplicity of the overlaps, 0 (the 
+                            default) means no upper limit
+  -u [ --uniregion ]        List union of overlapping regions instead of each 
+                            overlap, ignored if -c 1 is set
+  -n [ --nointrack ]        Do not detect overlaps within the same track, 
+                            ignored if -c 1 or -u is set
+  -t [ --timing ]           List execution times only, no region output
+  -F [ --free ] arg         Free regions (mandatory)
+  -f [ --fixed ] arg        Filenames of fixed tracks
+  -r [ --reshufflings ] arg Number of reshufflings, default 100
+  -s [ --seed ] arg         Random number generator seed, default 42
+</code></pre>
+
+<p>Most options are the same as in the "classic" MULTOVL. The free regions file
+must be specified using the <tt>-F</tt> option, it can in be any of the supported input 
+file formats. Fixed tracks may be defined by the <tt>-f</tt> option which can be
+repeated several times, one for each fixed file. The number of reshufflings is
+controlled by the <tt>-r</tt> option. It is advisable to start with a small number
+and then go up to at least 1000 reshufflings for a production run. The random number
+generator seed can be defined by the <tt>-s</tt> option. The <tt>multovlprob</tt>
+runs are always deterministic in the sense that the program always starts from
+a well-defined random seed.</p>
+
+<p>The output of <tt>multovlprob</tt> contains only the statistical information.
+If you need the actual overlap results with the unshuffled input tracks,
+run <tt>multovl</tt> beforehand. Here is a sample output:</p>
+
+<pre><code># Parameters =  -L 1 -m 2 -M 0 -F ../../src/test/data/triplefree.bed \
+  -r 100 -s 42 -f ../../src/test/data/triplea.bed
+# Input files = 3
+# ../../src/test/data/triplea.bed = track 1, region count = 2 [fixed]
+# ../../src/test/data/tripleb.bed = track 2, region count = 2 [shuffled]
+# ../../src/test/data/triplec.bed = track 3, region count = 2 [shuffled]
+# == Overlap length statistics ==
+Multiplicity,Actual,Mean,SD,Pvalue,Zscore
+2,200,263.44,104.863,0.07,-0.604978
+3,202,94.4062,71.9305,0.443956,1.4958
+4,0,56.5,44.3286,0,-1.27457
+</code></pre>
+
+<p>Here the <tt>triplea.bed</tt> track was held fixed. First the settings are listed,
+then the overlap length statistics is printed in CSV format. The "Actual" column
+lists the total number of overlapping basepairs without shuffling. "Mean" and "SD"
+are the mean and standard deviation of the null distributions, respectively. The
+"Pvalue" column is a naive two-sided p-value approximation: it is the CDF("Actual")
+estimate if it is below 0.5, or 1.0-CDF("Actual") otherwise. Small values indicate
+"significant" overlaps. The "Zscore" column shows ("Actual"-"Mean")/"SD". In the example above,
+the pairwise total overlap length is "significant" at <i>p &lt; 0.1</i>, 
+the triple overlaps could have happened by chance. The last row shows that
+no fourfold overlap was detected in the unshuffled data, but some did occur during
+the reshufflings.</p>
+
+<p>The interpretation of these results is left as an exercise to the reader.</p>
+
 <h3>MULTOVL talking to a relational database</h3>
 
 <p>The <tt>pgmultovl</tt> version of the program can fetch input track/region information
@@ -310,11 +402,14 @@ in the <tt>config/regan.cfg</tt> file in your installation:</p>
     },
     "sql":
     {
-        "download": "SELECT regionid, chrom, pb.iint_low(coords) AS first, pb.iint_high(coords) AS last, strand FROM reg.trackregview WHERE tracknm = $1",
+        "download": "SELECT regionid, chrom, pb.iint_low(coords) AS first, \
+          pb.iint_high(coords) AS last, strand FROM reg.trackregview WHERE tracknm = $1",
         "upload":
         {
-            "track": "SELECT diag FROM reg.add_comb_operation($1, 'pgmultovl', $2, 'overlap',$3, $4)",
-            "region": "SELECT diag FROM reg.store_region($1, $2, $3, $4, $5, 'overlap', $6)"
+            "track": "SELECT diag FROM reg.add_comb_operation($1, 'pgmultovl', 
+              $2, 'overlap',$3, $4)",
+            "region": "SELECT diag FROM reg.store_region($1, $2, $3, $4, $5,
+              'overlap', $6)"
         }
     }
 }
@@ -509,14 +604,14 @@ part of the actual output, I added them by hand for the sake of the explanations
 7 # ../src/test/data/regb.bed = track 2, region count = 9
 8 # Overlap count = 8
 9 # Multiplicity counts = 1,2:7 2:1
-10 chr1	multovl	overlap	100	150	2	.	.	ANCESTORS 1:REGa:.:100-200|2:REGb:.:50-150
-11 chr1	multovl	overlap	250	300	2	.	.	ANCESTORS 1:REGa:.:250-300|2:REGb:.:250-300
-12 chr1	multovl	overlap	340	340	2	.	.	ANCESTORS 1:REGa:.:340-340|2:REGb:.:340-340
-13 chr1	multovl	overlap	400	410	2	.	.	ANCESTORS 1:REGa:.:350-450|2:REGb:.:400-410
-14 chr1	multovl	overlap	415	415	2	.	.	ANCESTORS 1:REGa:.:350-450|2:REGb:.:415-415
-15 chr1	multovl	overlap	420	430	2	.	.	ANCESTORS 1:REGa:.:350-450|2:REGb:.:420-430
-16 chr1	multovl	overlap	440	450	2	.	.	ANCESTORS 1:REGa:.:350-450|2:REGb:.:440-500
-17 chr1	multovl	overlap	490	500	2	.	.	ANCESTORS 2:REGb:.:440-500|2:REGb:.:490-510
+10 chr1 multovl overlap 100 150 2 . . ANCESTORS 1:REGa:.:100-200|2:REGb:.:50-150
+11 chr1 multovl overlap 250 300 2 . . ANCESTORS 1:REGa:.:250-300|2:REGb:.:250-300
+12 chr1 multovl overlap 340 340 2 . . ANCESTORS 1:REGa:.:340-340|2:REGb:.:340-340
+13 chr1 multovl overlap 400 410 2 . . ANCESTORS 1:REGa:.:350-450|2:REGb:.:400-410
+14 chr1 multovl overlap 415 415 2 . . ANCESTORS 1:REGa:.:350-450|2:REGb:.:415-415
+15 chr1 multovl overlap 420 430 2 . . ANCESTORS 1:REGa:.:350-450|2:REGb:.:420-430
+16 chr1 multovl overlap 440 450 2 . . ANCESTORS 1:REGa:.:350-450|2:REGb:.:440-500
+17 chr1 multovl overlap 490 500 2 . . ANCESTORS 2:REGb:.:440-500|2:REGb:.:490-510
 </code></pre>
 
 <p>Let's walk through this line-by-line:</p>
@@ -566,10 +661,10 @@ information is provided in Column 4 (the "name" field), the multiplicity in Colu
 
 <h2><a name='thanks'>Acknowledgements</a></h2>
 
-<p>I would like to thank my colleagues Markus Jaritz and Johanna Trupke
+<p>I would like to thank my colleagues Markus Jaritz, Johanna Trupke, Roman Stocsits
 for providing me with use cases, feature requests and bug reports while developing MULTOVL.
 Special thanks are due to Meinrad Busslinger for his support.
-This work was financed by the 
+This work was partially financed by the 
 <a href='http://www.gen-au.at/projekt.jsp?projektId=106&lang=en' target='_blank'>Gen-AU epigenetics consortium</a>.</p>
 
 </body>

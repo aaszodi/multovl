@@ -10,7 +10,8 @@ endif()
 # Convenience library for 'multovl' and variants
 set(movlsrc
     region.cc ancregion.cc errors.cc reglimit.cc multireglimit.cc
-    polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc pipeline.cc
+    polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc
+    basepipeline.cc pipeline.cc
 )
 add_library(movl STATIC ${movlsrc})
 flag_fix(movl)
@@ -18,11 +19,17 @@ flag_fix(movl)
 # basic set of libraries for all variants
 set(MULTOVLIBS movl ${MULTOVL_BOOST_LIBS})   # library order does matter in Linux/g++
 
+# basic module unit tests
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(test)
+endif()
+
 # multovl (the file-based variant) is always built
 add_subdirectory(file)
 
 # PQXX_FOUND implies that Postgres has also been found
 if (PQXX_FOUND)
+    # build pgmultovl as well
     add_subdirectory(db)
 endif()
 

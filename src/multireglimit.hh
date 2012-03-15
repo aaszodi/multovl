@@ -61,6 +61,11 @@ class MultiRegLimit
     /// \return the calling object
     MultiRegLimit& operator+=(const MultiRegLimit& rhs);
     
+    protected:
+    
+    /// \return non-const access to the RegLimit multiset inside
+    reglim_t& nonconst_reglim() { return _reglim; }
+    
     private:
             
     // data 

@@ -40,13 +40,13 @@ namespace multovl {
  */
 class MultiOverlap: public MultiRegLimit
 {
-	// -- internal classes --
-	
-	private:
+private:
 	
     typedef std::pair<unsigned int, unsigned int> uintpair_t;
     typedef std::vector<uintpair_t> uintpairvec_t;
     
+	// -- internal classes --
+	
     /**
      * Encapsulates the parameters according to which the generated multiregions
      * should be filtered: the minimal overlap length, the minimal and maximal
@@ -54,7 +54,7 @@ class MultiOverlap: public MultiRegLimit
      */
     class Filter
     {
-        public:
+    public:
         
         /**
          * Constructs a Filter.
@@ -86,7 +86,7 @@ class MultiOverlap: public MultiRegLimit
         bool accept_new_region(unsigned int mrstart, unsigned int mrend,
             const ancregset_t& ancestors, unsigned int& mult) const;
             
-        private:
+    private:
         
         static unsigned int distinct_track_count(const ancregset_t& ancestors);
         
@@ -95,7 +95,7 @@ class MultiOverlap: public MultiRegLimit
         
     };  // class Filter
     
-	public: 
+public: 
 	
     /**
      * Counts how many overlaps were derived from regions in various track combinations.
@@ -104,7 +104,7 @@ class MultiOverlap: public MultiRegLimit
      */
     class Counter
     {
-        public:
+    public:
         
         /// Default ctor
         Counter(): _histo(), _total(0) {}
@@ -124,7 +124,7 @@ class MultiOverlap: public MultiRegLimit
         /// where "id1,id2,...idN" are the track IDs (uints).
         std::string to_string() const;
         
-        private:
+    private:
         
         static
         std::string get_key(
@@ -184,7 +184,7 @@ class MultiOverlap: public MultiRegLimit
     
     /// Returns the multiple overlaps found by the last 
     /// find_overlaps or find_unionoverlaps operation.
-    /// \return a vector of MultiOverlap objects.
+    /// \return a vector of MultiRegion objects.
     const multiregvec_t& overlaps() const { return _multiregions; }
     
     /// Generates some overlap statistics using the overlaps found by the last
@@ -192,7 +192,7 @@ class MultiOverlap: public MultiRegLimit
     /// \param counter a Counter object with track histogram data which will be updated.
     void overlap_stats(Counter& counter) const;
     
-    private:
+private:
             
     // -- data 
     multiregvec_t _multiregions;

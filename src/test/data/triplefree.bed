@@ -1,0 +1,5 @@
+# Valid free regions for testing multovlprob with the triple* regions set
+# same as in 'shuffleovltest.cc'
+chr1	50	650	free1
+chr1	690	850	free2
+chr1	900	1400	free3

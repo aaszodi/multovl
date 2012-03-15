@@ -23,20 +23,25 @@ cmake_minimum_required(VERSION 2.8)
 project(multovl CXX)
 
 # Directory layout:-
-#    |-cmake
-#    |-doc
-#    | |-html
+#    |-cmake            <== CMake includes (finders, OS-specific hacks...)
+#    |-doc              <== Documentation
+#    | |-html           <== HTML docs, e.g. user guide
 #    |
-#    |-src
-#      |-file
-#      | |-test
+#    |-src              <== generic multovl components: genomic regions, overlap algorithm
+#      |-file           <== file-based: "classic" multovl
+#      | |-test         <== unit tests for file-based multovl components (mainly I/O)
+#      | |-prob         <== overlap probabilities: multovlprob
+#      |   |-test       <== unit tests for multovlprob components
+#      |-db             <== database-enabled: pgmultovl
+#      | |-test         <== unit tests for database-enabled pgmultovl components
 #      |
-#      |-db
-#      | |-test
-#      |
-#      |-test
-#      |-exercise
-#      |-scripts
+#      |-test           <== unit tests for generic multovl components
+#      |-exercise       <== timing tests
+#      |-scripts        <== helper scripts
+
+# Brief system/compiler description
+message(STATUS "System = ${CMAKE_SYSTEM_NAME}")
+message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
 
 # Version string for the project
 set(MULTOVL_VERSION_MAJOR 1)
@@ -124,10 +129,39 @@ include("${CMAKE_SOURCE_DIR}/cmake/platformspec.cmake")
 # thanks to Robert J Maynard,
 # http://stackoverflow.com/questions/4372512/global-variables-in-cmake-for-dependency-tracking
 set(app_targets CACHE INTERNAL "app targets" FORCE)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    include(CTest)
+    enable_testing()
+    
+    # "truly global" variables
+    set(utestlibs CACHE INTERNAL "unit test libs" FORCE)
+    set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
+    
+    # Code coverage
+    # Currently only GNU compiler + gcov 
+    include("${CMAKE_SOURCE_DIR}/cmake/coverage.cmake")
+    if(GCOV_CAPABLE_COMPILER)
+        set(CMAKE_CXX_FLAGS "-g -O0 -Wall ${GCOV_COMPILER_FLAGS}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCOV_COMPILER_FLAGS}")
+        set(utestlibs
+            gcov
+            CACHE INTERNAL "unit test libs"
+        )
+        message(STATUS "Coverage tests were set up.")
+    endif()
+endif()
+
+# Add the source directory and recursively everything under it
+# (see respective CMakeLists.txt files therein)
 add_subdirectory(${SRCDIR} bin)
 
 # custom target to make all apps at once
 add_custom_target(apps DEPENDS ${app_targets})
+# ... and the unit tests
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_custom_target(unit_tests DEPENDS ${unit_test_targets})
+endif()
 
 # we add a config header
 # this stores, among other things, the version and the revision
@@ -137,18 +171,6 @@ configure_file (
   "${SRCDIR}/config.hh.in"
   "${PROJECT_BINARY_DIR}/multovl_config.hh"
 )
-
-# -- UNIT TESTS --
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    enable_testing()
-    
-    # another "truly global" variable
-    set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
-    add_subdirectory(${SRCDIR}/test test)
-    add_subdirectory(${SRCDIR}/file/test test/file)
-    add_custom_target(unit_tests DEPENDS ${unit_test_targets})
-endif()
 
 # -- INSTALLATION --
 
@@ -160,7 +182,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${MULTOVL_DESTDIR}/bin)
     set(DOCDIR "${PROJECT_SOURCE_DIR}/doc")
-    install(FILES "${DOCDIR}/README.txt" "${DOCDIR}/license.txt" 
+    install(FILES "${PROJECT_SOURCE_DIR}/README.txt" "${DOCDIR}/license.txt" 
         DESTINATION ${MULTOVL_DESTDIR}/doc)
     install(DIRECTORY "${DOCDIR}/html" DESTINATION ${MULTOVL_DESTDIR}/doc)
 
@@ -179,7 +201,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Multiple Overlaps of Genomic Regions")
     set(CPACK_PACKAGE_VENDOR "Andras Aszodi")
-    set(CPACK_PACKAGE_DESCRIPTION_FILE "${DOCDIR}/README.txt")
+    set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
     set(CPACK_RESOURCE_FILE_LICENSE "${DOCDIR}/license.txt")
     
     # executable package (no source)

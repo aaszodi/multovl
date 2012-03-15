@@ -21,6 +21,7 @@ if (BAMTOOLS_FOUND)
     list(APPEND FILEMULTOVLIBS ${BAMTOOLS_LIBRARIES})
 endif()
 
+# "classic" Multovl, single-core variant
 add_executable(multovl multovl.cc classicpipeline.cc classicopts.cc)
 flag_fix(multovl)
 target_link_libraries(multovl ${FILEMULTOVLIBS})
@@ -37,3 +38,10 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
     install(TARGETS multovl RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
 endif()
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(test)
+endif()
+
+# overlap probabilities
+add_subdirectory(prob)

@@ -2,23 +2,14 @@
 
 include_directories(${SRCDIR} ${SRCDIR}/file)
 
-# -- Unit tests --
+# == Unit tests ==
 
-# libraries needed by the unit tests
-# not all of them need all this of course
+# add the File I/O modules to the libraries needed for testing
 set(utestlibs
     movl_fileio
-    movl
-    ${Boost_DATE_TIME_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_REGEX_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    ${utestlibs}
+    CACHE INTERNAL "unit test libs"
 )
-if (BAMTOOLS_FOUND)
-    list(APPEND utestlibs ${BAMTOOLS_LIBRARIES})
-endif()
 
 # this is where the test executables are, needed for add_test() 
 set(testdir ${CMAKE_CURRENT_BINARY_DIR})
@@ -28,29 +19,33 @@ if (NOT Boost_USE_STATIC_LIBS)
     add_definitions(-DBOOST_TEST_DYN_LINK)
 endif()
 
-# Test programs
-set(testprogs
+# -- File I/O tests --
+
+# File test programs
+set(filetestprogs
     fileformattest fileiotest
     linereadertest linewritertest
 )
 
-foreach(testprog ${testprogs})
-    add_executable(${testprog} EXCLUDE_FROM_ALL ${testprog}.cc)
-    target_link_libraries(${testprog} ${utestlibs})
-	flag_fix(${testprog})
-	add_test(${testprog} ${testdir}/${testprog})
-endforeach(testprog)
+foreach(filetestprog ${filetestprogs})
+    add_executable(${filetestprog} EXCLUDE_FROM_ALL ${filetestprog}.cc)
+    target_link_libraries(${filetestprog} ${utestlibs})
+	flag_fix(${filetestprog})
+	add_test(${filetestprog} ${testdir}/${filetestprog})
+endforeach(filetestprog)
 
-# add to global unit test target list
+# ---
+
+# update global unit test target list
 set(unit_test_targets 
     ${unit_test_targets}
-    ${testprogs}
+    ${filetestprogs}
     CACHE INTERNAL "unit test targets"
 )
 
-# -- "Exerciser" --
+# == "Exerciser" ==
 
-# These things are for stress testing, timing etc.
+# These are for stress testing, timing etc. and they are not part of the unit tests.
 
 set(EXERCISELIBS 
     movl_fileio movl 

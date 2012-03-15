@@ -1,0 +1,76 @@
+MULTIPLE OVERLAP OF GENOMIC REGIONS
+===================================
+
+INSTRUCTIONS FOR DEVELOPERS AND OTHER NERDS
+===========================================
+
+IDE SETUP ADVICE
+----------------
+
+NetBeans
+--------
+
+NetBeans 6.8 and above can automatically import CMake-controlled projects.
+I tried NetBeans 7.1.1 on OS X 10.6.8 and SunStudio 12.3 on Solaris 11 (X86),
+which is essentially the same.
+
+0) In Preferences, specify the CMake location because NetBeans won't find it, even 
+    if it is in your $PATH. Also prepare an empty build directory.
+1) File: New Project...: C/C++: C/C++ Project with Existing Sources. Hit Next
+2) Browse for the folder with your source files and CMakeList.txt file. 
+3) For the "Select Configuration Mode", choose the Custom radio button. Hit Next
+4) Configure Arguments: here you need to fill in all the -DBOOST_ROOT, -DBAMTOOLS_ROOT,
+    -DPQXX_ROOT variables in addition to everything else NetBeans has filled in. 
+5) Click "Run configure script in subfolder", and specify the empty build directory
+    you created in Step 0. Hit Next
+6) Build Tools: may add -jN (N is the number of cores you'd like to use) to do parallel builds. Hit Next
+7) Click through "Source Files", "Code Assistance", "Project Name and Location", then Finish
+
+This should do it.
+
+Problems:
+1) Only a few standard targets are taken from CMake, you'd need to add e.g. unit_tests manually.
+2) Git handling is clumsy, you need to select the files you'd like to commit together.
+3) Code completion does not seem to be working. No on-the-fly syntax checking.
+4) The silly spellchecker cannot be switched off, you must deactivate the corresponding plugin.
+
+Eclipse
+-------
+
+Use the CMake Eclipse CDT generator. Run it in an out-of-source build directory. 
+Example:
+
+cmake -DCMAKE_BUILD_TYPE=Debug \
+    -DBOOST_ROOT=/usr/local/boost/1.47/ \
+    -DBAMTOOLS_ROOT=~/DEV/EXTERNSOFT/bamtools/current \
+    -DPQXX_ROOT=/usr/local/pqxx/current \
+    -G "Eclipse CDT4 - Unix Makefiles" \
+    -DCMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT=TRUE \ <== from CMake 2.8.7 on
+    ../../multovl/
+
+Then in Eclipse, click “File” –> “Import” –> “General” –> “Existing Projects into Workspace”.
+
+Xcode
+-----
+
+Use the CMake XCode generator. Run it in an out-of-source build directory.
+The usual cmake settings will suffice, just add '-G Xcode'. Then open the project with XCode.
+All CMake targets are available, which is nice.
+
+Problems:
+1) XCode 4.2 told me she cannot/will not refactor C++ code. WTF?
+2) Header files are not visible, you have to jump to them from the source files.
+3) If the project structure is rearranged (e.g. new files are added), there's no
+straightforward way to reflect this in the XCode project setup. When pulling from a remote repo,
+the new files do not get included in the source groups, you have to put them in manually.
+The XCode project file cannot be put under version control because it contains 
+absolute pathnames.
+
+COVERAGE TESTING
+----------------
+
+Currently 'gcov' with the Gnu compilers is supported. 
+Important note: For some strange reason Apple's default LLVM G++ compiler as supplied
+with Xcode 4 (tested with 4.2) does not produce the coverage files needed for analysis. 
+The workaround is to use the clang++ compiler. You get a warning when constructing
+a Debug build with CMake.
