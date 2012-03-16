@@ -144,10 +144,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(GCOV_CAPABLE_COMPILER)
         set(CMAKE_CXX_FLAGS "-g -O0 -Wall ${GCOV_COMPILER_FLAGS}")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCOV_COMPILER_FLAGS}")
-        set(utestlibs
-            gcov
-            CACHE INTERNAL "unit test libs"
-        )
         message(STATUS "Coverage tests were set up.")
     endif()
 endif()
