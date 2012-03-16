@@ -20,15 +20,29 @@ bool BasePipeline::run()
     
     // read the regions
     unsigned int trackcnt = read_input();
-    if (trackcnt == 0 || !errors().ok())
-        return false;
+    if (trackcnt == 0 || !errors().perfect())
+    {
+        std::cerr << "! Problems encountered during input" << std::endl;
+        errors().print(std::cerr);
+        if (!errors().ok())
+            return false;  // stop only on serious errors
+        else
+            _errors.clear();
+    }
     if (opt_ptr()->timing())
         timer.add_timepoint();  // [1]-st time point is the end of input
     
     // detect overlaps
     detect_overlaps();
-    if (!errors().ok())
-        return false;
+    if (!errors().perfect())
+    {
+        std::cerr << "! Problems encountered during overlap detection" << std::endl;
+        errors().print(std::cerr);
+        if (!errors().ok())
+            return false;  // stop on errors only
+        else
+            _errors.clear();
+    }
     if (opt_ptr()->timing())
     {
         timer.add_timepoint();  // [2]-nd timepoint is the end of the multioverlap calc
@@ -44,8 +58,14 @@ bool BasePipeline::run()
     
     // generate output: this can hardly go wrong, but who knows...
     write_output();
-    if (!errors().ok())
-        return false;
+    if (!errors().perfect())
+    {
+        std::cerr << "! Problems encountered during output" << std::endl;
+        if (!errors().ok())
+            return false;   // stop on errors only
+        else
+            _errors.clear();
+    }
         
     return true;    // all is fine
 }

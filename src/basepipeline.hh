@@ -34,7 +34,7 @@ class MultovlOptbase;
 /// error handling and a run() method with optional timing information.
 class BasePipeline: private boost::noncopyable
 {
-    public:
+public:
     
     /// Go through the whole analysis.
     /// \return true on success, false if something went wrong.
@@ -59,7 +59,7 @@ class BasePipeline: private boost::noncopyable
         {}
     };
     
-    protected:
+protected:
     
     typedef std::vector<Input> input_vec;
 

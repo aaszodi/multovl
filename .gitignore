@@ -7,3 +7,6 @@ build
 debug
 release
 xcode
+
+# Do not track Eclipse project setup files
+.project

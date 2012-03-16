@@ -37,6 +37,12 @@ BOOST_AUTO_TEST_CASE(error_test)
         outs.str(),
         "ERROR: to err is human\nERROR: total = 1\nWARNING: warned\nWARNING: twice\nWARNING: total = 2\n"
     );
+    
+    err.clear();
+    BOOST_CHECK(err.ok());
+    BOOST_CHECK(err.perfect());
+    BOOST_CHECK_EQUAL(err.error_count(), 0);
+    BOOST_CHECK_EQUAL(err.warning_count(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(append_error_test)

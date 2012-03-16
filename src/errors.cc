@@ -62,6 +62,12 @@ std::ostream& Errors::print(std::ostream& outf, bool warnings) const
     }
     return outf;
 }
+    
+void Errors::clear()
+{
+    _errors.clear();
+    _warnings.clear();
+}
 
 }   // namespace multovl
 

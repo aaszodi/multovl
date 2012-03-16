@@ -122,7 +122,6 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
     }
     if (problemcnt > 0)
     {
-        std::cerr << "NOTE: Problems while parsing free region file " << freefile << std::endl;
         reader.errors().print(std::cerr);    // print errors & warnings
         _errors.add_warning(
                             boost::lexical_cast<std::string>(problemcnt) +
@@ -206,13 +205,13 @@ unsigned int ProbPipeline::read_tracks(
             // OK, add the region
             csit->second.add(reg, trackid+1);
             if (shuffle)
+            {
                 csit->second.add_randomplacer(reg.length(), trackid+1);
+            }
             ++regcnt;
         }
         if (problemcnt > 0)
         {
-            std::cerr << "NOTE: Problems while parsing file " << currinp.name << std::endl;
-            reader.errors().print(std::cerr);    // print errors & warnings
             _errors.add_warning(
                 boost::lexical_cast<std::string>(problemcnt) +
                 "x problem reading from file " + currinp.name
@@ -227,7 +226,7 @@ unsigned int ProbPipeline::read_tracks(
             totalregcnt += regcnt;
             continue;
         }
-        _inputs.push_back(currinp);  // bad input, with regcnt still 0
+        _inputs.push_back(currinp);  // totally bad input, with regcnt still 0
         if (!reader.errors().ok())
         {
             _errors.add_warning("Could not read valid regions from file " + currinp.name);

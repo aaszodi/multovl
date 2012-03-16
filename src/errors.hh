@@ -14,7 +14,7 @@ namespace multovl {
 /// Simple facility to keep track of errors and warnings.
 class Errors
 {
-    public:
+public:
     
     /// Init the Errors object.
     /// \param errprefix string to prefix the error messages with, default "ERROR"
@@ -57,7 +57,10 @@ class Errors
     /// \param warnings if true, then print the warnings as well (this is the default)
     std::ostream& print(std::ostream& outf, bool warnings=true) const;
     
-    private:
+    /// Tell the calling object to forget all errors and warnings seen so far.
+    void clear();
+    
+private:
     
     std::vector<std::string> _errors, _warnings;
     std::string _errprefix, _warnprefix;
