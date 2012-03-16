@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
         bool ok = pipeline.run();
         if (!ok)
         {
-            pipeline.errors().print(std::cerr);
             std::exit(EXIT_FAILURE);
         }
         std::exit(EXIT_SUCCESS);
