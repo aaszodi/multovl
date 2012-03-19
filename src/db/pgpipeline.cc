@@ -92,11 +92,11 @@ bool PgPipeline::read_config()
         // ...
         _regionupload_sql = pt.get<std::string>("sql.upload.region");
         
-        return true;    // OK
     } catch (const ptree_error& pex) {
         std::cerr << "ERROR: " << pex.what() << std::endl;
         return false;
     }
+    return true;
 }
 
 unsigned int PgPipeline::read_input()
@@ -106,7 +106,7 @@ unsigned int PgPipeline::read_input()
     try {
         const str_vec& tracknames = 
             _optp->input_tracks();
-        _inputs.reserve(tracknames.size());
+        inputs().reserve(tracknames.size());
         
         // connect to the DB
         pqxx::connection conn(_rconnstr);
@@ -157,8 +157,8 @@ unsigned int PgPipeline::read_input()
                     // when writing back the results
                     reg.name(rit[0].c_str());
                     
-                    chrom_multovl_map::iterator cmit = _cmovl.find(chrom);
-                    if (cmit != _cmovl.end())
+                    chrom_multovl_map::iterator cmit = cmovl().find(chrom);
+                    if (cmit != cmovl().end())
                     {
                         // this chromosome has been seen already
                         // add current region to the corresponding MultiOverlap object
@@ -168,7 +168,7 @@ unsigned int PgPipeline::read_input()
                     {
                         // new chromosome with new MultiOverlap object
                         MultiOverlap mo(reg, trackid+1);
-                        _cmovl[chrom] = mo;
+                        cmovl()[chrom] = mo;
                     }
                     ++regcnt;
                 }
@@ -177,24 +177,24 @@ unsigned int PgPipeline::read_input()
                     // good input
                     currinp.trackid = ++trackid;
                     currinp.regcnt = regcnt;
-                    _inputs.push_back(currinp);
+                    inputs().push_back(currinp);
                     ta.commit();
                 }
                 else
                 {
-                    _errors.add_warning("Could not get regions from track " + *trkit);
-                    _inputs.push_back(currinp); // if regcnt == 0, currinp will be stored with trackid==0
+                    add_warning("Could not get regions from track", *trkit);
+                    inputs().push_back(currinp); // if regcnt == 0, currinp will be stored with trackid==0
                     ta.abort();
                 }
                 
             } catch (const pqxx::pqxx_exception& ex) {
-                _errors.add_warning(ex.base().what());  // silly base().what() needed...
+                add_warning("Database problem", ex.base().what());  // silly base().what() needed...
             }
         }
         conn.disconnect();  // may not be needed?
     } catch (const pqxx::pqxx_exception& ex) {
         // if the connection or the statement preparation went wrong
-        _errors.add_error(ex.base().what());
+        add_error("Database error", ex.base().what());
     }
     return trackid;
 }
@@ -205,8 +205,8 @@ bool PgPipeline::write_output()
 {
     // count "histograms": overlap combinations
     MultiOverlap::Counter counter;
-    for (chrom_multovl_map::iterator cmit = _cmovl.begin();
-        cmit != _cmovl.end(); ++cmit)
+    for (chrom_multovl_map::iterator cmit = cmovl().begin();
+        cmit != cmovl().end(); ++cmit)
     {
         cmit->second.overlap_stats(counter);      // "current overlap"
     }
@@ -215,9 +215,9 @@ bool PgPipeline::write_output()
     std::cout << "# PgMultovl version " << MULTOVL_VER() << MULTOVL_BUILD() << std::endl
         << "# Built with libpqxx version " << PQXX_VERSION << std::endl;
     std::cout << "# Parameters = " << _optp->param_str() << std::endl;
-    std::cout << "# Input tracks = " << _inputs.size() << std::endl;
-    for (input_vec::const_iterator it = _inputs.begin();
-        it != _inputs.end(); ++it)
+    std::cout << "# Input tracks = " << inputs().size() << std::endl;
+    for (input_seq_t::const_iterator it = inputs().begin();
+        it != inputs().end(); ++it)
     {
         std::cout << "# " << it->name;
         if (it->trackid > 0)
@@ -281,15 +281,15 @@ bool PgPipeline::write_output()
         trackupres[0][0].to(diag);
         if (diag != "OK")
         {
-            _errors.add_error(diag);
+            add_error("Result track upload", diag);
             ta.abort();
             return false;
         }
         
         // now upload the regions
         // process each chromosome in turn
-        for (chrom_multovl_map::const_iterator cmit = _cmovl.begin();
-            cmit != _cmovl.end(); ++cmit)
+        for (chrom_multovl_map::const_iterator cmit = cmovl().begin();
+            cmit != cmovl().end(); ++cmit)
         {
             const std::string& chrom = cmit->first;
             const MultiOverlap::multiregvec_t& mregs = cmit->second.overlaps();
@@ -307,7 +307,7 @@ bool PgPipeline::write_output()
                 regionupres[0][0].to(diag);
                 if (diag != "OK")
                 {
-                    _errors.add_error(diag);
+                    add_error("Result region upload", diag);
                     ta.abort();
                     return false;
                 }
@@ -317,7 +317,7 @@ bool PgPipeline::write_output()
         ta.commit();    // all went well
     } catch (const pqxx::pqxx_exception& ex) {
         // if the connection or the statement preparation went wrong
-        _errors.add_error(ex.base().what());
+        add_error("Database error", ex.base().what());
         return false;
     }
     return true;    // OK
@@ -329,8 +329,8 @@ std::string PgPipeline::inputs_to_anctrack() const
 {
     std::string lit("{");
     bool notfirst = false;
-    for (input_vec::const_iterator it = _inputs.begin();
-        it != _inputs.end(); ++it)
+    for (input_seq_t::const_iterator it = inputs().begin();
+        it != inputs().end(); ++it)
     {
         if (it->trackid == 0)   // could not read from this, no valid ancestor track, skip
             continue;

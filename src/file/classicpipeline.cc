@@ -67,11 +67,11 @@ unsigned int ClassicPipeline::read_input()
         try {
             std::ifstream ifs(_optp->load_from().c_str());
             boost::archive::binary_iarchive ia(ifs);
-            ia >> _inputs >> _cmovl;
-            trackcnt = _inputs.size();
+            ia >> inputs() >> cmovl();
+            trackcnt = inputs().size();
         } catch (const boost::archive::archive_exception& aex)
         {
-            _errors.add_error("Cannot load archive: " + std::string(aex.what()));
+            add_error("Cannot load archive", std::string(aex.what()));
             return 0;
         }
     } else {
@@ -86,8 +86,6 @@ unsigned int ClassicPipeline::read_tracks()
 {
     typedef std::vector<std::string> str_vec;
     const str_vec& inputfiles = _optp->input_files();
-    unsigned int filecnt = inputfiles.size();
-    _inputs.reserve(filecnt);
     unsigned int trackid = 0;   // current ID, will be equal to the number of OK tracks on return
     
     for (str_vec::const_iterator ifit = inputfiles.begin();
@@ -97,9 +95,9 @@ unsigned int ClassicPipeline::read_tracks()
         io::FileReader reader(currinp.name);    // automatic format detection
         if (!reader.errors().ok())
         {
-            // make a note
-            _errors += reader.errors();
-            _inputs.push_back(currinp);
+            // make a note of all errors seen by the reader
+            add_all_errors(reader.errors());
+            inputs().push_back(currinp);
             continue;
         }
         
@@ -117,8 +115,8 @@ unsigned int ClassicPipeline::read_tracks()
                 continue;
             }
 
-            chrom_multovl_map::iterator cmit = _cmovl.find(chrom);
-            if (cmit != _cmovl.end())
+            chrom_multovl_map::iterator cmit = cmovl().find(chrom);
+            if (cmit != cmovl().end())
             {
                 // this chromosome has been seen already
                 // add current region to the corresponding MultiOverlap object
@@ -128,14 +126,14 @@ unsigned int ClassicPipeline::read_tracks()
             {
                 // new chromosome with new MultiOverlap object
                 MultiOverlap mo(reg, trackid+1);
-                _cmovl[chrom] = mo;
+                cmovl()[chrom] = mo;
             }
             ++regcnt;
         }
         if (problemcnt > 0)
         {
             reader.errors().print(std::cerr);    // print errors & warnings
-            _errors.add_warning(
+            add_warning("Summary",
                 boost::lexical_cast<std::string>(problemcnt) +
                 "x problem reading from file " + currinp.name
             );
@@ -145,13 +143,13 @@ unsigned int ClassicPipeline::read_tracks()
             // good input
             currinp.trackid = ++trackid;
             currinp.regcnt = regcnt;
-            _inputs.push_back(currinp);
+            inputs().push_back(currinp);
             continue;
         }
-        _inputs.push_back(currinp);  // bad input, with trackid,regcnt still 0
+        inputs().push_back(currinp);  // bad input, with trackid,regcnt still 0
         if (!reader.errors().ok())
         {
-            _errors.add_warning("Could not read valid regions from file " + currinp.name);
+            add_warning("Could not read valid regions from file", currinp.name);
         }
     }
     return trackid; // number of tracks from which at least 1 region could be read
@@ -172,10 +170,10 @@ bool ClassicPipeline::write_output()
             // Note that only the input data and the chrom=>MultiOverlap map is saved
             // neither the results nor the parameter settings are.
             // The idea is to load these again and re-run with possibly different settings.
-            oa << _inputs << _cmovl;
+            oa << inputs() << cmovl();
         } catch (const boost::archive::archive_exception& aex)
         {
-            _errors.add_error("Cannot save archive: " + std::string(aex.what()));
+            add_error("Cannot save archive", std::string(aex.what()));
             return false;
         }
     }
@@ -208,8 +206,8 @@ bool ClassicPipeline::write_gff_output()
     write_comments();
     
     // process each chromosome in turn
-    for (chrom_multovl_map::const_iterator cmit = _cmovl.begin();
-        cmit != _cmovl.end(); ++cmit)
+    for (chrom_multovl_map::const_iterator cmit = cmovl().begin();
+        cmit != cmovl().end(); ++cmit)
     {
         io::GffLinewriter lw(
             _optp->source(), 
@@ -233,8 +231,8 @@ bool ClassicPipeline::write_bed_output()
     write_comments();
     
     // process each chromosome in turn
-    for (chrom_multovl_map::const_iterator cmit = _cmovl.begin();
-        cmit != _cmovl.end(); ++cmit)
+    for (chrom_multovl_map::const_iterator cmit = cmovl().begin();
+        cmit != cmovl().end(); ++cmit)
     {
         io::BedLinewriter lw(cmit->first); // init with chromosome
         const MultiOverlap::multiregvec_t& mregs = cmit->second.overlaps();
@@ -257,8 +255,8 @@ void ClassicPipeline::write_comments()
 {
     // count "histograms": overlap combinations
     MultiOverlap::Counter counter;
-    for (chrom_multovl_map::iterator cmit = _cmovl.begin();
-        cmit != _cmovl.end(); ++cmit)
+    for (chrom_multovl_map::iterator cmit = cmovl().begin();
+        cmit != cmovl().end(); ++cmit)
     {
         cmit->second.overlap_stats(counter);      // "current overlap"
     }
@@ -272,9 +270,9 @@ void ClassicPipeline::write_comments()
         std::cout << "# Input data loaded from archive = " 
             << _optp->load_from() << std::endl;
     }
-    std::cout << "# Input files = " << _inputs.size() << std::endl;
-    for (input_vec::const_iterator it = _inputs.begin();
-        it != _inputs.end(); ++it)
+    std::cout << "# Input files = " << inputs().size() << std::endl;
+    for (input_seq_t::const_iterator it = inputs().begin();
+        it != inputs().end(); ++it)
     {
         std::cout << "# " << it->name;
         if (it->trackid > 0)

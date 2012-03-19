@@ -22,9 +22,7 @@ namespace multovl {
 /// Abstract class that provides a framework for detecting multiple overlaps using the MultiOverlap class.
 class Pipeline: public BasePipeline
 {
-    public:
-    
-    protected:
+protected:
     
     /// There is one MultiOverlap object for each chromosome
     typedef std::map<std::string, MultiOverlap> chrom_multovl_map;
@@ -35,8 +33,14 @@ class Pipeline: public BasePipeline
     virtual
     unsigned int detect_overlaps();
     
-    // data which should be accessible
-    // to derived classes without too much bureaucracy
+    /// \return const access to the chromosome=>multiple overlap map
+    const chrom_multovl_map& cmovl() const { return _cmovl; }
+
+    /// \return non-const access to the chromosome=>multiple overlap map
+    chrom_multovl_map& cmovl() { return _cmovl; }
+
+private:
+
     chrom_multovl_map _cmovl;   ///< chromosome ==> MultiOverlap map
 };
 

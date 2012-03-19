@@ -61,7 +61,7 @@ public:
     
 protected:
     
-    typedef std::vector<Input> input_vec;
+    typedef std::vector<Input> input_seq_t;
 
     /// Reads the input tracks. Pure virtual.
     /// \return the number of tracks successfully read, 0 on error.
@@ -87,9 +87,30 @@ protected:
     virtual
     MultovlOptbase* opt_ptr() = 0;
     
-    // data which should be accessible
-    // to derived classes without too much bureaucracy
-    input_vec _inputs;      ///< vector of input track descriptors
+    /// \return const access to the input records
+    const input_seq_t& inputs() const { return _inputs; }
+
+    /// \return non-const access to the input records
+    input_seq_t& inputs() { return _inputs; }
+
+    /// Adds an error message
+    void add_error(const std::string& prefix,
+    		const std::string& what) { _errors.add_error(prefix + ": " + what); }
+
+    /// Adds the full contents of another Errors object
+    /// \param other another Errors object to be merged
+    void add_all_errors(const Errors& other) { _errors += other; }
+
+    /// Adds a warning message
+    void add_warning(const std::string& prefix,
+    		const std::string& what) { _errors.add_warning(prefix + ": " + what); }
+
+    /// Clears the errors
+    void clear_errors() { _errors.clear(); }
+
+private:
+
+    input_seq_t _inputs;      ///< vector of input track descriptors
     Errors _errors; ///< collect error messages here
 };
 

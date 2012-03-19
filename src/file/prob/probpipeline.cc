@@ -86,7 +86,7 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
     if (!reader.errors().ok())
     {
         // make a note
-        _errors += reader.errors();
+        add_all_errors(reader.errors());
         return 0;
     }
     
@@ -123,14 +123,14 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
     if (problemcnt > 0)
     {
         reader.errors().print(std::cerr);    // print errors & warnings
-        _errors.add_warning(
-                            boost::lexical_cast<std::string>(problemcnt) +
-                            "x problem reading from free region file " + freefile
-                            );
+        add_warning("Summary",
+					boost::lexical_cast<std::string>(problemcnt) +
+					"x problem reading from free region file " + freefile
+					);
     }
     if (regcnt == 0)
     {
-        _errors.add_warning("Could not read valid regions from free region file " + freefile);
+        add_warning("Could not read valid regions from free region file", freefile);
         return 0;
     }
     
@@ -163,8 +163,8 @@ unsigned int ProbPipeline::read_tracks(
         if (!reader.errors().ok())
         {
             // make a note
-            _errors += reader.errors();
-            _inputs.push_back(currinp);
+            add_all_errors(reader.errors());
+            inputs().push_back(currinp);
             continue;
         }
         
@@ -188,16 +188,16 @@ unsigned int ProbPipeline::read_tracks(
             chrom_shufovl_map::iterator csit = _csovl.find(chrom);
             if (csit == _csovl.end())
             {
-                _errors.add_warning(ERRPREFIX + ": Chromosome '" + chrom + "' not in free regions");
+                add_warning(ERRPREFIX, "Chromosome '" + chrom + "' not in free regions");
                 ++problemcnt;
                 continue;
             }
             if (! csit->second.fit_into_frees(reg))
             {
-                _errors.add_warning(ERRPREFIX + ": Region " + chrom + ":[" + 
-                                    boost::lexical_cast<std::string>(reg.first()) + "-" +
-                                    boost::lexical_cast<std::string>(reg.last()) +
-                                    "] not in free regions");
+                add_warning(ERRPREFIX, "Region " + chrom + ":[" +
+							boost::lexical_cast<std::string>(reg.first()) + "-" +
+							boost::lexical_cast<std::string>(reg.last()) +
+							"] not in free regions");
                 ++problemcnt;
                 continue;
             }
@@ -212,7 +212,7 @@ unsigned int ProbPipeline::read_tracks(
         }
         if (problemcnt > 0)
         {
-            _errors.add_warning(
+            add_warning("Summary",
                 boost::lexical_cast<std::string>(problemcnt) +
                 "x problem reading from file " + currinp.name
             );
@@ -222,14 +222,14 @@ unsigned int ProbPipeline::read_tracks(
             // good input
             currinp.trackid = ++trackid;
             currinp.regcnt = regcnt;
-            _inputs.push_back(currinp);
+            inputs().push_back(currinp);
             totalregcnt += regcnt;
             continue;
         }
-        _inputs.push_back(currinp);  // totally bad input, with regcnt still 0
+        inputs().push_back(currinp);  // totally bad input, with regcnt still 0
         if (!reader.errors().ok())
         {
-            _errors.add_warning("Could not read valid regions from file " + currinp.name);
+            add_warning("Could not read valid regions from file", currinp.name);
         }
     }
     return totalregcnt;
@@ -274,6 +274,7 @@ unsigned int ProbPipeline::detect_overlaps()
     UniformGen rng(_optp->random_seed());
     for (unsigned int r = 0; r < _optp->reshufflings(); ++r)
     {
+    	// TODO this loop may be parallelised
         OvlenCounter rndcounter;
         for (chrom_shufovl_map::iterator csit = _csovl.begin();
              csit != _csovl.end(); ++csit)
@@ -318,9 +319,9 @@ bool ProbPipeline::write_output()
     std::cout << "# Parameters = " << _optp->param_str() << std::endl;
     
     // input file names (the fixed are listed in the parameters above)
-    std::cout << "# Input files = " << _inputs.size() << std::endl;
-    for (input_vec::const_iterator it = _inputs.begin();
-        it != _inputs.end(); ++it)
+    std::cout << "# Input files = " << inputs().size() << std::endl;
+    for (input_seq_t::const_iterator it = inputs().begin();
+        it != inputs().end(); ++it)
     {
         std::cout << "# " << it->name;
         if (it->trackid > 0)

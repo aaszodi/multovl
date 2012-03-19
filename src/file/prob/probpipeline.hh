@@ -90,12 +90,10 @@ protected:
     virtual
     MultovlOptbase* opt_ptr() { return _optp; }
     
-    // data which should be accessible
-    // to derived classes without too much bureaucracy
+private:
+
     chrom_shufovl_map _csovl;   ///< chromosome ==> ShuffleOvl map
     Stat _stat; ///< overlap length statistics collection
-    
-private:
     
     unsigned int read_tracks(
         const std::vector<std::string>& inputfiles,

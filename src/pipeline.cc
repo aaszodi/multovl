@@ -17,8 +17,8 @@ unsigned int Pipeline::detect_overlaps()
 {
     // the overlaps are detected chromosome by chromosome
     unsigned int totalcounts = 0;
-    for (chrom_multovl_map::iterator cmit = _cmovl.begin();
-        cmit != _cmovl.end(); ++cmit)
+    for (chrom_multovl_map::iterator cmit = cmovl().begin();
+        cmit != cmovl().end(); ++cmit)
     {
         MultiOverlap& movl = cmit->second;      // "current overlap"
         

@@ -27,7 +27,7 @@ bool BasePipeline::run()
         if (!errors().ok())
             return false;  // stop only on serious errors
         else
-            _errors.clear();
+            clear_errors();
     }
     if (opt_ptr()->timing())
         timer.add_timepoint();  // [1]-st time point is the end of input
@@ -41,7 +41,7 @@ bool BasePipeline::run()
         if (!errors().ok())
             return false;  // stop on errors only
         else
-            _errors.clear();
+            clear_errors();
     }
     if (opt_ptr()->timing())
     {
@@ -64,7 +64,7 @@ bool BasePipeline::run()
         if (!errors().ok())
             return false;   // stop on errors only
         else
-            _errors.clear();
+            clear_errors();
     }
         
     return true;    // all is fine

@@ -20,7 +20,7 @@ class MultovlOpts;
 /// the output goes to a GFF2-formatted text file to standard output.
 class ClassicPipeline: public Pipeline
 {
-    public:
+public:
     
     /// Inits the pipeline with the command-line arguments.
     /// These will be parsed inside and the program exits with an error message
@@ -30,7 +30,7 @@ class ClassicPipeline: public Pipeline
     /// Destructor
     ~ClassicPipeline();
     
-    protected:
+protected:
     
     /// Reads the input tracks from files if no --load option was specified.
     /// The file names are parsed from the command line when the constructor runs.
@@ -56,7 +56,7 @@ class ClassicPipeline: public Pipeline
     virtual
     MultovlOptbase* opt_ptr() { return _optp; }
     
-    private:
+private:
     
     unsigned int read_tracks();
     
