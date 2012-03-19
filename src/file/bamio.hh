@@ -35,7 +35,7 @@ namespace io {
 /// and use the resulting Region immediately for building up a MultiOverlap object.
 class BamReader: public TrackReader
 {
-    public:
+public:
     
     /// Init a BamReader object to read from a BAM-formatted binary file.
     /// \param infname the input file name. 
@@ -53,12 +53,7 @@ class BamReader: public TrackReader
 
     ~BamReader();
     
-    protected:
-    
-    virtual
-    void add_error(const std::string& msg);
-    
-    private:
+private:
     
     BamTools::BamReader _bamreader;
     BamTools::RefVector _refs;

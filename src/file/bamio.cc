@@ -56,11 +56,5 @@ BamReader::~BamReader()
     _bamreader.Close();
 }
 
-// Adds a simple error message to _errors. Protected
-void BamReader::add_error(const std::string& msg)
-{
-    _errors.add_error(msg);
-}
-
 }   // namespace io
 }   // namespace multovl

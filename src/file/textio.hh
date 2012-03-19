@@ -31,7 +31,7 @@ class Linereader;
 /// and use the resulting Region immediately for building up a MultiOverlap object.
 class TextReader: public TrackReader
 {
-    public:
+public:
     
     /// Init a TextReader object to read from a file.
     /// \param infname the input file name. 
@@ -54,17 +54,19 @@ class TextReader: public TrackReader
 
     ~TextReader();
     
-    protected:
-    
+    /// Adds an error message to _errors, nicely decorated with linecount.
     virtual
     void add_error(const std::string& msg);
     
-    private:
+private:
     
+    bool is_valid() const { return _valid; }
+
     Linereader* _lrp;   // can be BedLinereader or GffLinereader
     std::ifstream _inf; // input file stream
     std::string _line;  // input buffer
     unsigned int _linecount;
+    bool _valid;
     
 };  // END OF CLASS TextReader
 

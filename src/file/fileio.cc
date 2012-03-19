@@ -28,13 +28,7 @@ FileReader::FileReader(
     Fileformat::Kind fmt = format;
     if (format == Fileformat::UNKNOWN)
          fmt = Fileformat::from_filename(infname);
-    if (fmt == Fileformat::UNKNOWN)
-    {
-        add_error("Cannot deduce format of file " + infname);
-        _finished = true;
-        return;
-    }
-    
+
     // select the appropriate track reader (factory pattern)
 #if USE_BAMTOOLS
     if (fmt == Fileformat::BAM)
@@ -51,7 +45,10 @@ FileReader::FileReader(
 FileReader::~FileReader()
 {
     if (_reader != NULL)
+    {
         delete _reader;
+        _reader = NULL;
+    }
 }
 
 bool FileReader::read_into(std::string& chrom, Region& reg)

@@ -30,7 +30,8 @@ TextReader::TextReader(
     TrackReader(),
     _lrp(NULL),
     _inf(),
-    _linecount(0)
+    _linecount(0),
+    _valid(false)
 {
     
     // input line reader (parser) factory
@@ -38,21 +39,28 @@ TextReader::TextReader(
     else if (format == Fileformat::GFF) _lrp = new GffLinereader();
     else
     {
-        // this should not happen...
-        _errors.add_error("Bad format for TextReader");
+        // invalid state
+    	// use parent class' add_error as there's no meaningful linecount to store
+        TrackReader::add_error("Unknown format for TextReader: " + infname);
+        return;
     }
     
     _inf.open(infname.c_str());
     if (!_inf)  // could not open
     {
-        _errors.add_error("Cannot open input file: " + infname);
+    	// invalid state
+        TrackReader::add_error("Cannot open input file: " + infname);
+        return;
     }
+
+    // all went well, state is valid, can do input
+    _valid = true;
 }
 
 std::string TextReader::read_into(std::string& chrom, Region& reg)
 {
-    if (!_inf)
-        return "Input file not open";
+    if (!is_valid())
+        return "Cannot read";
         
     while (std::getline(_inf, _line))
     {
@@ -87,15 +95,17 @@ TextReader::~TextReader()
 {
     _inf.close();
     if (_lrp != NULL)
+    {
         delete _lrp;
+        _lrp = NULL;
+    }
 }
 
-// Adds an error message to _errors, nicely decorated with linecount etc. Protected
 void TextReader::add_error(const std::string& msg)
 {
     std::string err = 
         "At line " + boost::lexical_cast<std::string>(_linecount) + ": " + msg;
-    _errors.add_error(err);
+    TrackReader::add_error(err);
 }
 
 }   // namespace io

@@ -34,7 +34,7 @@ namespace io {
 /// Subclasses contain implementations for reading text or binary files.
 class TrackReader: private boost::noncopyable
 {
-    public:
+public:
     
     /// default init
     TrackReader(): _errors() {}
@@ -51,14 +51,17 @@ class TrackReader: private boost::noncopyable
     /// \return const access to the internal error collecting object.
     const Errors& errors() const { return _errors; }
     
-    /// Add an error
+    // Adds a simple error message to _errors.
     virtual
-    void add_error(const std::string& msg) = 0;
-    
+    void add_error(const std::string& msg)
+    {
+        _errors.add_error(msg);
+    }
+
     virtual
     ~TrackReader() {}
     
-    protected:
+private:
     
     Errors _errors;
 
