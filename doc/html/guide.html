@@ -294,7 +294,8 @@ or the overlaps occurred much more often (or much less often) than what could be
 <p>Region reshuffling is performed within "free regions". These represent genomic
 segments in which it is possible to detect enrichments at all (e.g. regions tiled in microarrays
 or regions visible to high-throughput sequencing). All input regions must fit within
-a free region, <tt>multovlprob</tt> checks this before the analysis.</p>
+a free region, <tt>multovlprob</tt> checks this before the analysis. Regions that do not fit
+will be skipped and a warning is printed to standard error.</p>
 
 <p><tt>multovlprob</tt> distinguishes between "fixed" and "shufflable" tracks.
 You can fix tracks where shuffling makes no sense, e.g. annotation tracks containing
@@ -334,18 +335,18 @@ Options:
 </code></pre>
 
 <p>Most options are the same as in the "classic" MULTOVL. The free regions file
-must be specified using the <tt>-F</tt> option, it can in be any of the supported input 
+must be specified using the <tt>-F</tt> option, it can have any of the supported input 
 file formats. Fixed tracks may be defined by the <tt>-f</tt> option which can be
 repeated several times, one for each fixed file. The number of reshufflings is
 controlled by the <tt>-r</tt> option. It is advisable to start with a small number
 and then go up to at least 1000 reshufflings for a production run. The random number
 generator seed can be defined by the <tt>-s</tt> option. The <tt>multovlprob</tt>
-runs are always deterministic in the sense that the program always starts from
+runs are deterministic in the sense that the program always starts from
 a well-defined random seed.</p>
 
 <p>The output of <tt>multovlprob</tt> contains only the statistical information.
 If you need the actual overlap results with the unshuffled input tracks,
-run <tt>multovl</tt> beforehand. Here is a sample output:</p>
+run the "classic" <tt>multovl</tt> beforehand. Here is a sample output:</p>
 
 <pre><code># Parameters =  -L 1 -m 2 -M 0 -F ../../src/test/data/triplefree.bed \
   -r 100 -s 42 -f ../../src/test/data/triplea.bed
@@ -588,6 +589,9 @@ When reading from BAM files even the region names are ignored in the interest of
 from the input file extension. So please call your BED files <tt>something.bed</tt>,
 your GFF files <tt>something.gff</tt>, and your BAM files <tt>something.bam</tt> -- you get
 the idea.</p>
+
+<p>Also note that if one of the input files has a format MULTOVL cannot detect, you get an 
+error message and the program stops. Please make sure all input files are parsable by MULTOVL.</p>
 
 <h3><a name='outfile'>Output file format</a></h3>
 
