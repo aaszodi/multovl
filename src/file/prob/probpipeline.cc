@@ -9,6 +9,8 @@
 
 // -- Boost headers --
 
+#include "boost/progress.hpp"   // deprecated but pretty ASCII progress display
+
 // -- Standard headers --
 
 #include <utility>
@@ -271,8 +273,15 @@ unsigned int ProbPipeline::detect_overlaps()
     
     // now estimate the null distribution by reshuffling the shufflable tracks, 
     // and re-doing the overlaps with the same settings
+    unsigned int maxreshufflings = _optp->reshufflings();
+    boost::progress_display *progress = NULL;
+    if (_optp->progress())
+    {
+        // prints display at creation time
+        progress = new boost::progress_display(maxreshufflings, std::cerr);
+    }
     UniformGen rng(_optp->random_seed());
-    for (unsigned int r = 0; r < _optp->reshufflings(); ++r)
+    for (unsigned int r = 0; r < maxreshufflings; ++r)
     {
     	// TODO this loop may be parallelised
         OvlenCounter rndcounter;
@@ -305,6 +314,18 @@ unsigned int ProbPipeline::detect_overlaps()
         {
             _stat.add(mtcit->first, mtcit->second, false);
         }
+        
+        if (_optp->progress())
+        {
+            // update the ASCII progress display
+            ++(*progress);
+        }
+    }   // end of reshufflings
+    
+    if (_optp->progress())
+    {
+        delete progress;
+        progress = NULL;
     }
     
     // evaluate the stats

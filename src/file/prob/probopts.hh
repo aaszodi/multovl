@@ -50,6 +50,9 @@ class ProbOpts : public MultovlOptbase
     
     /// \return the random number generator seed
     unsigned int random_seed() const { return _randomseed; }
+    
+    /// \return true if the user requested an ASCII progress bar display
+    bool progress() const { return _progress; }
 	
 	virtual
     std::string param_str() const;
@@ -72,6 +75,7 @@ class ProbOpts : public MultovlOptbase
 	std::string _freefile;
 	filenames_t _fixedfiles;
     unsigned int _reshufflings, _randomseed;
+    bool _progress;
 };
 
 } // namespace prob

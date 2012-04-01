@@ -332,6 +332,7 @@ Options:
   -f [ --fixed ] arg        Filenames of fixed tracks
   -r [ --reshufflings ] arg Number of reshufflings, default 100
   -s [ --seed ] arg         Random number generator seed, default 42
+  --progress                Display ASCII progress bar on stderr
 </code></pre>
 
 <p>Most options are the same as in the "classic" MULTOVL. The free regions file
@@ -339,8 +340,10 @@ must be specified using the <tt>-F</tt> option, it can have any of the supported
 file formats. Fixed tracks may be defined by the <tt>-f</tt> option which can be
 repeated several times, one for each fixed file. The number of reshufflings is
 controlled by the <tt>-r</tt> option. It is advisable to start with a small number
-and then go up to at least 1000 reshufflings for a production run. The random number
-generator seed can be defined by the <tt>-s</tt> option. The <tt>multovlprob</tt>
+and then go up to at least 1000 reshufflings for a production run.
+If you specify the <tt>--progress</tt> option then a simple ASCII progress bar
+is printed to the standard error, which is useful if you have requested lots of reshufflings.
+The random number generator seed can be defined by the <tt>-s</tt> option. The <tt>multovlprob</tt>
 runs are deterministic in the sense that the program always starts from
 a well-defined random seed.</p>
 

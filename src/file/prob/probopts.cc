@@ -26,7 +26,8 @@ ProbOpts::ProbOpts():
     _freefile(""),
     _fixedfiles(),
     _reshufflings(DEFAULT_RESHUFFLINGS),
-    _randomseed(DEFAULT_RANDOMSEED)
+    _randomseed(DEFAULT_RANDOMSEED),
+    _progress(false)
 {
     add_mandatory_option<std::string>("free", "Free regions (mandatory)", 'F');
     add_option<filenames_t>("fixed", &_fixedfiles, filenames_t(), "Filenames of fixed tracks", 'f');
@@ -34,6 +35,8 @@ ProbOpts::ProbOpts():
 		"Number of reshufflings, default 100", 'r');
 	add_option<unsigned int>("seed", &_randomseed, DEFAULT_RANDOMSEED, 
                              "Random number generator seed, default 42", 's');
+    add_bool_switch("progress", &_progress,
+        "Display ASCII progress bar on stderr");
 }
 
 bool ProbOpts::check_variables()
