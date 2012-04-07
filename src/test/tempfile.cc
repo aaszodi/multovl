@@ -13,8 +13,10 @@
 
 Tempfile::Tempfile()
 {
-    _path = boost::filesystem::temp_directory_path() /
-        boost::filesystem::unique_path();
+    // used to have boost::filesystem::temp_directory_path() as prefix
+    // but this is supported only in later versions of Filesystem V3 :-(
+    // it definitely is not available in Boost 1.44
+    _path = boost::filesystem::unique_path();
 }
 
 Tempfile::~Tempfile()

@@ -38,7 +38,7 @@ class UniformGen: boost::noncopyable
     
     private:
     
-    typedef boost::random::mt19937 rng_t;    ///< Mersenne twister type
+    typedef boost::mt19937 rng_t;    ///< Mersenne twister type
     typedef boost::uniform_real<> unidistr_t;  ///< uniform distribution type
     typedef boost::variate_generator<rng_t&, unidistr_t > unigen_t; ///< uniform generator type
     

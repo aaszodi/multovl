@@ -8,6 +8,8 @@
 
 // -- Boost headers --
 
+// Use V3 of Boost::Filesystem, this is relevant between Boost versions 1.44 to 1.45
+#define BOOST_FILESYSTEM_VERSION 3
 #include "boost/filesystem.hpp"
 
 // -- Standard headers --
@@ -32,3 +34,4 @@ class Tempfile
 };
 
 #endif  // MULTOVL_TEST_TEMPFILE_HEADER
+
