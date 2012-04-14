@@ -10,8 +10,6 @@
 
 namespace multovl {
 
-class MultovlOpts;
-
 // -- Classes --
 
 /// The PgPipeline implements the "Postgres-based" MULTOVL pipeline.
@@ -47,10 +45,8 @@ class PgPipeline: public Pipeline
     virtual
     bool write_output();
     
-    /// Base-class sliced access to the option-handling object
-    /// which is of type PgMultovlOpts.
-    virtual
-    MultovlOptbase* opt_ptr() { return _optp; }
+    /// \return access to the option-handling object
+    PgMultovlOpts* opt_ptr() { return dynamic_cast<PgMultovlOpts*>(opt_baseptr()); }
 
     private:
     
@@ -62,7 +58,6 @@ class PgPipeline: public Pipeline
     std::string login_name();
     
     // data
-    PgMultovlOpts* _optp;
     std::string _rconnstr, _wconnstr,   // read-only and read-write connection strings
         _download_sql, _trackupload_sql, _regionupload_sql;
 };

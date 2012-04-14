@@ -22,6 +22,7 @@ namespace multovl {
 /// Abstract class that provides a framework for detecting multiple overlaps using the MultiOverlap class.
 class Pipeline: public BasePipeline
 {
+    
 protected:
     
     /// There is one MultiOverlap object for each chromosome

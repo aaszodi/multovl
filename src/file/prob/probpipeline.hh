@@ -30,7 +30,6 @@ public:
     /// if parsing goes wrong.
     ProbPipeline(int argc, char* argv[]);
     
-    /// Destructor
     ~ProbPipeline();
     
 protected:
@@ -86,9 +85,8 @@ protected:
     virtual
     bool write_output();
     
-    /// Base-class sliced access to the option-handling object
-    virtual
-    MultovlOptbase* opt_ptr() { return _optp; }
+    /// \return access to the option-handling object
+    ProbOpts* opt_ptr() { return dynamic_cast<ProbOpts*>(opt_baseptr()); }
     
 private:
 
@@ -102,7 +100,6 @@ private:
     unsigned int read_free_regions(const std::string& freefile);
     void write_comments() const;
     
-    ProbOpts* _optp;
 };
 
 }   // namespace prob

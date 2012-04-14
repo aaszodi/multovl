@@ -34,10 +34,9 @@
 namespace multovl {
 
 PgPipeline::PgPipeline(int argc, char* argv[]):
-    Pipeline()
 {
-    _optp = new PgMultovlOpts();    // "factory"
-    _optp->process_commandline(argc, argv); // exits on error or help request
+    set_optpimpl(new PgMultovlOpts());    // "factory"
+    opt_ptr()->process_commandline(argc, argv); // exits on error or help request
     
     // read the configuration file, prepare DB access
     if (!read_config())
@@ -49,7 +48,12 @@ PgPipeline::PgPipeline(int argc, char* argv[]):
 
 PgPipeline::~PgPipeline()
 {
-    delete _optp;
+    PgMultovlOpts *op = opt_ptr();
+    if (op != NULL)
+    {
+        delete op;
+        set_optpimpl(NULL);
+    }
 }
 
 // Reads a configuration file written in JSON format.
@@ -61,7 +65,7 @@ bool PgPipeline::read_config()
         ptree pt;
         
         // throws if input did not work for some reason
-        read_json(_optp->config_file(), pt);
+        read_json(opt_ptr()->config_file(), pt);
         
         // fetch the connection information, construct Postgres connection strings
         std::string hostdb = "host=" + pt.get("conn.hostname", "localhost")
@@ -105,7 +109,7 @@ unsigned int PgPipeline::read_input()
     unsigned int trackid = 0;   // current ID, will be equal to the number of OK tracks on return
     try {
         const str_vec& tracknames = 
-            _optp->input_tracks();
+            opt_ptr()->input_tracks();
         inputs().reserve(tracknames.size());
         
         // connect to the DB
@@ -214,7 +218,7 @@ bool PgPipeline::write_output()
     // Some general stats etc. will just be written to stdout as usual
     std::cout << "# PgMultovl version " << MULTOVL_VER() << MULTOVL_BUILD() << std::endl
         << "# Built with libpqxx version " << PQXX_VERSION << std::endl;
-    std::cout << "# Parameters = " << _optp->param_str() << std::endl;
+    std::cout << "# Parameters = " << opt_ptr()->param_str() << std::endl;
     std::cout << "# Input tracks = " << inputs().size() << std::endl;
     for (input_seq_t::const_iterator it = inputs().begin();
         it != inputs().end(); ++it)
@@ -270,11 +274,11 @@ bool PgPipeline::write_output()
         pqxx::work ta(conn);
         
         // create result track in DB
-        std::string outputtrack = _optp->output_track();
+        std::string outputtrack = opt_ptr()->output_track();
         pqxx::result trackupres = 
             ta.prepared("trackupload_stmt")
             (login_name())
-            (_optp->param_str())
+            (opt_ptr()->param_str())
             (inputs_to_anctrack())
             (outputtrack).exec();
         std::string diag;   // will be used later as well

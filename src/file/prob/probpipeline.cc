@@ -37,17 +37,21 @@ void ProbPipeline::OvlenCounter::update(const MultiOverlap::multiregvec_t& overl
 // -- ProbPipeline methods --
 
 ProbPipeline::ProbPipeline(int argc, char* argv[]):
-    BasePipeline(),
     _csovl(),
     _stat()
 {
-    _optp = new ProbOpts();
-    _optp->process_commandline(argc, argv); // exits on error or help request
+    set_optpimpl(new ProbOpts());
+    opt_ptr()->process_commandline(argc, argv); // exits on error or help request
 }
 
 ProbPipeline::~ProbPipeline()
 {
-    delete _optp;
+    ProbOpts *op = opt_ptr();
+    if (op != NULL)
+    {
+        delete op;
+        set_optpimpl(NULL);
+    }
 }
 
 // -- Virtual method implementations
@@ -58,18 +62,18 @@ unsigned int ProbPipeline::read_input()
     
     // first read the free regions
     // if successful, then _csovl is set up, no more chromosomes will be accepted
-    regcnt = read_free_regions(_optp->free_file());
+    regcnt = read_free_regions(opt_ptr()->free_file());
     if (regcnt == 0)
         return 0;
     
     // then read the optional fixed regions
-    if (_optp->fixed_filecnt() > 0)
+    if (opt_ptr()->fixed_filecnt() > 0)
     {
-        read_tracks(_optp->fixed_files(), trackcnt, false);
+        read_tracks(opt_ptr()->fixed_files(), trackcnt, false);
     }
     
     // read shufflable tracks from cmdline arg files
-    regcnt = read_tracks(_optp->shuffle_files(), trackcnt, true);
+    regcnt = read_tracks(opt_ptr()->shuffle_files(), trackcnt, true);
     if (regcnt == 0)
         return 0;
     
@@ -248,18 +252,18 @@ unsigned int ProbPipeline::detect_overlaps()
         ShuffleOvl& sovl = csit->second;      // "current overlap"
         
         // generate and store overlaps
-        if (opt_ptr()->uniregion())
+        if (opt_baseptr()->uniregion())
         {
-            acts += sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
-                opt_ptr()->minmult(), 
-                opt_ptr()->maxmult());
+            acts += sovl.find_unionoverlaps(opt_baseptr()->ovlen(), 
+                opt_baseptr()->minmult(), 
+                opt_baseptr()->maxmult());
         }
         else
         {
-            acts += sovl.find_overlaps(opt_ptr()->ovlen(), 
-                opt_ptr()->minmult(), 
-                opt_ptr()->maxmult(), 
-                !opt_ptr()->nointrack());
+            acts += sovl.find_overlaps(opt_baseptr()->ovlen(), 
+                opt_baseptr()->minmult(), 
+                opt_baseptr()->maxmult(), 
+                !opt_baseptr()->nointrack());
         }
         actcounter.update(sovl.overlaps()); // update actual counts
     }
@@ -273,14 +277,14 @@ unsigned int ProbPipeline::detect_overlaps()
     
     // now estimate the null distribution by reshuffling the shufflable tracks, 
     // and re-doing the overlaps with the same settings
-    unsigned int maxreshufflings = _optp->reshufflings();
+    unsigned int maxreshufflings = opt_ptr()->reshufflings();
     boost::progress_display *progress = NULL;
-    if (_optp->progress())
+    if (opt_ptr()->progress())
     {
         // prints display at creation time
         progress = new boost::progress_display(maxreshufflings, std::cerr);
     }
-    UniformGen rng(_optp->random_seed());
+    UniformGen rng(opt_ptr()->random_seed());
     for (unsigned int r = 0; r < maxreshufflings; ++r)
     {
     	// TODO this loop may be parallelised
@@ -292,18 +296,18 @@ unsigned int ProbPipeline::detect_overlaps()
             sovl.shuffle(rng);
             
             // generate and store overlaps
-            if (opt_ptr()->uniregion())
+            if (opt_baseptr()->uniregion())
             {
-                sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
-                    opt_ptr()->minmult(), 
-                    opt_ptr()->maxmult());
+                sovl.find_unionoverlaps(opt_baseptr()->ovlen(), 
+                    opt_baseptr()->minmult(), 
+                    opt_baseptr()->maxmult());
             }
             else
             {
-                sovl.find_overlaps(opt_ptr()->ovlen(), 
-                    opt_ptr()->minmult(), 
-                    opt_ptr()->maxmult(), 
-                    !opt_ptr()->nointrack());
+                sovl.find_overlaps(opt_baseptr()->ovlen(), 
+                    opt_baseptr()->minmult(), 
+                    opt_baseptr()->maxmult(), 
+                    !opt_baseptr()->nointrack());
             }
             rndcounter.update(sovl.overlaps()); // update actual counts
         }
@@ -315,14 +319,14 @@ unsigned int ProbPipeline::detect_overlaps()
             _stat.add(mtcit->first, mtcit->second, false);
         }
         
-        if (_optp->progress())
+        if (opt_ptr()->progress())
         {
             // update the ASCII progress display
             ++(*progress);
         }
     }   // end of reshufflings
     
-    if (_optp->progress())
+    if (opt_ptr()->progress())
     {
         delete progress;
         progress = NULL;
@@ -337,7 +341,7 @@ unsigned int ProbPipeline::detect_overlaps()
 bool ProbPipeline::write_output()
 {
     // Preamble: the command-line parameters
-    std::cout << "# Parameters = " << _optp->param_str() << std::endl;
+    std::cout << "# Parameters = " << opt_ptr()->param_str() << std::endl;
     
     // input file names (the fixed are listed in the parameters above)
     std::cout << "# Input files = " << inputs().size() << std::endl;
@@ -353,7 +357,7 @@ bool ProbPipeline::write_output()
         } else {
             std::cout << " : skipped";
         }
-        if (_optp->file_is_fixed(it->name))
+        if (opt_ptr()->file_is_fixed(it->name))
         	std::cout << " [fixed]";
         else
         	std::cout << " [shuffled]";

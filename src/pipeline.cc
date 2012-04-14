@@ -23,15 +23,15 @@ unsigned int Pipeline::detect_overlaps()
         MultiOverlap& movl = cmit->second;      // "current overlap"
         
         // generate and store overlaps
-        if (opt_ptr()->uniregion())
+        if (opt_baseptr()->uniregion())
         {
-            totalcounts += movl.find_unionoverlaps(opt_ptr()->ovlen(), 
-                opt_ptr()->minmult(), opt_ptr()->maxmult());
+            totalcounts += movl.find_unionoverlaps(opt_baseptr()->ovlen(), 
+                opt_baseptr()->minmult(), opt_baseptr()->maxmult());
         }
         else
         {
-            totalcounts += movl.find_overlaps(opt_ptr()->ovlen(), 
-                opt_ptr()->minmult(), opt_ptr()->maxmult(), !opt_ptr()->nointrack());
+            totalcounts += movl.find_overlaps(opt_baseptr()->ovlen(), 
+                opt_baseptr()->minmult(), opt_baseptr()->maxmult(), !opt_baseptr()->nointrack());
         }
     }
     return totalcounts;

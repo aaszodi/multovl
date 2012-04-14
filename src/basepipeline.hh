@@ -36,6 +36,13 @@ class BasePipeline: private boost::noncopyable
 {
 public:
     
+    /// Default init of a BasePipeline object.
+    BasePipeline():
+        _optpimpl(NULL),    // derived classes allocate this
+        _inputs(),
+        _errors()
+    {}
+    
     /// Go through the whole analysis.
     /// \return true on success, false if something went wrong.
     bool run();
@@ -44,7 +51,8 @@ public:
     const Errors& errors() const { return _errors; }
     
     virtual
-    ~BasePipeline() {}
+    ~BasePipeline()
+    {}
     
     /// The Input structure stores the name of the input (a filename 
     /// or track name in a database), an ID assigned by Multovl,
@@ -81,11 +89,13 @@ protected:
     virtual
     bool write_output() = 0;
     
-    /// Base-class sliced access to an option-handling object.
-    /// Derived classes will use their own option-handling,
-    /// it should be derived from MultovlOptbase.
-    virtual
-    MultovlOptbase* opt_ptr() = 0;
+    /// Sets the option handling object (invoke in ctor) but only if the pimpl was NULL.
+    /// \param optp pointer to an appropriate option handling object instance.
+    /// \return /true/ on success, /false/ if opt_baseptr() != NULL.
+    bool set_optpimpl(MultovlOptbase* optp);
+    
+    /// \return base-class sliced access to the option-handling object.
+    MultovlOptbase* opt_baseptr() { return _optpimpl; }
     
     /// \return const access to the input records
     const input_seq_t& inputs() const { return _inputs; }
@@ -110,6 +120,10 @@ protected:
 
 private:
 
+    // Each derived class will have its option-handling object
+    // which is derived from MultovlOptbase (parallel inheritance hierarchy). 
+    // The ptr to it remains NULL in this base class.
+    MultovlOptbase* _optpimpl;
     input_seq_t _inputs;      ///< vector of input track descriptors
     Errors _errors; ///< collect error messages here
 };

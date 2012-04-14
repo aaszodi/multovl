@@ -44,16 +44,20 @@ void serialize(Archive& ar, multovl::Pipeline::Input& inp, const unsigned int ve
 
 namespace multovl {
 
-ClassicPipeline::ClassicPipeline(int argc, char* argv[]):
-    Pipeline()
+ClassicPipeline::ClassicPipeline(int argc, char* argv[])
 {
-    _optp = new ClassicOpts();
-    _optp->process_commandline(argc, argv); // exits on error or help request
+    set_optpimpl(new ClassicOpts());
+    opt_ptr()->process_commandline(argc, argv); // exits on error or help request
 }
 
 ClassicPipeline::~ClassicPipeline()
 {
-    delete _optp;
+    ClassicOpts *op = opt_ptr();
+    if (op != NULL)
+    {
+        delete op;
+        set_optpimpl(NULL);
+    }
 }
 
 // -- Pipeline virtual method implementations
@@ -61,11 +65,11 @@ ClassicPipeline::~ClassicPipeline()
 unsigned int ClassicPipeline::read_input()
 {
     unsigned int trackcnt = 0;
-    if (_optp->load_from() != "")
+    if (opt_ptr()->load_from() != "")
     {
         // read input data from a previously saved archive
         try {
-            std::ifstream ifs(_optp->load_from().c_str());
+            std::ifstream ifs(opt_ptr()->load_from().c_str());
             boost::archive::binary_iarchive ia(ifs);
             ia >> inputs() >> cmovl();
             trackcnt = inputs().size();
@@ -85,7 +89,7 @@ unsigned int ClassicPipeline::read_input()
 unsigned int ClassicPipeline::read_tracks()
 {
     typedef std::vector<std::string> str_vec;
-    const str_vec& inputfiles = _optp->input_files();
+    const str_vec& inputfiles = opt_ptr()->input_files();
     unsigned int trackid = 0;   // current ID, will be equal to the number of OK tracks on return
     
     for (str_vec::const_iterator ifit = inputfiles.begin();
@@ -160,11 +164,11 @@ unsigned int ClassicPipeline::read_tracks()
 bool ClassicPipeline::write_output()
 {
     // save current status in archive if asked to do so
-    if (_optp->save_to() != "")
+    if (opt_ptr()->save_to() != "")
     {
         // write status data to archive file
         try {
-            std::ofstream ofs(_optp->save_to().c_str());
+            std::ofstream ofs(opt_ptr()->save_to().c_str());
             boost::archive::binary_oarchive oa(ofs);
             
             // Note that only the input data and the chrom=>MultiOverlap map is saved
@@ -179,7 +183,7 @@ bool ClassicPipeline::write_output()
     }
     
     // output the result in the selected format to stdout
-    if (_optp->outformat() == "BED")
+    if (opt_ptr()->outformat() == "BED")
     {
         // write BED output
         return write_bed_output();
@@ -210,7 +214,7 @@ bool ClassicPipeline::write_gff_output()
         cmit != cmovl().end(); ++cmit)
     {
         io::GffLinewriter lw(
-            _optp->source(), 
+            opt_ptr()->source(), 
             2, cmit->first
         );    // init with chromosome
         const MultiOverlap::multiregvec_t& mregs = cmit->second.overlaps();
@@ -262,13 +266,13 @@ void ClassicPipeline::write_comments()
     }
     
     // the command-line parameters
-    std::cout << "# Parameters = " << _optp->param_str() << std::endl;
+    std::cout << "# Parameters = " << opt_ptr()->param_str() << std::endl;
     
     // add the input file names as comments
-    if (_optp->load_from() != "")
+    if (opt_ptr()->load_from() != "")
     {
         std::cout << "# Input data loaded from archive = " 
-            << _optp->load_from() << std::endl;
+            << opt_ptr()->load_from() << std::endl;
     }
     std::cout << "# Input files = " << inputs().size() << std::endl;
     for (input_seq_t::const_iterator it = inputs().begin();

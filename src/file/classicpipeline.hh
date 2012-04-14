@@ -10,8 +10,6 @@
 
 namespace multovl {
 
-class MultovlOpts;
-
 // -- Classes --
 
 /// The ClassicPipeline implements the "classic" MULTOVL pipeline.
@@ -27,7 +25,6 @@ public:
     /// if parsing goes wrong.
     ClassicPipeline(int argc, char* argv[]);
     
-    /// Destructor
     ~ClassicPipeline();
     
 protected:
@@ -51,10 +48,8 @@ protected:
     virtual
     bool write_output();
     
-    /// Base-class sliced access to the option-handling object
-    /// which is of type ClassicOpts.
-    virtual
-    MultovlOptbase* opt_ptr() { return _optp; }
+    /// \return access to the option-handling object
+    ClassicOpts* opt_ptr() { return dynamic_cast<ClassicOpts*>(opt_baseptr()); }
     
 private:
     
@@ -63,8 +58,6 @@ private:
     bool write_gff_output();
     bool write_bed_output();
     void write_comments();
-    
-    ClassicOpts* _optp;
 };
 
 }   // namespace multovl
