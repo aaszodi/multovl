@@ -252,18 +252,18 @@ unsigned int ProbPipeline::detect_overlaps()
         ShuffleOvl& sovl = csit->second;      // "current overlap"
         
         // generate and store overlaps
-        if (opt_baseptr()->uniregion())
+        if (opt_ptr()->uniregion())
         {
-            acts += sovl.find_unionoverlaps(opt_baseptr()->ovlen(), 
-                opt_baseptr()->minmult(), 
-                opt_baseptr()->maxmult());
+            acts += sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), 
+                opt_ptr()->maxmult());
         }
         else
         {
-            acts += sovl.find_overlaps(opt_baseptr()->ovlen(), 
-                opt_baseptr()->minmult(), 
-                opt_baseptr()->maxmult(), 
-                !opt_baseptr()->nointrack());
+            acts += sovl.find_overlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), 
+                opt_ptr()->maxmult(), 
+                !opt_ptr()->nointrack());
         }
         actcounter.update(sovl.overlaps()); // update actual counts
     }
@@ -296,18 +296,18 @@ unsigned int ProbPipeline::detect_overlaps()
             sovl.shuffle(rng);
             
             // generate and store overlaps
-            if (opt_baseptr()->uniregion())
+            if (opt_ptr()->uniregion())
             {
-                sovl.find_unionoverlaps(opt_baseptr()->ovlen(), 
-                    opt_baseptr()->minmult(), 
-                    opt_baseptr()->maxmult());
+                sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                    opt_ptr()->minmult(), 
+                    opt_ptr()->maxmult());
             }
             else
             {
-                sovl.find_overlaps(opt_baseptr()->ovlen(), 
-                    opt_baseptr()->minmult(), 
-                    opt_baseptr()->maxmult(), 
-                    !opt_baseptr()->nointrack());
+                sovl.find_overlaps(opt_ptr()->ovlen(), 
+                    opt_ptr()->minmult(), 
+                    opt_ptr()->maxmult(), 
+                    !opt_ptr()->nointrack());
             }
             rndcounter.update(sovl.overlaps()); // update actual counts
         }

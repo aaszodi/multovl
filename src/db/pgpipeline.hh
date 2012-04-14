@@ -46,7 +46,7 @@ class PgPipeline: public Pipeline
     bool write_output();
     
     /// \return access to the option-handling object
-    PgMultovlOpts* opt_ptr() { return dynamic_cast<PgMultovlOpts*>(opt_baseptr()); }
+    PgMultovlOpts* opt_ptr() { return dynamic_cast<PgMultovlOpts*>(opt_pimpl()); }
 
     private:
     

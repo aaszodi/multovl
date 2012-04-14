@@ -49,7 +49,8 @@ protected:
     bool write_output();
     
     /// \return access to the option-handling object
-    ClassicOpts* opt_ptr() { return dynamic_cast<ClassicOpts*>(opt_baseptr()); }
+    virtual
+    ClassicOpts* opt_ptr() { return dynamic_cast<ClassicOpts*>(opt_pimpl()); }
     
 private:
     

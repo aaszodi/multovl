@@ -86,7 +86,8 @@ protected:
     bool write_output();
     
     /// \return access to the option-handling object
-    ProbOpts* opt_ptr() { return dynamic_cast<ProbOpts*>(opt_baseptr()); }
+    virtual
+    ProbOpts* opt_ptr() { return dynamic_cast<ProbOpts*>(opt_pimpl()); }
     
 private:
 

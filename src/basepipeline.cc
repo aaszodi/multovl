@@ -40,7 +40,7 @@ bool BasePipeline::run()
         else
             clear_errors();
     }
-    if (opt_baseptr()->timing())
+    if (opt_ptr()->timing())
         timer.add_timepoint();  // [1]-st time point is the end of input
     
     // detect overlaps
@@ -54,13 +54,13 @@ bool BasePipeline::run()
         else
             clear_errors();
     }
-    if (opt_baseptr()->timing())
+    if (opt_ptr()->timing())
     {
         timer.add_timepoint();  // [2]-nd timepoint is the end of the multioverlap calc
 
         // no overlap output is produced, just the
         // timing results are printed to stdout
-        std::cout << "Parameters: " << opt_baseptr()->param_str() 
+        std::cout << "Parameters: " << opt_ptr()->param_str() 
             << ", Timing: input = " << timer.interval(1) 
             << ", multovl = " << timer.interval(2,1)
             << ", total = " << timer.interval(2) << std::endl;

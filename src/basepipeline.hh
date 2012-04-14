@@ -91,11 +91,15 @@ protected:
     
     /// Sets the option handling object (invoke in ctor) but only if the pimpl was NULL.
     /// \param optp pointer to an appropriate option handling object instance.
-    /// \return /true/ on success, /false/ if opt_baseptr() != NULL.
+    /// \return /true/ on success, /false/ if opt_ptr() != NULL.
     bool set_optpimpl(MultovlOptbase* optp);
     
-    /// \return base-class sliced access to the option-handling object.
-    MultovlOptbase* opt_baseptr() { return _optpimpl; }
+    /// \return access to the option-handling pointer itself
+    MultovlOptbase* opt_pimpl() { return _optpimpl; }
+    
+    /// \return access to the option-handling object.
+    virtual
+    MultovlOptbase* opt_ptr() = 0;
     
     /// \return const access to the input records
     const input_seq_t& inputs() const { return _inputs; }
