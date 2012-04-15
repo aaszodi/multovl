@@ -30,7 +30,7 @@ project(multovl CXX)
 #    |-src              <== generic multovl components: genomic regions, overlap algorithm
 #      |-file           <== file-based: "classic" multovl
 #      | |-test         <== unit tests for file-based multovl components (mainly I/O)
-#      | |-prob         <== overlap probabilities: multovlprob
+#      | |-prob         <== overlap probabilities: [par]multovlprob
 #      |   |-test       <== unit tests for multovlprob components
 #      |-db             <== database-enabled: pgmultovl
 #      | |-test         <== unit tests for database-enabled pgmultovl components
@@ -79,13 +79,13 @@ set(BOOST_ROOT "/usr/local/boost" CACHE PATH "Top-level Boost directory")
 set(Boost_USE_STATIC_LIBS OFF CACHE PATH "Shall the Boost libraries be linked statically?")
 set(Boost_USE_MULTITHREADED ON)
 find_package( Boost COMPONENTS regex date_time filesystem system 
-	unit_test_framework program_options serialization REQUIRED)
+	unit_test_framework program_options serialization thread REQUIRED)
 	
 # list of Boost libraries needed by apps
 set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} 
     ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     ${Boost_REGEX_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY}
-	${Boost_SERIALIZATION_LIBRARY}
+	${Boost_SERIALIZATION_LIBRARY} ${Boost_THREAD_LIBRARY}
 )
 
 # we always need the Boost headers

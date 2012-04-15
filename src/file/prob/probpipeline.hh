@@ -6,7 +6,6 @@
 // -- Own headers --
 
 #include "basepipeline.hh"
-#include "multovlopts.hh"
 #include "stat.hh"
 #include "shuffleovl.hh"
 #include "probopts.hh"
@@ -33,6 +32,10 @@ public:
     ~ProbPipeline();
     
 protected:
+    
+    /// Default ctor that does not set the option processing object
+    /// used by ParProbPipeline ctor only
+    ProbPipeline();
     
     /// Internal class to keep track of overlap lengths.
     /// Basically a multiplicity => total overlap length map
@@ -73,12 +76,17 @@ protected:
     unsigned int read_input();
     
     /// Detects overlaps.
-    /// First the overlaps without shuffling are calculated. Then the shufflable tracks
+    /// First the overlaps without shuffling are calculated, see calc_actual_overlaps().
+    /// Then the shufflable tracks
     /// are permuted and the number of overlaps counted again and again which will provide
     /// an estimate of the null distribution (ie. the extent of overlaps by chance).
     /// \return the total number of overlaps found in the unpermuted case.
     virtual
     unsigned int detect_overlaps();
+    
+    /// Calculates the actual overlaps using the original input tracks without reshuffling.
+    /// \return the number of actual overlaps
+    unsigned int calc_actual_overlaps();
     
     /// Writes the results to standard output. Only the statistics are printed.
     /// \return true
@@ -88,6 +96,19 @@ protected:
     /// \return access to the option-handling object
     virtual
     ProbOpts* opt_ptr() { return dynamic_cast<ProbOpts*>(opt_pimpl()); }
+    
+    /// \return const access to the chrom => ShuffleOvl map
+    const chrom_shufovl_map& csovl() const { return _csovl; }
+    
+    /// \return access to the chrom => ShuffleOvl map
+    chrom_shufovl_map& csovl() { return _csovl; }
+    
+    /// \return const access to the statistics collector object
+    const Stat& stat() const { return _stat; }
+    
+    /// \return access to the statistics collector object
+    virtual // because ParProbPipeline needs a thread-safe variant
+    Stat& stat() { return _stat; }
     
 private:
 

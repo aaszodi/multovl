@@ -3,7 +3,6 @@
 // -- Own headers --
 
 #include "probpipeline.hh"
-#include "probopts.hh"
 #include "fileio.hh"
 #include "multovl_config.hh"
 
@@ -36,6 +35,12 @@ void ProbPipeline::OvlenCounter::update(const MultiOverlap::multiregvec_t& overl
 
 // -- ProbPipeline methods --
 
+// needed for the derived class, hence protected
+ProbPipeline::ProbPipeline():
+    _csovl(),
+    _stat()
+{}
+
 ProbPipeline::ProbPipeline(int argc, char* argv[]):
     _csovl(),
     _stat()
@@ -61,7 +66,7 @@ unsigned int ProbPipeline::read_input()
     unsigned int trackcnt = 0, regcnt = 0;
     
     // first read the free regions
-    // if successful, then _csovl is set up, no more chromosomes will be accepted
+    // if successful, then csovl() is set up, no more chromosomes will be accepted
     regcnt = read_free_regions(opt_ptr()->free_file());
     if (regcnt == 0)
         return 0;
@@ -140,12 +145,12 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
         return 0;
     }
     
-    // set up _csovl map
+    // set up csovl() map
     for (crv_t::const_iterator crvcit = crv.begin(); crvcit != crv.end(); ++crvcit)
     {
         const std::string& chrom = crvcit->first;
         const rv_t& regs = crvcit->second;
-        _csovl.insert(std::make_pair<std::string, ShuffleOvl>(chrom,ShuffleOvl(regs)));
+        csovl().insert(std::make_pair<std::string, ShuffleOvl>(chrom,ShuffleOvl(regs)));
     }
     return regcnt;
 }
@@ -191,8 +196,8 @@ unsigned int ProbPipeline::read_tracks(
             
             // /chrom/, /reg/ now contain a chromosome and a successfully parsed region
             // check if /reg/ fits into the free regions previously defined for /chrom/
-            chrom_shufovl_map::iterator csit = _csovl.find(chrom);
-            if (csit == _csovl.end())
+            chrom_shufovl_map::iterator csit = csovl().find(chrom);
+            if (csit == csovl().end())
             {
                 add_warning(ERRPREFIX, "Chromosome '" + chrom + "' not in free regions");
                 ++problemcnt;
@@ -244,36 +249,7 @@ unsigned int ProbPipeline::read_tracks(
 unsigned int ProbPipeline::detect_overlaps()
 {
     // first calculate the actual overlaps without shuffling
-    OvlenCounter actcounter;
-    unsigned int acts = 0;
-    for (chrom_shufovl_map::iterator csit = _csovl.begin();
-         csit != _csovl.end(); ++csit)
-    {
-        ShuffleOvl& sovl = csit->second;      // "current overlap"
-        
-        // generate and store overlaps
-        if (opt_ptr()->uniregion())
-        {
-            acts += sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
-                opt_ptr()->minmult(), 
-                opt_ptr()->maxmult());
-        }
-        else
-        {
-            acts += sovl.find_overlaps(opt_ptr()->ovlen(), 
-                opt_ptr()->minmult(), 
-                opt_ptr()->maxmult(), 
-                !opt_ptr()->nointrack());
-        }
-        actcounter.update(sovl.overlaps()); // update actual counts
-    }
-    
-    // add actual counts to statistics
-    for (OvlenCounter::mtolen_t::const_iterator mtcit = actcounter.mtolen().begin();
-        mtcit != actcounter.mtolen().end(); ++mtcit)
-    {
-        _stat.add(mtcit->first, mtcit->second, true);
-    }
+    unsigned int acts = calc_actual_overlaps();
     
     // now estimate the null distribution by reshuffling the shufflable tracks, 
     // and re-doing the overlaps with the same settings
@@ -289,8 +265,8 @@ unsigned int ProbPipeline::detect_overlaps()
     {
     	// TODO this loop may be parallelised
         OvlenCounter rndcounter;
-        for (chrom_shufovl_map::iterator csit = _csovl.begin();
-             csit != _csovl.end(); ++csit)
+        for (chrom_shufovl_map::iterator csit = csovl().begin();
+             csit != csovl().end(); ++csit)
         {
             ShuffleOvl& sovl = csit->second;
             sovl.shuffle(rng);
@@ -316,7 +292,7 @@ unsigned int ProbPipeline::detect_overlaps()
         for (OvlenCounter::mtolen_t::const_iterator mtcit = rndcounter.mtolen().begin();
             mtcit != rndcounter.mtolen().end(); ++mtcit)
         {
-            _stat.add(mtcit->first, mtcit->second, false);
+            stat().add(mtcit->first, mtcit->second, false);
         }
         
         if (opt_ptr()->progress())
@@ -333,9 +309,44 @@ unsigned int ProbPipeline::detect_overlaps()
     }
     
     // evaluate the stats
-    _stat.evaluate();
+    stat().evaluate();
     
     return acts;    // the NUMBER of actual overlaps
+}
+
+unsigned int ProbPipeline::calc_actual_overlaps()
+{
+    OvlenCounter actcounter;
+    unsigned int acts = 0;
+    for (chrom_shufovl_map::iterator csit = csovl().begin();
+         csit != csovl().end(); ++csit)
+    {
+        ShuffleOvl& sovl = csit->second;      // "current overlap"
+        
+        // generate and store overlaps
+        if (opt_ptr()->uniregion())
+        {
+            acts += sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), 
+                opt_ptr()->maxmult());
+        }
+        else
+        {
+            acts += sovl.find_overlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), 
+                opt_ptr()->maxmult(), 
+                !opt_ptr()->nointrack());
+        }
+        actcounter.update(sovl.overlaps()); // update actual counts
+    }
+    
+    // add actual counts to statistics
+    for (OvlenCounter::mtolen_t::const_iterator mtcit = actcounter.mtolen().begin();
+        mtcit != actcounter.mtolen().end(); ++mtcit)
+    {
+        stat().add(mtcit->first, mtcit->second, true);
+    }
+    return acts;
 }
 
 bool ProbPipeline::write_output()
@@ -370,10 +381,10 @@ bool ProbPipeline::write_output()
     unsigned int mcount = 0;
     std::cout << "# == Overlap length statistics ==" << std::endl
         << "Multiplicity,Actual,Mean,SD,Pvalue,Zscore" << std::endl;
-    for (unsigned int m = _stat.min_mult(); m <= _stat.max_mult(); ++m)
+    for (unsigned int m = stat().min_mult(); m <= stat().max_mult(); ++m)
     {
         try {
-            const Stat::Distr& distr = _stat.distr(m);
+            const Stat::Distr& distr = stat().distr(m);
             if (distr.is_valid())
             {
                 const EmpirDistr& nd = distr.nulldistr();
