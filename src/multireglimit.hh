@@ -29,7 +29,7 @@ namespace multovl {
  */
 class MultiRegLimit
 {
-	public: 
+public: 
 	
     typedef std::multiset<RegLimit> reglim_t;
     
@@ -44,6 +44,15 @@ class MultiRegLimit
     {
         add(region, trackid);
     }
+    
+    /// Copy ctor
+    /// Implements a deep copy so that the AncestorRegion objects under the RegLimits
+    /// will be completely independent from those under /other/
+    MultiRegLimit(const MultiRegLimit& other);
+    
+    /// Assignment
+    /// Implements a deep copy of the underlying AncestorRegion objects just like the copy ctor
+    MultiRegLimit& operator=(const MultiRegLimit& rhs);
     
     virtual ~MultiRegLimit() {}
     
@@ -61,13 +70,16 @@ class MultiRegLimit
     /// \return the calling object
     MultiRegLimit& operator+=(const MultiRegLimit& rhs);
     
-    protected:
+protected:
     
     /// \return non-const access to the RegLimit multiset inside
     reglim_t& nonconst_reglim() { return _reglim; }
     
-    private:
-            
+private:
+    
+    static
+    void deep_copy(const reglim_t& source, reglim_t& target);
+    
     // data 
     reglim_t _reglim;
 

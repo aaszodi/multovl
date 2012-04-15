@@ -87,8 +87,18 @@ BOOST_AUTO_TEST_CASE(multireglimit_test)
     MultiRegLimit mrl;
     add_region(mrl, 1, 5, '+', "r15", 9);
     add_region(mrl, 4, 6, '-', "r46", 17);
-    
     checker(mrl);
+    
+    // copy ctor and assignment tests
+    // NOTE: these are deep copies so the proper test would be
+    // to modify the sources and be happy if the targets don't change
+    MultiRegLimit mrl2(mrl);
+    checker(mrl2);
+    
+    MultiRegLimit mrl3;
+    add_region(mrl3, 7, 9, '-', "r79", 13);
+    mrl3 = mrl;
+    checker(mrl3);
 }
 
 BOOST_AUTO_TEST_CASE(multireglimit_merge_test)

@@ -29,7 +29,7 @@ namespace multovl {
 /// It can also be serialized.
 class RegLimit
 {
-    public:
+public:
     
     /// Init to empty
     RegLimit(): _regp(), _isfirst(false) {}
@@ -43,14 +43,22 @@ class RegLimit
     
     // -- Accessors --
     
+    /// \return the AncestorRegion underlying this RegLimit.
     const AncestorRegion& region() const
     {
         return *_regp;
     }
     
+    /// \return /true/ if this limit is the "first" coordinate of the underlying AncestorRegion.
     bool is_first() const
     {
         return _isfirst;
+    }
+    
+    /// Sets the first attribute of the calling object.
+    void first(bool isfirst)
+    {
+        _isfirst = isfirst;
     }
     
     unsigned int track_id() const
@@ -93,7 +101,7 @@ class RegLimit
         AncestorRegion* raw_region_ptr() { return _regp.get(); }
     #endif
     
-    private:
+private:
     
     // data
     boost::shared_ptr<AncestorRegion> _regp;
