@@ -23,18 +23,18 @@ using namespace multovl;
 struct ReglimitFixture
 {
     ReglimitFixture():
-        anc(4, 6, '-', "a46", 9)
-    {
-    }
+        anc(4, 6, '-', "a46", 9),
+        ancp(boost::make_shared<AncestorRegion>(anc))
+    {}
     
     AncestorRegion anc;
+    boost::shared_ptr<AncestorRegion> ancp;
 };
 
 BOOST_FIXTURE_TEST_SUITE(reglimitsuite, ReglimitFixture)
 
 BOOST_AUTO_TEST_CASE(reglimit_test)
 {
-    boost::shared_ptr<AncestorRegion> ancp = boost::make_shared<AncestorRegion>(anc);
     RegLimit rf(ancp, true), rl(ancp, false);
     
     BOOST_CHECK_EQUAL(rf.region().to_attrstring(), "9:a46:-:4-6");
@@ -57,7 +57,6 @@ BOOST_AUTO_TEST_CASE(reglimitser_test)
     Tempfile tempfile;
     {
         // create 2 RegLimit objects referring to the same ancregion
-        boost::shared_ptr<AncestorRegion> ancp = boost::make_shared<AncestorRegion>(anc);
         RegLimit rlf(ancp, true), rll(ancp, false);
         std::ofstream ofs(tempfile.name());
         boost::archive::text_oarchive oa(ofs);
@@ -74,7 +73,7 @@ BOOST_AUTO_TEST_CASE(reglimitser_test)
         ia >> inrlf >> inrll;
         
         // The raw pointers should be the same...
-        BOOST_CHECK_EQUAL(inrlf.raw_region_ptr(), inrll.raw_region_ptr());
+        BOOST_CHECK_EQUAL(inrlf.const_raw_region_ptr(), inrll.const_raw_region_ptr());
         
         // first & last
         BOOST_CHECK_EQUAL(inrlf.region().to_attrstring(), "9:a46:-:4-6");
@@ -82,6 +81,22 @@ BOOST_AUTO_TEST_CASE(reglimitser_test)
         BOOST_CHECK_EQUAL(inrll.region().to_attrstring(), "9:a46:-:4-6");
         BOOST_CHECK(!inrll.is_first());
     }
+}
+
+BOOST_AUTO_TEST_CASE(deepcopy_test)
+{
+    RegLimit rl(ancp, true);
+    RegLimit rlcopy = rl.deep_copy();
+    
+    // contents same, raw ptrs different
+    BOOST_CHECK(rl.const_raw_region_ptr() != rlcopy.const_raw_region_ptr());
+    BOOST_CHECK_EQUAL(rl.region().to_attrstring(), rlcopy.region().to_attrstring());
+    BOOST_CHECK(rlcopy.is_first());
+    
+    // change the copy's name, the original must stay unaffected
+    rlcopy.raw_region_ptr()->name("chgdname");
+    BOOST_CHECK_EQUAL(rlcopy.region().name(), "chgdname");
+    BOOST_CHECK_EQUAL(rl.region().name(), "a46");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

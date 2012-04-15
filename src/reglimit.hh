@@ -31,11 +31,17 @@ class RegLimit
 {
     public:
     
+    /// Init to empty
     RegLimit(): _regp(), _isfirst(false) {}
     
+    /// Init with a shared pointer to an ancestor region
+    /// \param regp shared pointer to an ancestor region, usually created with boost::make_shared
+    /// \param isfirst true if first position, false if last
     explicit RegLimit(const boost::shared_ptr<AncestorRegion>& regp, 
         bool isfirst=true)
     : _regp(regp), _isfirst(isfirst) {}
+    
+    // -- Accessors --
     
     const AncestorRegion& region() const
     {
@@ -52,11 +58,15 @@ class RegLimit
         return _regp->track_id();   // convenience function
     }
     
+    /// \return the position of the calling object, depending on is_first().
+    /// If is_first() == true, then the first position is returned, otherwise the last is returned.
     unsigned int this_pos() const
     {
         return (is_first()? _regp->first(): _regp->last());
     }
     
+    /// \return the "other" position of the calling object, depending on is_first().
+    /// If is_first() == true, then the last position is returned, otherwise the first is returned.
     unsigned int other_pos() const
     {
         return (is_first()? _regp->last(): _regp->first());
@@ -65,11 +75,22 @@ class RegLimit
     /// Ordering according to position, or first before last if the same position.
     bool operator<(const RegLimit& other) const;
     
+    /// Deep copy operation.
+    /// The default copy ctor returns a shallow copy in the sense that 
+    /// only the internal shared pointer is copied but not the AncestorRegion it is pointing to,
+    /// as it is to be expected from a boost::shared_ptr.
+    /// \return a new RegLimit object whose internal shared pointer points to a completely
+    /// separate copy of the AncestorRegion.
+    RegLimit deep_copy() const
+    {
+        boost::shared_ptr<AncestorRegion> ancp(new AncestorRegion(this->region()));
+        return RegLimit(ancp, this->is_first()); 
+    }
+    
     #ifdef DEBUG
-        const AncestorRegion* raw_region_ptr() const
-        {
-            return _regp.get();
-        }
+        // these are used by the unit tests only
+        const AncestorRegion* const_raw_region_ptr() const { return _regp.get(); }
+        AncestorRegion* raw_region_ptr() { return _regp.get(); }
     #endif
     
     private:
