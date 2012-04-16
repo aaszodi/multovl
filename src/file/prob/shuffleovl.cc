@@ -52,10 +52,16 @@ unsigned int ShuffleOvl::shuffle(UniformGen& rng)
     for (rpm_t::const_iterator rcit = _rpm.begin(); rcit != _rpm.end(); ++rcit)
     {
         unsigned int rtid = rcit->first;    // reshufflable track ID
-        for (reglim_t::iterator rlit = reglim().begin(); rlit != reglim().end(); ++rlit)
+        reglim_t::const_iterator rlit = reglim().begin();
+        while(rlit != reglim().end())
         {
             if (rtid == rlit->track_id())
-                nonconst_reglim().erase(rlit);
+            {
+                reglim_t::iterator me = rlit;   // rlit still valid
+                ++rlit;                         // so increment it...
+                nonconst_reglim().erase(me);    // me is now invalid
+            }
+            else ++rlit;
         }
     }
     
