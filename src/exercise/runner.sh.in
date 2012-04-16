@@ -1,0 +1,86 @@
+#!/bin/sh
+
+# Runs a given MULTOVL variant "forever" with big input files
+# Can be used to detect 'random' crashes in multithreaded versions
+# 2012-04-16 AA
+
+# -- Directories --
+
+PGMS=@PROJECT_BINARY_DIR@/bin
+TEST=${PGMS}/exercise
+DATA=${TEST}/running
+
+# -- Default values for script parameters --
+
+CHROM=20
+DELTA=10
+GROUPCNT=1000
+TRACKNO=8
+
+# -- Functions --
+
+print_usage()
+{
+    cat <<HERE 
+Script to run a MULTOVL variant with big input files 'forever'
+Usage: `basename $0` [script-options] program [program-options]
+Script options:
+    -c <chrom>: number of chromosomes in input files, default ${CHROM}
+    -d <delta>: relative shift of regions, default ${DELTA}
+    -g <groupcnt>: number of overlap groups, default ${GROUPCNT}
+    -t <trackno>: number of input tracks, default ${TRACKNO}
+    -h, -?: Print this help and exit
+HERE
+}
+
+# == MAIN ==
+
+if [ $# -lt 1 ]; then
+	print_usage
+	exit 99
+fi
+
+while getopts c:d:g:t:h OPTION
+do
+    case $OPTION in
+        c) CHROM=$OPTARG ;;
+        d) DELTA=$OPTARG ;;
+        g) GROUPCNT=$OPTARG ;;
+        t) TRACKNO=$OPTARG ;;
+        h|\?) print_usage; exit 99 ;;
+    esac
+done
+shift `expr $OPTIND - 1`
+if [ $# -lt 1 ]; then
+	echo "You must specify the path to the program to be run."
+	exit 1
+fi
+if [ ! -x $1 ]; then
+	echo "Program $1 not found or is not executable."
+	exit 2
+fi
+
+# this is the setup part
+OUTPUT_FILE=${DATA}/runner_output.txt
+if [ -d ${DATA} ]; then
+    echo "Making a clean slate in exercise directory ${DATA}"
+    rm -rf ${DATA}/track_*.bed
+    rm -f ${OUTPUT_FILE}
+else
+    echo "Creating exercise directory ${DATA}"
+    mkdir -p ${DATA}
+fi
+
+echo "Making input files..."
+INPUTCMD="${TEST}/inputfiles -c ${CHROM} -d ${DELTA} -D ${DATA} -t ${TRACKNO} -g ${GROUPCNT}"
+echo $INPUTCMD
+$INPUTCMD
+echo "Run program $1 'forever' (Ctrl-C to stop)..."
+
+while true; do
+	$@ ${DATA}/*.bed > ${OUTPUT_FILE} 2>&1
+    if [ $? != 0 ]; then
+        echo "Program failure, check ${OUTPUT_FILE}"
+        break
+    fi
+done

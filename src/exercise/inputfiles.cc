@@ -130,12 +130,13 @@ int main(int argc, char *argv[])
 	std::vector<std::string> chroms;
 	for (i=0; i<chromcnt; ++i)
 		chroms.push_back("chr" + boost::lexical_cast<std::string>(i+1));
-		
+	
+	boost::filesystem::path outpath(outdir);
 	for (i=0; i<trackcnt; ++i)
 	{
 	    // create and open the track file
 		std::string filenm = "track_" + boost::lexical_cast<std::string>(i) + ".bed";
-		boost::filesystem::path filepath = boost::filesystem::path(outdir) / filenm;
+		boost::filesystem::path filepath = outpath / filenm;
         boost::filesystem::ofstream out(filepath);	    
 	    if (!out)
 	    {
@@ -157,6 +158,28 @@ int main(int argc, char *argv[])
 		out.close();
 	}
 	
+	// add a "free.bed" as free regions for [par]multovlprob
+	// this is very simple, just one region per chromosome
+	// we write it 'by hand'
+	boost::filesystem::path freepath = outpath / "free.bed";
+    boost::filesystem::ofstream out(freepath);	    
+    if (out)
+    {
+        const unsigned int FREEMAX = 2 * delta * trackcnt * groupcnt;
+        out << "# Synthetic free regions file made by inputfiles" << std::endl;
+		for (unsigned int ch = 1; ch <= chromcnt; ++ch)
+		{
+		    out << "chr" << ch << "\t1\t" << FREEMAX << "\tfree" << ch << "\t0\t." << std::endl;
+        }
+        out.close();
+    }
+    else
+    {
+        std::cerr << "? Cannot not open \"" << freepath.string() << "\", skipped" << std::endl;
+    }
+
+
+
 	std::exit(EXIT_SUCCESS);
 }
 

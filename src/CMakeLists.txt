@@ -24,7 +24,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_subdirectory(test)
 endif()
 
-# multovl (the file-based variant) is always built
+# classic multovl (the file-based variant) is always built
 add_subdirectory(file)
 
 # PQXX_FOUND implies that Postgres has also been found
@@ -33,3 +33,5 @@ if (PQXX_FOUND)
     add_subdirectory(db)
 endif()
 
+# Exercising/timing, always built
+add_subdirectory(${SRCDIR}/exercise exercise)

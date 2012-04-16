@@ -42,26 +42,3 @@ set(unit_test_targets
     ${filetestprogs}
     CACHE INTERNAL "unit test targets"
 )
-
-# == "Exerciser" ==
-
-# These are for stress testing, timing etc. and they are not part of the unit tests.
-
-set(EXERCISELIBS 
-    movl_fileio movl 
-    ${Boost_DATE_TIME_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} 
-    ${Boost_SYSTEM_LIBRARY} ${Boost_REGEX_LIBRARY}
-)
-    
-# Programs needed for exercising
-# currently, it is only "inputfiles"
-# that makes bogus input files
-set(progexers inputfiles)
-foreach(progexer ${progexers})
-    add_executable(${progexer} EXCLUDE_FROM_ALL ${progexer}.cc)
-    target_link_libraries(${progexer} ${EXERCISELIBS})
-    flag_fix(${progexer})
-endforeach(progexer)
-
-add_custom_target(exerciser DEPENDS ${progexers})
-
