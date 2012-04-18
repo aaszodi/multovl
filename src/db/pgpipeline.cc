@@ -33,7 +33,7 @@
 
 namespace multovl {
 
-PgPipeline::PgPipeline(int argc, char* argv[]):
+PgPipeline::PgPipeline(int argc, char* argv[])
 {
     set_optpimpl(new PgMultovlOpts());    // "factory"
     opt_ptr()->process_commandline(argc, argv); // exits on error or help request
