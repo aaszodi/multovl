@@ -1,0 +1,45 @@
+// Standalone Doxygen documentation, following the advice from
+// http://entrenchant.blogspot.com/2009/09/doxygen-gotchas.html
+
+/**
+\defgroup multovl_grp "MULTOVL module"
+This module contains the components of the MULTOVL application suite,
+enclosed in the <tt>multovl</tt> namespace.
+
+\defgroup multovl_io_grp "MULTOVL input/output module"
+This module contains the components needed to perform file-based I/O,
+enclosed in the <tt>multovl::io</tt> namespace.
+
+\defgroup multovl_prob_grp "MULTOVL probability module"
+This module contains the components needed to estimate the probabilities
+of overlaps occurring by chance,
+enclosed in the <tt>multovl::prob</tt> namespace.
+
+*/
+
+/**
+ \namespace multovl
+ \ingroup multovl_grp
+ \brief Namespace for the MULTOVL tools.
+ 
+ All components of the MULTOVL suite live in the <tt>genreg</tt> namespace.
+ */
+
+/**
+ \namespace multovl::io
+ \ingroup multovl_io_grp
+ \brief Namespace for the MULTOVL input/output services.
+ 
+ All components live in the <tt>multovl::io</tt> namespace.
+ 
+ */
+ 
+/**
+ \namespace multovl::prob
+ \ingroup multovl_prob_grp
+ \brief Namespace for the multiple overlap probability tools.
+ 
+ All components live in the <tt>multovl::prob</tt> namespace.
+ 
+ */
+ 

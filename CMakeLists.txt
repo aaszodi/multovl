@@ -23,11 +23,13 @@ cmake_minimum_required(VERSION 2.8)
 project(multovl CXX)
 
 # Directory layout:-
-#    |-cmake            <== CMake includes (finders, OS-specific hacks...)
-#    |-doc              <== Documentation
-#    | |-html           <== HTML docs, e.g. user guide
+#    multovl            <== ${CMAKE_SOURCE_DIR}: top-level
+#    |-cmake            <== extra CMake includes (finders, OS-specific hacks...)
+#    |-doc              <== ${DOCDIR}: Documentation
+#    | |-html           <== HTML docs under version control, e.g. user guide
+#    | |-doxygen        <== Doxygen input
 #    |
-#    |-src              <== generic multovl components: genomic regions, overlap algorithm
+#    |-src              <== ${SRCDIR}: generic multovl components
 #      |-file           <== file-based: "classic" multovl
 #      | |-test         <== unit tests for file-based multovl components (mainly I/O)
 #      | |-prob         <== overlap probabilities: [par]multovlprob
@@ -37,7 +39,7 @@ project(multovl CXX)
 #      |
 #      |-test           <== unit tests for generic multovl components
 #      |-exercise       <== timing tests
-#      |-scripts        <== helper scripts
+#      |-scripts        <== ${SCRIPTS}: helper scripts
 
 # Brief system/compiler description
 message(STATUS "System = ${CMAKE_SYSTEM_NAME}")
@@ -49,9 +51,10 @@ set(MULTOVL_VERSION_MINOR 2)
 
 # the source directory
 # The top-level dir will be CMAKE_SOURCE_DIR because this CMakeLists.txt is there
-# the "real sources" are in SRCDIR
+# the "real sources" are in SRCDIR underneath
 set(SRCDIR "${CMAKE_SOURCE_DIR}/src")
 set(SCRIPTDIR "${SRCDIR}/scripts")
+set(DOCDIR "${PROJECT_SOURCE_DIR}/doc")
 
 # extra detection scripts
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
@@ -168,19 +171,36 @@ configure_file (
   "${PROJECT_BINARY_DIR}/multovl_config.hh"
 )
 
+# Doxygen documentation
+include(FindDoxygen)
+if(DOXYGEN)
+    message(STATUS "Doxygen found, API documentation can be made")
+    add_subdirectory(${DOCDIR}/doxygen)
+else(DOXYGEN)
+    message(WARNING "Doxygen not found, API documentation will not be created")
+endif(DOXYGEN)
+
 # -- INSTALLATION --
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    # apps are installed from their respective subdirs, see there
-    # (the only script so far. Note: install(PROGRAMS... wouldn't add the exec permissions)
+    # apps are installed from their respective subdirs
+    # see corresponding CMakeLists.txt files
+    
+    # scripts
+    # Note: install(PROGRAMS... wouldn't add the exec permissions)
     install(FILES "${SCRIPTDIR}/anctrack.awk" 
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE 
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${MULTOVL_DESTDIR}/bin)
-    set(DOCDIR "${PROJECT_SOURCE_DIR}/doc")
+    
+    # documentation
     install(FILES "${PROJECT_SOURCE_DIR}/README.txt" "${DOCDIR}/license.txt" 
         DESTINATION ${MULTOVL_DESTDIR}/doc)
     install(DIRECTORY "${DOCDIR}/html" DESTINATION ${MULTOVL_DESTDIR}/doc)
+    if(DOXYGEN)
+        install(DIRECTORY "${PROJECT_BINARY_DIR}/doc/doxygen/html" 
+            DESTINATION ${MULTOVL_DESTDIR}/doc/doxygen)
+    endif(DOXYGEN)
 
     # optional Postgres example config file
     if (PQXX_FOUND)

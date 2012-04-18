@@ -37,5 +37,5 @@ endif()
 # install won't find non-toplevel targets
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
-    install(TARGETS ${PROBROGS} RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
+    install(TARGETS ${PROBPROGS} RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
 endif()

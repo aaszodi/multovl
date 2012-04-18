@@ -38,16 +38,20 @@ that do not overlap, 2 over pairwise overlaps, 3 over triples, ... etc. The sort
 can be done in <em>O(N log N)</em> time, and the walking-over is linear, which makes
 the whole process very efficient.</p>
 
-<p>The MULTOVL algorithm can produce several kinds of output regions. In addition to the
+<h3>Kinds of overlaps</h3>
+
+<p>The MULTOVL algorithm can detect several kinds of region overlaps. In addition to the
 <span class='verb'>N-fold overlaps</span> you can detect
 <span class='verb'>solitary regions</span> which are the input regions that do not overlap
-with any other region in the input data set, and <span class='verb'>union overlaps</span>
+with any other region <em>in the input data set</em>, and <span class='verb'>union overlaps</span>
 that is the union of the input regions that overlap at least once somewhere.</p>
 
 <a name='soli_union'><div><img class='bordered' src="soli_union.jpg" ALT="Types of overlaps"></div></a>
 
 <p>Which kind of overlaps are detected will be specified through 
 <a href='#tools'>command-line options</a>.</p>
+
+<h3>Parallel implementation</h3>
 
 <p>Because overlaps make sense only between regions on the same chromosome, the MULTOVL
 algorithm can easily be parallelized as the overlap detection on a chromosome is fully
@@ -56,17 +60,12 @@ be done in parallel in theory, leading to the following high-level schema:-</p>
 
 <a name='parallel'><div><img class='bordered' src="parallel.jpg" ALT="Parallelization schema"></div></a>
 
-<p>Parallelisation is currently under development which means no parallel executables
-will be built.</p>
-
-<!--
-<p>The parallel implementations of MULTOVL either use
-the <a href='http://www.openmp.org' _target='blank'>OpenMP</a> standard or Intel's
+<p>This is a planned feature which has not been implemented yet. I tried
+the <a href='http://www.openmp.org' _target='blank'>OpenMP</a> standard and Intel's
 <a href='http://'http://www.threadingbuildingblocks.org/' _target='blank'>Threading Building Blocks</a> (TBB).
-It turns out, however, that on the hardware platforms accessible to me the speedup was nowhere
-near the theoretical optimum. The parallel versions are therefore offered as
-"work in progress": maybe you find an architecture on which they perform as they should.</p>
--->
+It turned out, however, that at least on the hardware platforms accessible to me the speedup was nowhere
+near the theoretical optimum. The current distribution therefore does not contain these
+experimental implementations.</p>
 
 <h2><a name='installation'>Installation</a></h2>
 
@@ -84,7 +83,7 @@ Linux (Ubuntu, Debian, OpenSUSE), Solaris, and sometimes even IRIX.</li>
 compilers and 
 <a href= 'http://www.oracle.com/technetwork/server-storage/solarisstudio/downloads/studio12-update1-136165.html' _target='blank'>SunStudio 12u1</a>
 under Solaris.</li>
-<li>The <a href='www.boost.org' target='_blank'>Boost C++ libraries</a>, at least V1.45.
+<li>The <a href='www.boost.org' target='_blank'>Boost C++ libraries</a>, at least V1.44.
 Note that Debian distros contain antediluvian versions
 of Boost, which may lead to problems. You have to remove them fully and then compile your own from source,
 because CMake will link the system Boost libraries if it can find them, leading to all sorts of
@@ -105,7 +104,7 @@ the most up-to-date version of course.</li>
 <li>MULTOVL can also get its input data from PostgreSQL databases if you have the PostgreSQL
 development headers and libraries (at least Version 8.4) and the official PostgreSQL C++ library
 <a href=http://pqxx.org' target='_blank'>libpqxx</a>
-available. Version 3.1 is required.</li>
+available. At least version 3.1 is required, but version 4.0 or above is recommended.</li>
 </ul>
 
 <!--
@@ -170,29 +169,6 @@ make install
 <tt>-DCMAKE_BUILD_TYPE=Debug</tt> and omitting the
 <tt>-DCMAKE_INSTALL_PREFIX</tt> setting when invoking <tt>cmake</tt>.
 This is important only for developers.</p>
-
-<!--
-<h3>Exercising the parallel MULTOVL variants</h3>
-
-<p>The parallel exercise tools are built when OpenMP or TBB are detected. To check for 
-difficult-to-reproducible deadlocks, run the <tt>runner.sh</tt> script in the <tt>bin/exercise</tt>
-subdirectory of the build directory:</p>
-
-<p><tt>runner.sh omp|tbb [&lt;trackno&gt; [&lt;threadno&gt; [&lt;groupcnt&gt;]]]</tt></p>
-
-<p>where the first parameter selects the OpenMP or TBB MULTOVL variant,
-<tt>trackno</tt> is the number of synthetic tracks (i.e. input files),
-<tt>threadno</tt> is the number of threads, 2 by default, and <tt>groupcnt</tt>
-is the number of overlapping region groups in the track set, 1000 by default.
-The script first runs the classic serial MULTOVL, then runs the selected parallel version
-until a mismatch between the serial and parallel output is found. Ideally, this should never
-happen and the script should run forever. Just kill it with Ctrl-C when you get bored.</p>
-
-<p>Timing tests can be done with the <tt>timer.sh</tt> script. It takes the same arguments
-as <tt>runner.sh</tt>. First it runs the serial MULTOVL, then the selected parallel version
-with 1,2, ..., <tt>maxthreadno</tt> threads. The timing results are printed to the standard
-output.</p>
--->
 
 <h2><a name='tools'>Command-line tools</a></h2>
 
@@ -374,9 +350,18 @@ estimate if it is below 0.5, or 1.0-CDF("Actual") otherwise. Small values indica
 the pairwise total overlap length is "significant" at <i>p &lt; 0.1</i>, 
 the triple overlaps could have happened by chance. The last row shows that
 no fourfold overlap was detected in the unshuffled data, but some did occur during
-the reshufflings.</p>
+the reshufflings. The interpretation of these results is left as an exercise to the reader.</p>
 
-<p>The interpretation of these results is left as an exercise to the reader.</p>
+<h3>Multiple overlap probabilities in parallel</h3>
+
+<p>The repeated reshuffling operations in <tt>multovlprob</tt> can be speeded up
+near-linearly on multicore machines by assigning them to more than one thread.
+This is implemented in the program <tt>parmultovlprob</tt>. It takes exactly the same
+command-line arguments as <tt>multovlprob</tt> and launches as many worker threads
+at the reshuffling step as there are CPU cores. You may override this by specifying
+the number of worker threads using the <tt>-T threadno</tt> option. Note that each
+worker thread holds a private copy of the input track data structures: be aware of 
+the speed/memory tradeoff.</p>
 
 <h3>MULTOVL talking to a relational database</h3>
 
@@ -511,8 +496,8 @@ track names are specified as positional parameters, you'll need to specify at le
 <p><tt>pgmultovl</tt> also prints some general information to standard output which corresponds
 to the comments written in the output file by the "classic" variant. Here is an example:</p>
 
-<pre><code># PgMultovl version 1.1 rev. 178 (Jun 28 2011), Debug build: GNU compiler on Darwin
-# Built with libpqxx version 3.1
+<pre><code># PgMultovl version 1.2 rev. 80 (Apr 18 2012), Debug build: GNU compiler on Darwin
+# Built with libpqxx version 4.0
 # Parameters =  -L 1 -m 2 -M 0 -o ovl -C ../config/regan.cfg
 # Input tracks = 2
 # rega = track 1, region count = 9
@@ -521,10 +506,10 @@ to the comments written in the output file by the "classic" variant. Here is an 
 # Multiplicity counts = 1,2:7
 </code></pre>
 
+<!--
 <h3>Parallel MULTOVL versions</h3>
 
 <p>These will come later whenever there is a pressing need (and time!) to implement them.</p>
-<!--
 <pre><code>Multiple Chromosome / Multiple Region Overlaps
 Parallel OpenMP version
 Number of available CPU cores: 4
@@ -604,7 +589,8 @@ part of the actual output, I added them by hand for the sake of the explanations
 
 <pre><code>1 ##gff-version 2
 2 ##date 2011-06-18
-3 ##source-version Multovl version 1.1 rev. 166 (Jun 18 2011), Debug build: GNU compiler on Darwin
+3 ##source-version Multovl version 1.2 rev. 80 (Apr 18 2012), 
+  Debug build: GNU compiler on Darwin
 4 # Parameters =  -L 1 -c 2
 5 # Input files = 2
 6 # ../src/test/data/rega.bed = track 1, region count = 8

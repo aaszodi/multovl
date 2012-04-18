@@ -1,0 +1,13 @@
+// Standalone Doxygen documentation, following the advice from
+// http://entrenchant.blogspot.com/2009/09/doxygen-gotchas.html
+
+/**
+\mainpage The MULTOVL application suite
+
+\section intro_sec Overview
+
+The MULTOVL tools implement an efficient algorithm for detecting multiple
+overlaps among genomic regions.
+
+*/
+
