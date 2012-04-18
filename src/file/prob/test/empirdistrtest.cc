@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(unirnd_test)
 BOOST_AUTO_TEST_CASE(normrnd_test)
 {
     // set up the RNG: spell out everything
-    typedef boost::random::mt19937 rng_t;
+    typedef boost::mt19937 rng_t;
     typedef boost::normal_distribution<double> normdistr_t;
     rng_t rng(42u);
     const double EMEAN=3.2, EDEV=1.7;
