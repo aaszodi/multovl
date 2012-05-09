@@ -83,11 +83,23 @@ BOOST_AUTO_TEST_CASE(empty_test)
     } catch (const EmpirDistr::Exception& exc) {
         BOOST_CHECK_EQUAL(exc.error_message(), "variance(): not enough data");
     }
+    BOOST_CHECK_EQUAL(ed.low(), 3.14);
+    BOOST_CHECK_EQUAL(ed.high(), 3.14);
+    BOOST_CHECK_EQUAL(ed.cdf(3.1), 0.0);
+    BOOST_CHECK_EQUAL(ed.cdf(3.14), 1.0);
+    BOOST_CHECK_EQUAL(ed.cdf(3.2), 1.0);
     
     // adding another is now OK
     ed.add(2.71);
     ed.evaluate();
     BOOST_CHECK_NO_THROW(ed.variance());
+    BOOST_CHECK_EQUAL(ed.low(), 2.71);
+    BOOST_CHECK_EQUAL(ed.high(), 3.14);
+    BOOST_CHECK_EQUAL(ed.cdf(2.0), 0.0);
+    // gives around 0.86: BOOST_CHECK_EQUAL(ed.cdf(2.71), 0.0);
+    BOOST_CHECK_EQUAL(ed.cdf(3.14), 1.0);
+    BOOST_CHECK_EQUAL(ed.cdf(3.2), 1.0);
+    
 }
 
 // uniform distribution with values 1,2,..,6

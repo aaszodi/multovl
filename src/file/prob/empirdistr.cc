@@ -4,14 +4,15 @@
 
 #include "empirdistr.hh"
 
+// -- Boost headers --
+
+#include "boost/math/special_functions/next.hpp"    // minimal floating-point distance
+
 // -- System headers --
 
 #include <algorithm>
 #include <functional>
-
-#ifdef DEBUGG
-#include <iostream>
-#endif
+#include <limits>
 
 namespace multovl {
 namespace prob {
@@ -76,6 +77,15 @@ double EmpirDistr::variance() const throw(Exception)
     return boost::accumulators::variance(_acc);
 }
 
+double EmpirDistr::std_dev() const throw(Exception)
+{
+    double var = variance();
+    if (var < std::numeric_limits<double>::epsilon())
+        return 0.0; // because the devil never sleeps
+    else
+        return std::sqrt(var);
+}
+
 double EmpirDistr::cdf(double x) const throw(Exception)
 {
     if (_dirty)
@@ -92,20 +102,27 @@ double EmpirDistr::cdf(double x) const throw(Exception)
     double xlow, xhigh, ylow, yhigh;
     if (hit == _histogram.begin())
     {
-        xlow = _low; ylow = 0.0;
-        xhigh = hit->first; yhigh = hit->second;
+        // covers single-bin case
+        xlow = _low; xhigh = hit->first; 
+        ylow = 0.0; yhigh = hit->second;
     }
     else if (hit == _histogram.end())
     {
-        xlow = hit->first; ylow = hit->second;
-        xhigh = _high; yhigh = 1.0;
+        // shouldn't really happen, but if it does, then...
+        return 1.0;
     }
     else
     {
+        // must have >=2 bins
         histogram_iter_t lit = hit--;
         xlow = lit->first; ylow = lit->second;
         xhigh = hit->first; yhigh = hit->second;
     }
+    
+    // xlow, xhigh are too close
+    int ulpdist = boost::math::float_distance(xlow, xhigh);
+    if (ulpdist == 0)
+        return (ylow + yhigh)/2.0;
     
     // simple linear interpolation btw the two bins
     double xdelta = xhigh - xlow, ydelta = yhigh - ylow;

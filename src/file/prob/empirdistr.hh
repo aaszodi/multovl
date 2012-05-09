@@ -13,6 +13,8 @@ using namespace boost::accumulators;
 
 #include <cmath>
 
+// == Classes ==
+
 namespace multovl {
 namespace prob {
 
@@ -84,15 +86,13 @@ public:
     double mean() const throw(Exception);
     
     /// \return the (estimated) variance of the distribution.
-    /// \throw DirtyException if evaluate() was not invoked beforehand.
+    /// \throw Exception if evaluate() was not invoked beforehand.
     /// or if less than 2 data points have been added to the calling object.
     double variance() const throw(Exception);
     
     /// \return the standard deviation (by taking the square root of variance()).
-    double std_dev() const throw(Exception)
-	{
-		return std::sqrt(variance());
-	}
+    /// \throw Exception if variance() throws.
+    double std_dev() const throw(Exception);
 
     private: 
     
