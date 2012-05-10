@@ -13,13 +13,23 @@ See doc/license.txt for details.
 Installation for the Impatient
 ------------------------------
 
-You will need cmake 2.8 or above, a C++98-compliant compiler, and the Boost libraries (1.40 or above) to build Multovl. The basic steps:
+You will need cmake 2.8 or above, a C++98-compliant compiler, 
+and the Boost libraries (1.44 or above) to build Multovl.
+If you want BAM file support, define BAMTOOLS_ROOT.
+If you want to build 'pgmultovl' that reads/writes tracks from/to
+a PostgreSQL database using libpqxx, then define PQXX_ROOT.
+
+By default all these external libraries will be linked statically.
+To link all of them dynamically instead, specify
+-DMULTOVL_USE_DYNAMIC_LIBS:BOOL=ON
+
+The basic steps:
 
 mkdir build 
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/path/to/boost \
-	-DBAMTOOLS_ROOT=/path/to/bamtools \
-	-DPQXX_ROOT=/path/to/pqxx \
+	-DBAMTOOLS_ROOT=/path/to/bamtools \                <=== optional
+	-DPQXX_ROOT=/path/to/pqxx \                        <=== optional
     -DCMAKE_INSTALL_PREFIX=/path/to/installdir ..
 
 make apps

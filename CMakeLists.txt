@@ -13,7 +13,10 @@
 #   -DCMAKE_CXX_COMPILER=<compiler> for using a C++ compiler other than the system default
 #   -DCMAKE_INSTALL_PREFIX=/inst/path for defining the installation root,
 #       makes sense only when CMAKE_BUILD_TYPE=Release
-#   -D{Boost,BAMTOOLS,POSTGRES,PQXX}_USE_STATIC_LIBS: if you want static linking (dynamic by default)
+#   -D{Boost,BAMTOOLS,POSTGRES,PQXX}_USE_STATIC_LIBS: if you want static linking (all ON by default)
+#   -DMULTOVL_USE_DYNAMIC_LIBS: links all libraries dynamically if ON,
+#       overrides the *_USE_STATIC_LIBS settings if set (unset by default)
+#   Note that the Multovl-internal utility libraries are always statically linked.
 #
 # You may run cmake -i which will then ask for the parameters interactively.
 #
@@ -77,9 +80,15 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # The cached variables below should be set e.g. from ccmake or cmake -i or
 # via -D switches
 
+# if you want to link all extra libraries dynamically
+set(STATICON "ON")
+if (MULTOVL_USE_DYNAMIC_LIBS)
+    set(STATICON "OFF")
+endif()
+
 # Boost -- we cannot do anything without you...
 set(BOOST_ROOT "/usr/local/boost" CACHE PATH "Top-level Boost directory")
-set(Boost_USE_STATIC_LIBS OFF CACHE PATH "Shall the Boost libraries be linked statically?")
+set(Boost_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the Boost libraries be linked statically?")
 set(Boost_USE_MULTITHREADED ON)
 find_package( Boost COMPONENTS regex date_time filesystem system 
 	unit_test_framework program_options serialization thread REQUIRED)
@@ -101,7 +110,7 @@ include_directories(
 
 # optional BAM tools for the file-based I/O
 set(BAMTOOLS_ROOT "/usr/local/bamtools" CACHE PATH "Top-level BamTools directory")
-set(BAMTOOLS_USE_STATIC_LIBS OFF CACHE PATH "Shall BAM tools be linked statically?")
+set(BAMTOOLS_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the BAM tools be linked statically?")
 find_package(BamTools QUIET)
 if (NOT BAMTOOLS_FOUND)
     message(STATUS "BAM file format will not be supported.")
@@ -109,12 +118,12 @@ endif()
 
 # optional Postgres database access
 set(POSTGRES_ROOT "/usr/local/pgsql" CACHE PATH "Top-level PostgreSQL directory")
-set(POSTGRES_USE_STATIC_LIBS OFF CACHE PATH "Shall the Postgres libraries be linked statically?")
+set(POSTGRES_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the Postgres libraries be linked statically?")
 find_package(Postgres QUIET)
 set(PQXX_FOUND 0)
 if (POSTGRES_FOUND)
     set(PQXX_ROOT "/usr/local/pqxx" CACHE PATH "Top-level PQXX library directory")
-    set(PQXX_USE_STATIC_LIBS OFF CACHE PATH "Shall PQXX library be linked statically?")
+    set(PQXX_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall PQXX library be linked statically?")
     find_package(PQXX QUIET)
 else()
     message(STATUS "Postgres database access will not be supported.")

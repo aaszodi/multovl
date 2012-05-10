@@ -75,7 +75,7 @@ experimental implementations.</p>
 
 <ul>
 <li>A UNIX-like operating system. MULTOVL is developed and tested under
-Mac OS X "Leopard", "Snow Leopard",
+Mac OS X "Leopard", "Snow Leopard", "Lion",
 Linux (Ubuntu, Debian, OpenSUSE), Solaris, and sometimes even IRIX.</li>
 <li>An ANSI-compliant C++ compiler. MULTOVL is developed and tested with the 
 <a href='gcc.gnu.org' target='_blank'>GNU G++</a>, the 
@@ -83,7 +83,7 @@ Linux (Ubuntu, Debian, OpenSUSE), Solaris, and sometimes even IRIX.</li>
 compilers and 
 <a href= 'http://www.oracle.com/technetwork/server-storage/solarisstudio/downloads/studio12-update1-136165.html' _target='blank'>SunStudio 12u1</a>
 under Solaris.</li>
-<li>The <a href='www.boost.org' target='_blank'>Boost C++ libraries</a>, at least V1.44.
+<li>The <a href='www.boost.org' target='_blank'>Boost C++ libraries</a>, at least Version 1.44.
 Note that Debian distros contain antediluvian versions
 of Boost, which may lead to problems. You have to remove them fully and then compile your own from source,
 because CMake will link the system Boost libraries if it can find them, leading to all sorts of
@@ -139,6 +139,12 @@ cmake -DCMAKE_BUILD_TYPE=Release \
 <p>If the <tt>-DCMAKE_CXX_COMPILER</tt> parameter is omitted, the system default C++ compiler
 will be used. On Linux and OS X, this will be the GNU g++ compiler.</p>
 
+<p>CMake's Boost detection script is not perfect. Sometimes it is not enough to specify
+<tt>-DBOOST_ROOT</tt>: for instance on 64-bit OpenSuSE, the Boost headers are in
+<tt>/usr/include/boost</tt> but the libraries are in <tt>/usr/lib64</tt>. In this case
+you have to specify <tt>-DBOOST_INCLUDEDIR=/usr/include</tt> and 
+<tt>-DBOOST_LIBRARYDIR=/usr/lib64</tt> separately.</p>
+
 <p>If the <tt>-DBAMTOOLS_ROOT</tt> parameter is specified, then BAM-formatted binary
 input files will be supported.</p>
 
@@ -148,9 +154,13 @@ development headers and libraries will be found automatically if the <tt>pg_conf
 is in your <tt>PATH</tt>. If this is not the case, you can help CMake by specifying
 <tt>-DPOSTGRES_ROOT</tt> or by adding <tt>pg_config</tt> to your <tt>PATH</tt>.</p>
 
-<p>The libraries will be linked dynamically by default. You can ask CMake to use static linking
-by specifying the option <tt>-D&lt;lib&gt;_USE_STATIC_LIBS=ON</tt> where <tt>&lt;lib&gt;</tt>
-can be <tt>Boost, BAMTOOLS, POSTGRES, PQXX</tt>.</p>
+<p>The external libraries will be linked statically by default. You can ask CMake to 
+link all external libraries dynamically by specifying the option
+<tt>-DMULTOVL_USE_DYNAMIC_LIBS=ON</tt>. Or you can specify for each external library
+whether you want to have static or dynamic linking by setting the options
+<tt>-D&lt;lib&gt;_USE_STATIC_LIBS=ON</tt> where <tt>&lt;lib&gt;</tt>
+can be <tt>Boost, BAMTOOLS, POSTGRES, PQXX</tt>. (Although I do not know why
+anyone in his/her right mind would do that...)</p>
 <!--
 <p>Additionally, you may need to specify the
 location of the TBB (see <tt>${MULTOVL}/FindTBB.cmake</tt>). </p>
