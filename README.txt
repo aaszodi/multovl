@@ -7,8 +7,8 @@ Version 1.2
 See doc/html/guide.html for installation instructions
 and a detailed documentation.
 
-This program is under the BSD Open Source license.
-See doc/license.txt for details.
+This program is is licensed under the terms of the BSD Open Source license.
+See the file LICENSE for details.
 
 Installation for the Impatient
 ------------------------------
