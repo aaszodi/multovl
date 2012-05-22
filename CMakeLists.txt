@@ -181,13 +181,13 @@ configure_file (
 )
 
 # Doxygen documentation
-include(FindDoxygen)
-if(DOXYGEN)
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
     message(STATUS "Doxygen found, API documentation can be made")
     add_subdirectory(${DOCDIR}/doxygen)
-else(DOXYGEN)
+else(DOXYGEN_FOUND)
     message(WARNING "Doxygen not found, API documentation will not be created")
-endif(DOXYGEN)
+endif(DOXYGEN_FOUND)
 
 # -- INSTALLATION --
 
@@ -203,7 +203,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
         DESTINATION ${MULTOVL_DESTDIR}/bin)
     
     # documentation
-    install(FILES "${PROJECT_SOURCE_DIR}/README.txt" "${DOCDIR}/license.txt" 
+    install(FILES "${PROJECT_SOURCE_DIR}/README.txt" "${PROJECT_SOURCE_DIR}/LICENSE" 
         DESTINATION ${MULTOVL_DESTDIR}/doc)
     install(DIRECTORY "${DOCDIR}/html" DESTINATION ${MULTOVL_DESTDIR}/doc)
     if(DOXYGEN)
@@ -227,15 +227,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Multiple Overlaps of Genomic Regions")
     set(CPACK_PACKAGE_VENDOR "Andras Aszodi")
     set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
-    set(CPACK_RESOURCE_FILE_LICENSE "${DOCDIR}/license.txt")
+    set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
     
     # executable package (no source)
     set(CPACK_GENERATOR "TGZ")
-    set(CPACK_IGNORE_FILES "cmake/;src/;debug/;release/;\\\\.git;
+    set(CPACK_IGNORE_FILES "cmake/;src/;build/;debug/;release/;\\\\.project;\\\\.git;
         "/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store")
     
     # source package
     set(CPACK_SOURCE_GENERATOR "TGZ")
-    set(CPACK_SOURCE_IGNORE_FILES "debug/;release/;\\\\.DS_Store;\\\\.git")
+    set(CPACK_SOURCE_IGNORE_FILES "build/;debug/;release/;\\\\.DS_Store;\\\\.project;\\\\.git")
     include(CPack)
 endif()

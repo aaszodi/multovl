@@ -32,7 +32,15 @@ cmake -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/path/to/boost \
 	-DPQXX_ROOT=/path/to/pqxx \                        <=== optional
     -DCMAKE_INSTALL_PREFIX=/path/to/installdir ..
 
+make [all]
+
+Or you can spell out what make all does:
+
 make apps
+make doc    (this generates Doxygen documentation if you have Doxygen installed)
+
+And then finally:
+
 make install (this you may need to run as root, depending on installdir permissions)
 
 The tools should now be installed in ${CMAKE_INSTALL_PREFIX}/multovl-1.2/bin.

@@ -36,6 +36,10 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(DOXYFILE_IN DEFAULT_MSG "DOXYFILE_IN")
 
 if(DOXYFILE_IN_FOUND)
+	set(DOXYFILE_LATEX "NO")
+	set(DOXYFILE_PDFLATEX "NO")
+	set(DOXYFILE_DOT "NO")
+
 	usedoxygen_set_default(DOXYFILE_OUTPUT_DIR "${PROJECT_BINARY_DIR}/doc/doxygen")
 	usedoxygen_set_default(DOXYFILE_HTML_DIR "html")
     configure_file(${DOXYFILE_IN} ${PROJECT_BINARY_DIR}/doxygen/Doxyfile ESCAPE_QUOTES IMMEDIATE @ONLY)
@@ -43,13 +47,9 @@ if(DOXYFILE_IN_FOUND)
 	set_property(DIRECTORY APPEND PROPERTY
 			ADDITIONAL_MAKE_CLEAN_FILES "${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_HTML_DIR}")
 
-	set(DOXYFILE_LATEX "NO")
-	set(DOXYFILE_PDFLATEX "NO")
-	set(DOXYFILE_DOT "NO")
-
 	get_target_property(DOC_TARGET doc TYPE)
 	if(NOT DOC_TARGET)
-		add_custom_target(doc)
+		add_custom_target(doc ALL)
 	endif()
 		
 	add_dependencies(doc doxygen)
