@@ -123,11 +123,14 @@ find_package(Postgres QUIET)
 set(PQXX_FOUND 0)
 if (POSTGRES_FOUND)
     set(PQXX_ROOT "/usr/local/pqxx" CACHE PATH "Top-level PQXX library directory")
-    set(PQXX_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall PQXX library be linked statically?")
+    set(PQXX_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the PQXX library be linked statically?")
     find_package(PQXX QUIET)
-else()
-    message(STATUS "Postgres database access will not be supported.")
-endif()
+    if (NOT PQXX_FOUND)
+        message(STATUS "Database access will not be supported because the PQXX library was not found.")
+    endif(NOT PQXX_FOUND)
+else(POSTGRES_FOUND)
+    message(STATUS "Database access will not be supported because Postgres was not found.")
+endif(POSTGRES_FOUND)
 
 # -- END OF LIBRARIES --
 
