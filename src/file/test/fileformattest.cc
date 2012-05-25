@@ -54,13 +54,24 @@ BOOST_AUTO_TEST_CASE(fromfile_test)
     BOOST_CHECK(f == Fileformat::GFF);
     BOOST_CHECK_EQUAL(Fileformat::to_string(f), "GFF");
     
+#if USE_BAMTOOLS
     f = Fileformat::from_filename("file.bam");
     BOOST_CHECK(f == Fileformat::BAM);
     BOOST_CHECK_EQUAL(Fileformat::to_string(f), "BAM");
+#endif
     
     f = Fileformat::from_filename("file.blabla");
     BOOST_CHECK(f == Fileformat::UNKNOWN);
     BOOST_CHECK_EQUAL(Fileformat::to_string(f), "UNKNOWN");
+}
+
+BOOST_AUTO_TEST_CASE(knownextension_test)
+{
+    std::string knownext(".bed, .gff, .gtf");
+#if USE_BAMTOOLS
+    knownext += ", .bam";
+#endif
+    BOOST_CHECK_EQUAL(Fileformat::known_extensions(), knownext);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

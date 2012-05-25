@@ -75,7 +75,10 @@ TextReader::TextReader(
     {
         // invalid state
     	// use parent class' add_error as there's no meaningful linecount to store
-        TrackReader::add_error("Unknown format for TextReader: " + infname);
+        TrackReader::add_error(
+            infname + ": Cannot deduce format from extension: use " + 
+            Fileformat::known_extensions()
+        );
         return;
     }
     

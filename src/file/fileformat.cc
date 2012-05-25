@@ -76,10 +76,21 @@ std::string Fileformat::to_string(Fileformat::Kind format)
         return "GFF";
     else if (format == BED)
         return "BED";
+#if USE_BAMTOOLS
     else if (format == BAM)
         return "BAM";
+#endif
     else
         return "UNKNOWN";
+}
+
+std::string Fileformat::known_extensions()
+{
+    std::string extensions = ".bed, .gff, .gtf";
+#if USE_BAMTOOLS
+    extensions += ", .bam";
+#endif
+    return extensions;
 }
 
 // this is private
@@ -90,8 +101,10 @@ Fileformat::Kind Fileformat::from_string(const std::string& fstr)
         return GFF;
     else if (formstr == "bed")
         return BED;
+#if USE_BAMTOOLS
     else if (formstr == "bam")
         return BAM;
+#endif
     else
         return UNKNOWN;
 }

@@ -43,6 +43,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \date 2011-06-15.
  */
 
+// -- Own headers --
+
+#include "multovl_config.hh"
+
 // -- Standard headers --
 
 #include <string>
@@ -55,15 +59,17 @@ namespace io {
 /// and some static methods to deduce these types.
 class Fileformat
 {
-    public:
+public:
     
     enum Kind {
         UNKNOWN = 0,
         BED = 1,    // these are ASCII...
         GFF2 = 2,
         GFF3 = 4,   // also GTF
-        GFF = 6, // GFF2 | GFF3
-        BAM = 8     // this is binary
+        GFF = 6 // GFF2 | GFF3
+#if USE_BAMTOOLS
+        , BAM = 8     // this is binary
+#endif
     };
 
     /// Deduces the format from the filename extension.
@@ -79,7 +85,11 @@ class Fileformat
     static
     std::string to_string(Kind format);
     
-    private:
+    /// \return a string listing the known filename extensions, e.g. ".bed, .gff, .gtf"
+    static
+    std::string known_extensions();
+
+private:
     
     static
     Kind from_string(const std::string& fstr);

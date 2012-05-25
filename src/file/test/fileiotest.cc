@@ -255,7 +255,10 @@ BOOST_AUTO_TEST_CASE(badformat_test)
     io::FileReader fr(inputname);   // noncopyable, must make here...
     ok = fr.errors().ok();
     BOOST_CHECK(!ok);
-    BOOST_CHECK_EQUAL(fr.errors().last_error(), "ERROR: Unknown format for TextReader: unknown_format.xyz");
+    BOOST_CHECK_EQUAL(fr.errors().last_error(), 
+        "ERROR: unknown_format.xyz: Cannot deduce format from extension: use " +
+        io::Fileformat::known_extensions()
+    );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
