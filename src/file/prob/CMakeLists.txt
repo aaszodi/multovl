@@ -20,7 +20,11 @@ add_executable(parmultovlprob parmultovlprob.cc parprobpipeline.cc parprobopts.c
 set(PROBPROGS multovlprob parmultovlprob)
 foreach(PROBPROG ${PROBPROGS})
     flag_fix(${PROBPROG})
-    target_link_libraries(${PROBPROG} ${MULTOVPROBLIBS})
+    if (PROBPROG STREQUAL "parmultovlprob" AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_link_libraries(${PROBPROG} pthread ${MULTOVPROBLIBS})
+    else()
+        target_link_libraries(${PROBPROG} ${MULTOVPROBLIBS})
+    endif()
     
     # add to global app target list
     set(app_targets 
