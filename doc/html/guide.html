@@ -100,7 +100,8 @@ libraries are available:</p>
 <ul>
 <li>If you have the <a href='http://pezmaster31.github.com/bamtools' target='_blank'>BAMtools</a> library
 then the "classic" MULTOVL will support BAM-formatted binary input files. You will need
-the most up-to-date version of course.</li>
+the most up-to-date version of course. Note that BAMtools can not be compiled with
+the Sun Studio 12 compiler at the time of this writing.</li>
 <li>MULTOVL can also get its input data from PostgreSQL databases if you have the PostgreSQL
 development headers and libraries (at least Version 8.4) and the official PostgreSQL C++ library
 <a href=http://pqxx.org' target='_blank'>libpqxx</a>
@@ -567,6 +568,56 @@ through the UNIX tools <tt>sort</tt> and <tt>uniq</tt> to obtain a unique list o
 like this:-</p>
 
 <pre><code>anctrack.awk -v trackid=X ovl.gff | sort | uniq > Xancestor.gff
+</code></pre>
+
+<h3>Exercising MULTOVL</h3>
+
+<p>The following tools are provided to test/exercise MULTOVL:</p>
+
+<h4>Synthetic input files</h4>
+
+<p>The utility <tt>inputfiles</tt> can generate synthetic tracks with groups of
+overlapping regions. Usage:</p>
+
+<pre><code>Input files for multovl testing 
+Usage: inputfiles [options]
+Options:
+	-c <N> use N chromosomes (default 2)
+	-d <N> regions within overlap groups are shifted by N (default 10)
+	-D <outdir> output directory (mandatory)
+	-t <N> generate N tracks (default 3)
+	-g <N> make N overlap groups (default 4)
+	-l <N> region length (default 30)
+	-L <N> gap between groups (default 100)
+	-h|-?: print this help and exit
+Writes the files track_{0,1,...}.bed and free.bed to output directory
+Example: regions generated for -c 1 -g 2 -t 3
+
+            reglen
+         <---------->
+         :          :
+Track 1  |==========|                    |==========|
+Track 2  :   |==========|                :   |==========|    
+Track 3  :   :   |==========|            :       |==========|
+         :   :              :            :
+         <--->              <------------>
+         delta                 groupgap
+</code></pre>
+
+<h4>Running MULTOVL "forever"</h4>
+
+<p>The script <tt>runner.sh</tt> exercises a MULTOVL tool by running it repeatedly
+on a set of input files made by <tt>inputfiles</tt>. This can be used for timing
+measurements. Usage:</p>
+
+<pre><code>Script to run a MULTOVL variant with big input files 'forever'
+Usage: runner.sh [script-options] program [program-options]
+Script options:
+    -c <chrom>: number of chromosomes in input files, default 20
+    -d <delta>: relative shift of regions, default 10
+    -g <groupcnt>: number of overlap groups, default 1000
+    -t <trackno>: number of input tracks, default 8
+    -h, -?: Print this help and exit
 </code></pre>
 
 <h2><a name='formats'>File formats</a></h2>

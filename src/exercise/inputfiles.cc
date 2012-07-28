@@ -53,6 +53,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 // -- Boost headers --
@@ -75,12 +76,15 @@ typedef std::vector<regvec_t> trackvec_t;
 
 static std::ostream& print_help(std::ostream &out);
 static unsigned int parse_uintparam(const char* optarg, unsigned int defval);
-static trackvec_t make_regvecs(unsigned int delta, unsigned int trackcnt, 
-	unsigned int groupcnt);
+static trackvec_t make_regvecs(
+    unsigned int delta, unsigned int reglen, unsigned int groupgap,
+    unsigned int trackcnt, unsigned int groupcnt
+);
 
 // -- Default values --
 
-static const unsigned int CHROMCNT=2, DELTA=10, TRACKCNT=3, GROUPCNT=4;
+static const unsigned int CHROMCNT = 2, DELTA = 10, TRACKCNT = 3, GROUPCNT = 4, 
+    REGLEN = TRACKCNT*DELTA, GROUPGAP = 100;
 
 // == MAIN ==
 
@@ -88,12 +92,17 @@ int main(int argc, char *argv[])
 {
     extern char* optarg;
     signed char optch;
-	unsigned int chromcnt=CHROMCNT, delta=DELTA, trackcnt=TRACKCNT, groupcnt=GROUPCNT;
+	unsigned int chromcnt = CHROMCNT,  // number of chromosomes
+	    delta = DELTA, // amount of shift between regions within an overlap group
+	    trackcnt = TRACKCNT,   // number of tracks
+	    groupcnt = GROUPCNT,    // number of overlap groups
+	    reglen = REGLEN, // length of each region
+	    groupgap = GROUPGAP;    // distance between neighbouring overlap groups
 	boost::filesystem::path outdir;
 	bool outdirseen = false;
 	
 	// process command-line options
-    static const char OPTCHARS[] = "c:d:D:t:g:h";
+    static const char OPTCHARS[] = "c:d:D:t:g:l:L:h";
     while((optch = getopt(argc, argv, OPTCHARS)) != -1)
     {
         switch(optch)
@@ -128,6 +137,16 @@ int main(int argc, char *argv[])
                 if (groupcnt == 0)
                     groupcnt = GROUPCNT;
                 break;
+            case 'l':
+                reglen = parse_uintparam(optarg, REGLEN);
+                if (reglen == 0)
+                    reglen = REGLEN;
+                break;
+            case 'L':
+                groupgap = parse_uintparam(optarg, GROUPGAP);
+                if (groupgap == 0)
+                    groupgap = GROUPGAP;
+                break;
             case 'h':
             case '?':
                 print_help(std::cout);
@@ -155,9 +174,15 @@ int main(int argc, char *argv[])
 		}
 	}
 	
+	// generate settings string
+	std::ostringstream sets;
+	sets << "made by inputfiles -c " << chromcnt << " -d " << delta << " -t " << trackcnt
+	    << " -g " << groupcnt << " -l " << reglen << " -L " << groupgap;
+    std::string setstr = sets.str();
+    
 	// generate and save the tracks
 	unsigned int i;
-	trackvec_t regvecs = make_regvecs(delta, trackcnt, groupcnt);
+	trackvec_t regvecs = make_regvecs(delta, reglen, groupgap, trackcnt, groupcnt);
 	
 	// we could just have numbered chromosomes, but
 	// let's simulate the usual case with "chrX"-style names
@@ -177,7 +202,7 @@ int main(int argc, char *argv[])
 	        std::cerr << "? Cannot not open \"" << filepath.string() << "\", skipped" << std::endl;
 	        continue;
 	    }
-	    out << "# Synthetic input file made by inputfiles" << std::endl;
+	    out << "# Synthetic input " << filenm << " " << setstr << std::endl;
 	    
 		for (unsigned int ch = 0; ch < chromcnt; ++ch)
 		{
@@ -194,13 +219,15 @@ int main(int argc, char *argv[])
 	
 	// add a "free.bed" as free regions for [par]multovlprob
 	// this is very simple, just one region per chromosome
+	// that spans all input regions
 	// we write it 'by hand'
 	boost::filesystem::path freepath = outpath / "free.bed";
     boost::filesystem::ofstream out(freepath);	    
     if (out)
     {
-        const unsigned int FREEMAX = 2 * delta * trackcnt * groupcnt;
-        out << "# Synthetic free regions file made by inputfiles" << std::endl;
+        const unsigned int FREEMAX = (reglen + (trackcnt-1)*delta) * groupcnt 
+            + groupgap*(groupcnt -1) + 2*delta;
+        out << "# Synthetic free regions file free.bed " << setstr << std::endl;
 		for (unsigned int ch = 1; ch <= chromcnt; ++ch)
 		{
 		    out << "chr" << ch << "\t1\t" << FREEMAX << "\tfree" << ch << "\t0\t." << std::endl;
@@ -229,7 +256,21 @@ static std::ostream& print_help(std::ostream &out)
     out << "\t-D <outdir> output directory (mandatory)" << std::endl;
     out << "\t-t <N> generate N tracks (default " << TRACKCNT << ")" << std::endl;
     out << "\t-g <N> make N overlap groups (default " << GROUPCNT << ")" << std::endl;
+    out << "\t-l <N> region length (default " << REGLEN << ")" << std::endl;
+    out << "\t-L <N> gap between groups (default " << GROUPGAP << ")" << std::endl;
     out << "\t-h|-?: print this help and exit" << std::endl;
+    out << "Writes the files track_{0,1,...}.bed and free.bed to output directory" << std::endl;
+	out << "Example: regions generated for -c 1 -g 2 -t 3" << std::endl << std::endl;
+	out << "            reglen" << std::endl;
+	out << "         <---------->" << std::endl;
+	out << "         :          :" << std::endl;
+	out << "Track 1  |==========|                    |==========|" << std::endl;
+	out << "Track 2  :   |==========|                :   |==========|    " << std::endl;
+	out << "Track 3  :   :   |==========|            :       |==========|" << std::endl;
+	out << "         :   :              :            :" << std::endl;
+	out << "         <--->              <------------>" << std::endl;
+	out << "         delta                 groupgap" << std::endl;
+
     return out;
 }
 
@@ -243,8 +284,10 @@ static unsigned int parse_uintparam(const char* optarg, unsigned int defval)
     }
 }
 
-static trackvec_t make_regvecs(unsigned int delta, unsigned int trackcnt, 
-	unsigned int groupcnt)
+static trackvec_t make_regvecs(
+    unsigned int delta, unsigned int reglen, unsigned int groupgap,
+    unsigned int trackcnt, unsigned int groupcnt
+)
 {
 	// generate track names
 	unsigned int t;
@@ -255,7 +298,6 @@ static trackvec_t make_regvecs(unsigned int delta, unsigned int trackcnt,
 	trackvec_t regvecs(trackcnt);
 	
 	unsigned int pos = delta;	// starting position
-	unsigned int reglen = trackcnt * delta;	// length of one region
 	for (unsigned int g = 0; g < groupcnt; g++)
 	{
 		for (t = 0; t < trackcnt; ++t)
@@ -265,7 +307,7 @@ static trackvec_t make_regvecs(unsigned int delta, unsigned int trackcnt,
 			);
 			pos += delta;
 		}
-		pos += reglen;
+		pos += reglen - delta + groupgap;
 	}
 	
 	return regvecs;
