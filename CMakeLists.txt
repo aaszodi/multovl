@@ -90,7 +90,10 @@ endif()
 set(BOOST_ROOT "/usr/local/boost" CACHE PATH "Top-level Boost directory")
 set(Boost_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the Boost libraries be linked statically?")
 set(Boost_USE_MULTITHREADED ON)
-find_package( Boost COMPONENTS regex date_time filesystem system 
+
+# The minimum Boost version
+set(BOOST_MINIMUM_VERSION "1.44.0")
+find_package( Boost ${BOOST_MINIMUM_VERSION} COMPONENTS regex date_time filesystem system 
 	unit_test_framework program_options serialization thread REQUIRED)
 	
 # list of Boost libraries needed by apps
