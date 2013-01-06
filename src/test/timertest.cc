@@ -37,7 +37,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Standard headers --
 
+#ifdef _WIN32
+#include <Windows.h>
+#define sleep Sleep
+#else
 #include <unistd.h>
+#endif
 #include <iostream>
 #include <iomanip>
 using namespace std;
