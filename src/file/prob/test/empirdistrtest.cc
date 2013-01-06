@@ -47,14 +47,19 @@ using namespace prob;
 
 // we test with normal random deviates in addition to what is provided in "randomgen.hh"
 #include "boost/random/normal_distribution.hpp"
+#include "boost/math/special_functions/erf.hpp"
 
 // -- standard headers --
 
 // NOTE: we boldly assume <cmath> provides the erf() function as per ISO/IEC 9899:1999(E).
+// MSVC does NOT have it.
+#if 0
 #include <cmath>
 #ifdef __SUNPRO_CC
 #include <math.h>
 #endif
+#endif
+
 #include <iostream>
 #include <string>
 
@@ -75,7 +80,7 @@ static double norm_cdf(double m, double s, double x)
 {
     static const double SQRT2 = std::sqrt(2.0);
     double t = (x - m)/(SQRT2*s);
-    return ((1.0+erf(t))/2.0);
+    return ((1.0+boost::math::erf(t))/2.0);
 }
 
 struct EmpirDistrFixture

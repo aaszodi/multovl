@@ -48,14 +48,19 @@ using namespace prob;
 #include "boost/random/mersenne_twister.hpp"
 #include "boost/random/variate_generator.hpp"
 #include "boost/random/normal_distribution.hpp"
+#include "boost/math/special_functions/erf.hpp"
 
 // -- standard headers --
 
 // NOTE: we boldly assume <cmath> provides the erf() function as per ISO/IEC 9899:1999(E).
+// MSVC doesn't.
+#if 0
 #include <cmath>
 #ifdef __SUNPRO_CC
 #include <math.h>
 #endif
+#endif
+
 #include <iostream>
 #include <string>
 
@@ -75,7 +80,7 @@ static double norm_cdf(double m, double s, double x)
 {
     static const double SQRT2 = std::sqrt(2.0);
     double t = (x - m)/(SQRT2*s);
-    return ((1.0+erf(t))/2.0);
+    return ((1.0+boost::math::erf(t))/2.0);
 }
 
 struct StatFixture
