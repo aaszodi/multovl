@@ -23,6 +23,7 @@
 # By convention I put all the various build directories under multovl/build.
 #
 cmake_minimum_required(VERSION 2.8)
+
 project(multovl CXX)
 
 # Directory layout:-
