@@ -71,7 +71,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/gitrevision.cmake")
 message(STATUS "Git revision = ${GITREVISION}")
 
 # make sure my DEBUG macro is defined if not release (don't rely on NDEBUG)
-set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG")
 
 # so that we see what goes wrong:-
 set(CMAKE_VERBOSE_MAKEFILE ON)
