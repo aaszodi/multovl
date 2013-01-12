@@ -45,11 +45,15 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdlib>
 
+#ifdef _WIN32
+#include "wgetopt.h"
+#else
 #if defined(__sun) && defined(__SUNPRO_CC)
 #define __EXTENSIONS__
 #include <unistd.h>	// Solaris/SunPro getopt() is here...
 #else
 #include <getopt.h> // Linux, MacOS
+#endif
 #endif
 
 #include <iostream>

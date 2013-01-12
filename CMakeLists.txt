@@ -24,7 +24,7 @@
 #
 cmake_minimum_required(VERSION 2.8)
 
-project(multovl CXX)
+project(multovl C CXX)
 
 # Directory layout:-
 #    multovl            <== ${CMAKE_SOURCE_DIR}: top-level
