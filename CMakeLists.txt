@@ -94,8 +94,12 @@ set(Boost_USE_MULTITHREADED ON)
 
 # The minimum Boost version
 set(BOOST_MINIMUM_VERSION "1.44.0")
-find_package( Boost ${BOOST_MINIMUM_VERSION} COMPONENTS regex date_time filesystem system 
-	unit_test_framework program_options serialization thread REQUIRED)
+
+find_package( Boost ${BOOST_MINIMUM_VERSION}
+    COMPONENTS regex date_time filesystem system 
+	unit_test_framework program_options serialization thread
+	OPTIONAL_COMPONENTS chrono
+)
 	
 # list of Boost libraries needed by apps
 set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} 
@@ -103,6 +107,10 @@ set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY}
     ${Boost_REGEX_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY}
 	${Boost_SERIALIZATION_LIBRARY} ${Boost_THREAD_LIBRARY}
 )
+# Turns out that from V1.50.0 on Boost.Thread depends on Boost.Chrono
+if (Boost_VERSION VERSION_GREATER "1.49")
+	list(APPEND MULTOVL_BOOST_LIBS ${Boost_CHRONO_LIBRARY})
+endif()
 
 # we always need the Boost headers
 # and the binary dir for config.hh
