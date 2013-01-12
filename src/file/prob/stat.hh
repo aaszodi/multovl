@@ -142,7 +142,7 @@ public:
                 _pvalue = (c >= 0.5)? 1.0 - c: c;
                 _zscore = (_actual - _nulldistr.mean())/_nulldistr.std_dev();
                 _valid = true;
-            } catch (const EmpirDistr::Exception& ex) {
+            } catch (const EmpirDistr::Exception&) {
                 _valid = false;
             }
         }
