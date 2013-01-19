@@ -14,12 +14,19 @@ endif()
 flag_fix(inputfiles)
 target_link_libraries(inputfiles movl_fileio ${MULTOVLIBS})
 
+# Test scripts
+if(WIN32)
+    set(EXT "bat")
+else()
+    set(EXT "sh")
+endif()
+
 # make the 'runner' test script
 # use this to run the parallel multovls "forever" to catch multithreaded bugs
-configure_file( runner.sh.in runner.sh @ONLY)
+configure_file( runner.${EXT}.in runner.${EXT} @ONLY)
 
 # make the 'timer' test script
 # use this to collect timing data
-### configure_file( timer.sh.in timer.sh @ONLY)
+### configure_file( timer.${EXT}.in timer.${EXT} @ONLY)
 
-add_custom_target(exerciser DEPENDS ${progexers})
+add_custom_target(exerciser DEPENDS inputfiles)

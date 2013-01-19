@@ -1,0 +1,57 @@
+@ECHO OFF
+REM Runs a given MULTOVL variant "forever" with big input files
+REM Can be used to detect 'random' crashes in multithreaded versions
+REM Ported manually from runner.sh.in
+REM 2013-01-19 AA
+
+REM -- Directories --
+
+REM Note that VS projects have a more complex layout than the Unix compilers.
+REM Under the bin directory we still have file, exercise, prob, ...
+REM but within these build directories there is an extra level
+REM corresponding to the @CMAKE_BUILD_TYPE@.
+
+SET BINDIR=@PROJECT_BINARY_DIR@\bin
+SET EXERCISEDIR=%BINDIR%\exercise\@CMAKE_BUILD_TYPE@
+SET DATA=%EXERCISEDIR%\running
+
+REM Default values for script parameters.
+REM These we keep fixed because reproducing the Bash getopts would take too much work.
+REM use this thing as runner.bat <program> [options]
+REM and edit the parameters below if you need.
+
+SET /A CHROM=20
+SET /A DELTA=10
+SET /A GROUPCNT=1000
+SET /A TRACKNO=8
+
+REM Just make sure we have enough arguments
+SET /A ARGCNT=0
+FOR %%X IN (%*) DO SET /A ARGCNT+=1
+
+IF %ARGCNT% EQU 0 ECHO Usage: runner.bat ..\{file|prob}\{Debug|Release}\program [program options] & GOTO Done
+
+REM Setup
+SET OUTPUT_FILE=%DATA%\runner_output.txt
+IF EXIST %DATA% (
+    ECHO Making a clean slate in exercise directory & ERASE /Q %DATA%\track_*.bed %OUTPUT_FILE%
+) ELSE (
+    ECHO Creating exercise directory %DATA% & MKDIR %DATA%
+)
+
+ECHO Making input files...
+%EXERCISEDIR%\inputfiles -c %CHROM% -d %DELTA% -D %DATA% -t %TRACKNO% -g %GROUPCNT%
+
+REM Workaround to list the input BED files as CMD.EXE does not support wildcard expansion inline
+SET BEDFILES=
+Set /A MAXTRACKNO=%TRACKNO%-1
+FOR /L %%X IN (0, 1, %MAXTRACKNO%) DO CALL SET BEDFILES=%%BEDFILES%% %%DATA%%\track_%%X.bed
+ECHO Run program %1 forever, (Ctrl-C to stop)...
+
+:Forever
+REM %* contains the cmdline params, i.e. the pgm name to be run
+    %* %BEDFILES% > %OUTPUT_FILE% 2>&1
+    IF ERRORLEVEL 1 ECHO Program failure, check %OUTPUT_FILE% & GOTO :Done
+GOTO Forever
+
+:Done
