@@ -38,11 +38,16 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND ${CMAKE_SYSTEM_NAME} MATCHES "
     endmacro(flag_fix)
 elseif(MSVC)
     # force static linking everywhere
-    macro(flag_fix targ)
-        set_target_properties(
-            ${targ} PROPERTIES COMPILE_FLAGS "/MT" 
-        )
-    endmacro(flag_fix)
+    if(STATICON)
+        macro(flag_fix targ)
+            set_target_properties(
+                ${targ} PROPERTIES COMPILE_FLAGS "/MT" 
+            )
+        endmacro(flag_fix)
+    else(STATICON)
+        macro(flag_fix targ)
+        endmacro(flag_fix)
+    endif(STATICON)
 else()
     # empty macro
     macro(flag_fix targ)
