@@ -553,6 +553,29 @@ parallel threads with the <tt>-T</tt> option, which is set to the number of avai
 CPU cores by default.</p>
 -->
 
+<h3><a name=bed2gff>BED-to-GFF format and coordinate conversion script <tt>bed2gff.sh</tt></a></h3>
+
+<p>Although MULTOVL can read BED-formatted files directly, it can be useful
+to convert them to GFF format so that the BED&rarr;GFF coordinate conversion
+is also applied. Here is how to use it:</p>
+
+<pre><code>This script converts one or more BED files to GFF files.
+Usage: bed2gff.sh [options] file1.bed [file2.bed ...]
+Options:
+-c Apply BED->GFF coordinate transformation (default: no change)
+-o Overwrite output file(s) if they exist (default: skip)
+-h Print this help and exit
+Each dir/path/file.bed will be saved to file.gff in the current directory
+</code></pre>
+
+<p>For instance if you issue the command:</p>
+
+<p><tt>bed2gff.sh -c -o foo/file1.bed bar/file2.bed</tt></p>
+
+<p>then the script will write <tt>file1.gff</tt> and <tt>file2.gff</tt> in the 
+current directory, converting the BED coordinates to the GFF convention,
+and overwriting the output files if they exist.</p>
+
 <h3>Extracting ancestor regions with the script <tt>anctrack.awk</tt></h3>
 
 <p>Sometimes you would like to list the ancestor regions from one of the input tracks
@@ -633,6 +656,15 @@ is parsed. The program can also read
 <a href='http://genome.ucsc.edu/goldenPath/help/bam.html' target='_blank'>BAM files</a> using the 
 <a href='http://pezmaster31.github.com/bamtools' target='_blank'>BAMtools</a> library.
 When reading from BAM files even the region names are ignored in the interest of speed.</p>
+
+<p>Be aware that MULTOVL <em>always</em> uses the "GFF coordinate system" convention.
+In other words, regions are closed intervals where the start and end coordinates correspond
+to the nucleotides, as opposed to the "BED coordinate system" convention
+where the start and end positions would correspond to the inter-nucleotide position before
+the first and after the last nucleotide within the region, respectively. Even if you supply
+BED files as input, MULTOVL interprets the start and end positions there according to
+the GFF convention. Use the <a href=#bed2gff><tt>bed2gff.sh</tt> script</a>
+to convert BED coordinates to GFF.</p>
 
 <p>Note that MULTOVL uses the <em>extremely simple-minded</em> "strategy" of deducing the file format
 from the input file extension. So please call your BED files <tt>something.bed</tt>,

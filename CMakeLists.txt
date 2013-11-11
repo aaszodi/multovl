@@ -203,7 +203,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     
     # scripts
     # Note: install(PROGRAMS... wouldn't add the exec permissions)
-    install(FILES "${SCRIPTDIR}/anctrack.awk" 
+    install(FILES "${SCRIPTDIR}/anctrack.awk" "${SCRIPTDIR}/bed2gff.sh"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE 
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${MULTOVL_DESTDIR}/bin)
