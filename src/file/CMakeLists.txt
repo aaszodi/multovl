@@ -12,7 +12,11 @@ if (BAMTOOLS_FOUND)
     )
     list(APPEND movl_fileiosrc bamio.cc)
 endif()
-add_library(movl_fileio STATIC ${movl_fileiosrc})
+if (MULTOVL_USE_DYNAMIC_LIBS)
+	add_library(movl_fileio SHARED ${movl_fileiosrc})
+else()
+	add_library(movl_fileio STATIC ${movl_fileiosrc})
+endif()
 flag_fix(movl_fileio)
 
 # basic set of libraries for all variants

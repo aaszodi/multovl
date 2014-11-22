@@ -98,7 +98,7 @@ const Region& FreeRegions::select_free_region(UniformGen& rng, unsigned int minl
 {
     unsigned int idx;
     do {
-        float rnd = rng(); // 0.0 .. 1.0
+        float rnd = static_cast<float>(rng()); // 0.0 .. 1.0
         std::vector<float>::const_iterator roulit = 
             std::lower_bound(_roulette_sectors.begin(), _roulette_sectors.end(), rnd);
         idx = (roulit - _roulette_sectors.begin());

@@ -13,7 +13,11 @@ set(movlsrc
     polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc
     basepipeline.cc pipeline.cc
 )
-add_library(movl STATIC ${movlsrc})
+if (MULTOVL_USE_DYNAMIC_LIBS)
+	add_library(movl SHARED ${movlsrc})
+else()
+	add_library(movl STATIC ${movlsrc})
+endif()
 flag_fix(movl)
 
 # basic set of libraries for all variants

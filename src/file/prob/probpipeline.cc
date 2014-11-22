@@ -427,7 +427,7 @@ bool ProbPipeline::write_output()
                     << distr.p_value() << ',' << distr.z_score() << std::endl;
                 ++mcount;
             }
-        } catch (const Stat::NotfoundException& ex) {
+        } catch (const Stat::NotfoundException&) {
             // skip this multiplicity
         }
     }

@@ -246,8 +246,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     
     # executable package (no source)
     set(CPACK_GENERATOR "TGZ")
-    set(CPACK_IGNORE_FILES "cmake/;src/;build/;debug/;release/;\\\\.project;\\\\.git;
-        "/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store")
+    set(CPACK_IGNORE_FILES "cmake/;src/;build/;debug/;release/;\\\\.project;\\\\.git;"/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store")
     
     # source package
     set(CPACK_SOURCE_GENERATOR "TGZ")
