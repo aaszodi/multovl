@@ -36,7 +36,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND ${CMAKE_SYSTEM_NAME} MATCHES "
             LINK_FLAGS "-use_asm -static-intel"
         )
     endmacro(flag_fix)
-elseif(MSVC)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     # force static linking everywhere
     if(STATICON)
         macro(flag_fix targ)

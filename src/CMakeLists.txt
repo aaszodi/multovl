@@ -13,10 +13,10 @@ set(movlsrc
     polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc
     basepipeline.cc pipeline.cc
 )
-if (MULTOVL_USE_DYNAMIC_LIBS)
-	add_library(movl SHARED ${movlsrc})
-else()
+if (MULTOVL_USE_STATIC_LIBS)
 	add_library(movl STATIC ${movlsrc})
+else()
+	add_library(movl SHARED ${movlsrc})
 endif()
 flag_fix(movl)
 
