@@ -37,17 +37,18 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND ${CMAKE_SYSTEM_NAME} MATCHES "
         )
     endmacro(flag_fix)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-    # force static linking everywhere
-    if(STATICON)
+    # force static linking everywhere, overriding CMake's "/MD" by "/MT"
+    if(MULTOVL_USE_STATIC_LIBS)
         macro(flag_fix targ)
             set_target_properties(
                 ${targ} PROPERTIES COMPILE_FLAGS "/MT" 
             )
         endmacro(flag_fix)
-    else(STATICON)
+    else(MULTOVL_USE_STATIC_LIBS)
+		# empty macro
         macro(flag_fix targ)
         endmacro(flag_fix)
-    endif(STATICON)
+    endif(MULTOVL_USE_STATIC_LIBS)
 else()
     # empty macro
     macro(flag_fix targ)
