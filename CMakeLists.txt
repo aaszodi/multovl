@@ -1,21 +1,29 @@
 # Top-level CMake file for the Multovl tools
 # 2010-08-10 Andras Aszodi
 #
-# NOTE: you should invoke cmake in your build directory like this:-
+# USAGE: you should invoke cmake in your build directory like this:-
 # cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \
-#   -DCMAKE_CXX_COMPILER=your_favourite_compiler \
 #   -DBOOST_ROOT=/path/to/boost \
+#	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ # <-- optional if not found automatically
 #   -DBAMTOOLS_ROOT=/path/to/bamtools \
 #   -DPQXX_ROOT=/path/to/pqxx \
 #   ..
 #
+# The Debug build will contain the unit tests but no INSTALL or PACKAGE targets.
+# The Release build will not contain the unit tests but will provide INSTALL and PACKAGE.
+#
+# Static vs shared/dynamic linking:-
+#	By default everything will be linked statically. To link everything dynamically, specify
+#	-DMULTOVL_USE_STATIC_LIBS:BOOL=OFF
+#	You can specify dynamic linkage for each of the 3rd party libraries (not recommended)
+#	by setting 
+#	-D{Boost,BAMTOOLS,POSTGRES,PQXX}_USE_STATIC_LIBS:BOOL=OFF as appropriate.
+#
 # Optional parameters:-
 #   -DCMAKE_CXX_COMPILER=<compiler> for using a C++ compiler other than the system default
+#	-DCMAKE_C_COMPILER=<compiler> for using a C compiler other than the system default
 #   -DCMAKE_INSTALL_PREFIX=/inst/path for defining the installation root,
 #       makes sense only when CMAKE_BUILD_TYPE=Release
-#   -D{Boost,BAMTOOLS,POSTGRES,PQXX}_USE_STATIC_LIBS: if you want static linking (all ON by default)
-#   -DMULTOVL_USE_STATIC_LIBS: links all libraries statically if ON (default),
-#       links all libraries dynamically if OFF
 #
 # You may run cmake -i which will then ask for the parameters interactively.
 #
@@ -82,17 +90,18 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # if you want to link all extra libraries dynamically, set this to OFF
 # this will set the defaults for the individual static/dynamic linker settings
-set(MULTOVL_USE_STATIC_LIBS "ON" CACHE PATH "Shall all Multovl programs be linked statically?")
+set(MULTOVL_USE_STATIC_LIBS ON CACHE BOOL "Shall all Multovl programs be linked statically?")
 
 # Boost
 set(BOOST_ROOT "/usr/local/boost" CACHE PATH "Top-level Boost directory")
 set(Boost_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS} 
-    CACHE PATH "Shall the Boost libraries be linked statically?")
-set(Boost_USE_MULTITHREADED "ON")
+    CACHE BOOL "Shall the Boost libraries be linked statically?")
+set(Boost_USE_MULTITHREADED ON)
 
 # If Boost is linked statically, then the Visual Studio runtime must be static, too
-if(MVSC AND Boost_USE_STATIC_LIBS)
-    set(Boost_USE_STATIC_RUNTIME "ON")
+if(MSVC AND Boost_USE_STATIC_LIBS)
+    set(Boost_USE_STATIC_RUNTIME ON 
+		CACHE BOOL "Shall the Boost libraries be linked against the static runtime?")
 endif()
 
 # The minimum Boost version
@@ -126,7 +135,7 @@ include_directories(
 # optional BAM tools for the file-based I/O
 set(BAMTOOLS_ROOT "/usr/local/bamtools" CACHE PATH "Top-level BamTools directory")
 set(BAMTOOLS_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
-    CACHE PATH "Shall the BAM tools be linked statically?")
+    CACHE BOOL "Shall the BAM tools be linked statically?")
 find_package(BamTools QUIET)
 if (NOT BAMTOOLS_FOUND)
     message(STATUS "BAM file format will not be supported.")
@@ -135,13 +144,13 @@ endif()
 # optional Postgres database access
 set(POSTGRES_ROOT "/usr/local/pgsql" CACHE PATH "Top-level PostgreSQL directory")
 set(POSTGRES_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
-    CACHE PATH "Shall the Postgres libraries be linked statically?")
+    CACHE BOOL "Shall the Postgres libraries be linked statically?")
 find_package(Postgres QUIET)
 set(PQXX_FOUND 0)
 if (POSTGRES_FOUND)
     set(PQXX_ROOT "/usr/local/pqxx" CACHE PATH "Top-level PQXX library directory")
     set(PQXX_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
-        CACHE PATH "Shall the PQXX library be linked statically?")
+        CACHE BOOL "Shall the PQXX library be linked statically?")
     find_package(PQXX QUIET)
     if (NOT PQXX_FOUND)
         message(STATUS "Database access will not be supported because the PQXX library was not found.")

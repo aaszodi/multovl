@@ -78,6 +78,23 @@ BOOST_LIBRARYDIR=C:\local\boost_1_57_0\lib32-msvc-12.0
 Boost_USE_STATIC_LIBS=ON
 Boost_USE_STATIC_RUNTIME=ON
 
+64-bit Windows version
+
+The CMake GUI does not provide a 64-bit MSVC generator. Run CMake from the 
+Visual Studio 64-bit command prompt. This you can find in the Start menu on Windows7 by
+looking for the All Programs > Visual Studio 2013 > Visual Studio Tools. I made shortcuts to the 
+X86 and X64 versions on the desktop.
+
+Invoke CMake from the 64-bit VS command prompt 
+in the build directory like this (substitute the BOOST_ROOT
+and BOOST_LIBRARYDIR hints as appropriate): 
+
+cmake -G "Visual Studio 12 Win64" -DBOOST_ROOT=C:\path\to\boost \
+	-DBOOST_LIBRARYDIR=C:\path\to\boost\64-bit-libraries 
+	-DCMAKE_BUILD_TYPE=Release ..
+
+Then open the solution in VS. Note that even though CMake was told to generate a Release,
+it will open as Debug. Change to Release configuration and then build.
 
 COVERAGE TESTING
 ----------------
