@@ -58,7 +58,14 @@ class Tempfile
     Tempfile();
     ~Tempfile();
     
-    const char* name() const { return _path.string().c_str(); }
+	// Returns the name of the temporary file.
+	// Under Windows the pathnames are wide-char.
+#ifdef _WIN32
+	const wchar_t*
+#else
+    const char*
+#endif
+	name() const { return _path.native().c_str(); }
     
     // print the contents of the temp file to /outs/    
     std::ostream& print(std::ostream& outs = std::cout) const;

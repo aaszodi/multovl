@@ -6,19 +6,27 @@ include_directories(${SRCDIR} ${SRCDIR}/file)
 # Programs needed for exercising
 # currently, it is only "inputfiles"
 # that makes bogus input files
-set(progexers inputfiles)
-foreach(progexer ${progexers})
-    add_executable(${progexer} ${progexer}.cc)
-    flag_fix(${progexer})
-    target_link_libraries(${progexer} movl_fileio ${MULTOVLIBS})
-endforeach(progexer)
+if(WIN32)
+    add_executable(inputfiles inputfiles.cc wgetopt.c)
+else()
+    add_executable(inputfiles inputfiles.cc)
+endif()
+flag_fix(inputfiles)
+target_link_libraries(inputfiles movl_fileio ${MULTOVLIBS})
+
+# Test scripts
+if(WIN32)
+    set(EXT "bat")
+else()
+    set(EXT "sh")
+endif()
 
 # make the 'runner' test script
 # use this to run the parallel multovls "forever" to catch multithreaded bugs
-configure_file( runner.sh.in runner.sh @ONLY)
+configure_file( runner.${EXT}.in runner.${EXT} @ONLY)
 
 # make the 'timer' test script
 # use this to collect timing data
-### configure_file( timer.sh.in timer.sh @ONLY)
+### configure_file( timer.${EXT}.in timer.${EXT} @ONLY)
 
-add_custom_target(exerciser DEPENDS ${progexers})
+add_custom_target(exerciser DEPENDS inputfiles)

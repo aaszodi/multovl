@@ -1,29 +1,37 @@
 # Top-level CMake file for the Multovl tools
 # 2010-08-10 Andras Aszodi
 #
-# NOTE: you should invoke cmake in your build directory like this:-
+# USAGE: you should invoke cmake in your build directory like this:-
 # cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \
-#   -DCMAKE_CXX_COMPILER=your_favourite_compiler \
 #   -DBOOST_ROOT=/path/to/boost \
+#	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ # <-- optional if not found automatically
 #   -DBAMTOOLS_ROOT=/path/to/bamtools \
 #   -DPQXX_ROOT=/path/to/pqxx \
 #   ..
 #
+# The Debug build will contain the unit tests but no INSTALL or PACKAGE targets.
+# The Release build will not contain the unit tests but will provide INSTALL and PACKAGE.
+#
+# Static vs shared/dynamic linking:-
+#	By default everything will be linked statically. To link everything dynamically, specify
+#	-DMULTOVL_USE_STATIC_LIBS:BOOL=OFF
+#	You can specify dynamic linkage for each of the 3rd party libraries (not recommended)
+#	by setting 
+#	-D{Boost,BAMTOOLS,POSTGRES,PQXX}_USE_STATIC_LIBS:BOOL=OFF as appropriate.
+#
 # Optional parameters:-
 #   -DCMAKE_CXX_COMPILER=<compiler> for using a C++ compiler other than the system default
+#	-DCMAKE_C_COMPILER=<compiler> for using a C compiler other than the system default
 #   -DCMAKE_INSTALL_PREFIX=/inst/path for defining the installation root,
 #       makes sense only when CMAKE_BUILD_TYPE=Release
-#   -D{Boost,BAMTOOLS,POSTGRES,PQXX}_USE_STATIC_LIBS: if you want static linking (all ON by default)
-#   -DMULTOVL_USE_DYNAMIC_LIBS: links all libraries dynamically if ON,
-#       overrides the *_USE_STATIC_LIBS settings if set (unset by default)
-#   Note that the Multovl-internal utility libraries are always statically linked.
 #
 # You may run cmake -i which will then ask for the parameters interactively.
 #
 # By convention I put all the various build directories under multovl/build.
 #
 cmake_minimum_required(VERSION 2.8)
-project(multovl CXX)
+
+project(multovl C CXX)
 
 # Directory layout:-
 #    multovl            <== ${CMAKE_SOURCE_DIR}: top-level
@@ -70,7 +78,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/gitrevision.cmake")
 message(STATUS "Git revision = ${GITREVISION}")
 
 # make sure my DEBUG macro is defined if not release (don't rely on NDEBUG)
-set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG")
 
 # so that we see what goes wrong:-
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -80,21 +88,30 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # The cached variables below should be set e.g. from ccmake or cmake -i or
 # via -D switches
 
-# if you want to link all extra libraries dynamically
-set(STATICON "ON")
-if (MULTOVL_USE_DYNAMIC_LIBS)
-    set(STATICON "OFF")
-endif()
+# if you want to link all extra libraries dynamically, set this to OFF
+# this will set the defaults for the individual static/dynamic linker settings
+set(MULTOVL_USE_STATIC_LIBS ON CACHE BOOL "Shall all Multovl programs be linked statically?")
 
-# Boost -- we cannot do anything without you...
+# Boost
 set(BOOST_ROOT "/usr/local/boost" CACHE PATH "Top-level Boost directory")
-set(Boost_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the Boost libraries be linked statically?")
+set(Boost_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS} 
+    CACHE BOOL "Shall the Boost libraries be linked statically?")
 set(Boost_USE_MULTITHREADED ON)
+
+# If Boost is linked statically, then the Visual Studio runtime must be static, too
+if(MSVC AND Boost_USE_STATIC_LIBS)
+    set(Boost_USE_STATIC_RUNTIME ON 
+		CACHE BOOL "Shall the Boost libraries be linked against the static runtime?")
+endif()
 
 # The minimum Boost version
 set(BOOST_MINIMUM_VERSION "1.44.0")
-find_package( Boost ${BOOST_MINIMUM_VERSION} COMPONENTS regex date_time filesystem system 
-	unit_test_framework program_options serialization thread REQUIRED)
+
+find_package( Boost ${BOOST_MINIMUM_VERSION}
+    COMPONENTS regex date_time filesystem system 
+	unit_test_framework program_options serialization thread
+	OPTIONAL_COMPONENTS chrono
+)
 	
 # list of Boost libraries needed by apps
 set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} 
@@ -102,6 +119,10 @@ set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY}
     ${Boost_REGEX_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY}
 	${Boost_SERIALIZATION_LIBRARY} ${Boost_THREAD_LIBRARY}
 )
+# Turns out that from V1.50.0 on Boost.Thread depends on Boost.Chrono
+if (Boost_VERSION VERSION_GREATER "1.49")
+	list(APPEND MULTOVL_BOOST_LIBS ${Boost_CHRONO_LIBRARY})
+endif()
 
 # we always need the Boost headers
 # and the binary dir for config.hh
@@ -113,7 +134,8 @@ include_directories(
 
 # optional BAM tools for the file-based I/O
 set(BAMTOOLS_ROOT "/usr/local/bamtools" CACHE PATH "Top-level BamTools directory")
-set(BAMTOOLS_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the BAM tools be linked statically?")
+set(BAMTOOLS_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
+    CACHE BOOL "Shall the BAM tools be linked statically?")
 find_package(BamTools QUIET)
 if (NOT BAMTOOLS_FOUND)
     message(STATUS "BAM file format will not be supported.")
@@ -121,12 +143,14 @@ endif()
 
 # optional Postgres database access
 set(POSTGRES_ROOT "/usr/local/pgsql" CACHE PATH "Top-level PostgreSQL directory")
-set(POSTGRES_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the Postgres libraries be linked statically?")
+set(POSTGRES_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
+    CACHE BOOL "Shall the Postgres libraries be linked statically?")
 find_package(Postgres QUIET)
 set(PQXX_FOUND 0)
 if (POSTGRES_FOUND)
     set(PQXX_ROOT "/usr/local/pqxx" CACHE PATH "Top-level PQXX library directory")
-    set(PQXX_USE_STATIC_LIBS ${STATICON} CACHE PATH "Shall the PQXX library be linked statically?")
+    set(PQXX_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
+        CACHE BOOL "Shall the PQXX library be linked statically?")
     find_package(PQXX QUIET)
     if (NOT PQXX_FOUND)
         message(STATUS "Database access will not be supported because the PQXX library was not found.")
@@ -235,13 +259,19 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
     set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
     
-    # executable package (no source)
-    set(CPACK_GENERATOR "TGZ")
-    set(CPACK_IGNORE_FILES "cmake/;src/;build/;debug/;release/;\\\\.project;\\\\.git;
-        "/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store")
+    # Select package generators
+    if (UNIX)
+        set(CPACK_GENERATOR "TGZ")
+        set(CPACK_SOURCE_GENERATOR "TGZ")
+    elseif(WIN32)
+        set(CPACK_GENERATOR "ZIP")
+        set(CPACK_SOURCE_GENERATOR "ZIP")
+    endif()
     
-    # source package
-    set(CPACK_SOURCE_GENERATOR "TGZ")
+    # executable package (no source)
+    set(CPACK_IGNORE_FILES "cmake/;src/;build/;debug/;release/;\\\\.project;\\\\.git;"/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store")
+    
+    # source package    
     set(CPACK_SOURCE_IGNORE_FILES "build/;debug/;release/;\\\\.DS_Store;\\\\.project;\\\\.git")
     include(CPack)
 endif()

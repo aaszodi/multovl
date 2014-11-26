@@ -154,7 +154,7 @@ double EmpirDistr::cdf(double x) const throw(Exception)
     }
     
     // xlow, xhigh are too close
-    int ulpdist = boost::math::float_distance(xlow, xhigh);
+    int ulpdist = static_cast<int>(boost::math::float_distance(xlow, xhigh));
     if (ulpdist == 0)
         return (ylow + yhigh)/2.0;
     

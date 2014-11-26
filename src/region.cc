@@ -98,7 +98,7 @@ void Region::set_coords(unsigned int f, unsigned int l)
 
 void Region::strand(char s)
 {
-    if (s == '+' or s == '-')
+    if (s == '+' || s == '-')
         _strand = s;
     else
         _strand = '.';

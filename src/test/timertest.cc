@@ -37,13 +37,32 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Standard headers --
 
+#ifdef _WIN32
+#include <Windows.h>
+#define sleep Sleep
+#else
 #include <unistd.h>
+#endif
+
 #include <iostream>
 #include <iomanip>
 using namespace std;
 
 #include "timer.hh"
 using namespace multovl;
+
+static void sleep_seconds(int sec)
+#ifdef _WIN32
+{
+	// Windows takes millisecond arg
+	Sleep(1000*sec);
+}
+#else
+{
+	// Unix takes second arg
+	sleep(sec);
+}
+#endif
 
 static void check_approx_duration(
     const boost::posix_time::time_duration& actualdur,
@@ -58,9 +77,9 @@ static void check_approx_duration(
 BOOST_AUTO_TEST_CASE(timer_test)
 {
     Timer timer;
-    sleep(1);
+    sleep_seconds(1);
     timer.add_timepoint();
-    sleep(2);
+    sleep_seconds(2);
     timer.add_timepoint();
     boost::posix_time::time_duration actual_duration = timer.interval(1);
     check_approx_duration(actual_duration, 1);

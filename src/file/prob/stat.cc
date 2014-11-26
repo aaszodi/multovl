@@ -67,8 +67,7 @@ void Stat::add(unsigned int multiplicity,
         // multiplicity hasn't been seen so far
         Distr distr(val, is_actual);
         _distrs.insert(
-            std::make_pair<unsigned int, Distr>(
-                multiplicity, distr)
+            std::make_pair(multiplicity, distr)
         );
     }
     

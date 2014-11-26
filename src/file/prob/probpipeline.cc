@@ -161,7 +161,7 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
         else
         {
             // new chromosome
-            crv.insert(std::make_pair<std::string, rv_t>(chrom, rv_t(1, reg)));
+            crv.insert(std::make_pair(chrom, rv_t(1, reg)));
         }
         ++regcnt;
     }
@@ -184,7 +184,7 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
     {
         const std::string& chrom = crvcit->first;
         const rv_t& regs = crvcit->second;
-        csovl().insert(std::make_pair<std::string, ShuffleOvl>(chrom,ShuffleOvl(regs)));
+        csovl().insert(std::make_pair(chrom,ShuffleOvl(regs)));
     }
     return regcnt;
 }
@@ -427,7 +427,7 @@ bool ProbPipeline::write_output()
                     << distr.p_value() << ',' << distr.z_score() << std::endl;
                 ++mcount;
             }
-        } catch (const Stat::NotfoundException& ex) {
+        } catch (const Stat::NotfoundException&) {
             // skip this multiplicity
         }
     }
