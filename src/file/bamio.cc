@@ -76,7 +76,7 @@ std::string BamReader::read_into(std::string& chrom, Region& reg)
     
     // coordinates
     int32_t first = _albuf.Position;
-    int32_t last = _albuf.GetEndPosition() + 1;
+    int32_t last = _albuf.GetEndPosition() + 1; // BamTools V2: 0-based, half-open
     char strand = _albuf.IsReverseStrand()? '-': '+';
     
     reg.set_coords(first, last);
