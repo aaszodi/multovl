@@ -27,8 +27,9 @@ endif()
 
 # "classic" Multovl, single-core variant
 add_executable(multovl multovl.cc classicpipeline.cc classicopts.cc)
-flag_fix(multovl)
 target_link_libraries(multovl ${FILEMULTOVLIBS})
+add_dependencies(multovl always_rebuild)
+flag_fix(multovl)
 
 # add to global app target list
 set(app_targets 

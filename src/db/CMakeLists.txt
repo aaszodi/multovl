@@ -13,11 +13,12 @@ set(PGMULTOVL_SRC
 add_executable(pgmultovl
     ${PGMULTOVL_SRC}
 )
-flag_fix(pgmultovl)
 target_link_libraries(pgmultovl 
     ${PQXX_LIBRARIES} ${POSTGRES_LIBRARIES}
     ${MULTOVLIBS}
 )
+add_dependencies(pgmultovl always_rebuild)
+flag_fix(pgmultovl)
 
 # add to global app target list
 set(app_targets 

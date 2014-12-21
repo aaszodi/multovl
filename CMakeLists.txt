@@ -73,10 +73,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 # the installation directory 
 set(MULTOVL_DESTDIR "multovl-${MULTOVL_VERSION_MAJOR}.${MULTOVL_VERSION_MINOR}")
 
-# Git revision string
-include("${CMAKE_SOURCE_DIR}/cmake/gitrevision.cmake")
-message(STATUS "Git revision = ${GITREVISION}")
-
 # make sure my DEBUG macro is defined if not release (don't rely on NDEBUG)
 set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG")
 
@@ -164,6 +160,10 @@ endif(POSTGRES_FOUND)
 # platform-specific settings
 include("${CMAKE_SOURCE_DIR}/cmake/platformspec.cmake")
 
+# Add a custom command to (re)generate "src/gitrevision.h" if the source tree
+# is under revision control. The file itself should be in .gitignore .
+include("${CMAKE_SOURCE_DIR}/cmake/gitrev.cmake")
+
 # -- SOURCE TREE --
 
 # we collect the app targets in this "truly global" variable
@@ -208,6 +208,17 @@ endif()
 configure_file (
   "${SRCDIR}/config.hh.in"
   "${PROJECT_BINARY_DIR}/multovl_config.hh"
+)
+
+# config.hh is written during CMake configuration
+# but it will be always out-of-date and recompiled during every build
+# this makes sure the __DATE__ and __TIME__ macros inside give you the
+# build timestamp, not the compilation timestamp.
+# Add this target as a dependency to all executables
+add_custom_target(
+    always_rebuild ALL
+    COMMAND ${CMAKE_COMMAND} -E touch ${PROJECT_BINARY_DIR}/multovl_config.hh
+    DEPENDS ${SRCDIR}/gitrevision.h
 )
 
 # Doxygen documentation

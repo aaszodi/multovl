@@ -1,5 +1,4 @@
-# The revision string file should be ignored
-gitrevision.txt
+src/gitrevision.h
 
 # Build and project directories
 # By convention 'build' contains 'debug' and 'release'

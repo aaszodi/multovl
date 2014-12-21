@@ -1,9 +1,21 @@
 #ifndef MULTOVL_CONFIG_HEADER
 #define MULTOVL_CONFIG_HEADER
 
-// == Config header template ==
+// == Config header ==
 
 // NOTE: this template will be filled in by CMake
+// DO NOT EDIT.
+
+// \file config.hh
+// Configuration settings, macros and useful functions.
+// \date 2013-06-19
+// \author Andras Aszodi
+
+// -- Own headers --
+
+#include "gitrevision.h"    // supplies short and full SHA1 rev checksum, last rev. date
+
+// == Macros ==
 
 // stringification
 #ifndef CONFIG_STRINGIFY_MACROS
@@ -16,12 +28,13 @@
 
 #define MULTOVL_VERSION_MAJOR @MULTOVL_VERSION_MAJOR@
 #define MULTOVL_VERSION_MINOR @MULTOVL_VERSION_MINOR@
-#define MULTOVL_REVISION @GITREVISION@
-#define MULTOVL_VER() TOSTRING(MULTOVL_VERSION_MAJOR.MULTOVL_VERSION_MINOR rev. MULTOVL_REVISION)
+#define MULTOVL_VER() TOSTRING(MULTOVL_VERSION_MAJOR.MULTOVL_VERSION_MINOR GITREV_DATE)
 
 // -- Compiler details --
 
-#define MULTOVL_BUILD() TOSTRING(@CMAKE_BUILD_TYPE@ build: @CMAKE_CXX_COMPILER_ID@ compiler on @CMAKE_SYSTEM_NAME@)
+#define MULTOVL_BUILD() TOSTRING(@CMAKE_BUILD_TYPE@ build: \
+@CMAKE_CXX_COMPILER_ID@ compiler @CMAKE_CXX_COMPILER_VERSION@ \
+on @CMAKE_SYSTEM_NAME@ @CMAKE_SYSTEM_VERSION@)
 
 // -- Boost details --
 
