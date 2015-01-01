@@ -190,17 +190,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     endif()
 endif()
 
-# Add the source directory and recursively everything under it
-# (see respective CMakeLists.txt files therein)
-add_subdirectory(${SRCDIR} bin)
-
-# custom target to make all apps at once
-add_custom_target(apps DEPENDS ${app_targets})
-# ... and the unit tests
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_custom_target(unit_tests DEPENDS ${unit_test_targets})
-endif()
-
 # we add a config header
 # this stores, among other things, the version and the revision
 # and the versions of the supporting libraries
@@ -220,6 +209,17 @@ add_custom_target(
     COMMAND ${CMAKE_COMMAND} -E touch ${PROJECT_BINARY_DIR}/multovl_config.hh
     DEPENDS ${SRCDIR}/gitrevision.h
 )
+
+# Add the source directory and recursively everything under it
+# (see respective CMakeLists.txt files therein)
+add_subdirectory(${SRCDIR} bin)
+
+# custom target to make all apps at once
+add_custom_target(apps DEPENDS ${app_targets})
+# ... and the unit tests
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_custom_target(unit_tests DEPENDS ${unit_test_targets})
+endif()
 
 # Doxygen documentation
 find_package(Doxygen)
