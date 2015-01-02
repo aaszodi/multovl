@@ -199,17 +199,6 @@ configure_file (
   "${PROJECT_BINARY_DIR}/multovl_config.hh"
 )
 
-# config.hh is written during CMake configuration
-# but it will be always out-of-date and recompiled during every build
-# this makes sure the __DATE__ and __TIME__ macros inside give you the
-# build timestamp, not the compilation timestamp.
-# Add this target as a dependency to all executables
-add_custom_target(
-    always_rebuild ALL
-    COMMAND ${CMAKE_COMMAND} -E touch ${PROJECT_BINARY_DIR}/multovl_config.hh
-    DEPENDS ${SRCDIR}/gitrevision.h
-)
-
 # Add the source directory and recursively everything under it
 # (see respective CMakeLists.txt files therein)
 add_subdirectory(${SRCDIR} bin)

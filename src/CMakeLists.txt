@@ -19,7 +19,7 @@ else()
 	add_library(movl SHARED ${movlsrc})
 endif()
 flag_fix(movl)
-add_dependencies(movl always_rebuild)
+add_dependencies(movl create_gitrevision)
 
 # basic set of libraries for all variants
 set(MULTOVLIBS movl ${MULTOVL_BOOST_LIBS})   # library order does matter in Linux/g++

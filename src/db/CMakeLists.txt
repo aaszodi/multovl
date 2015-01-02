@@ -17,7 +17,6 @@ target_link_libraries(pgmultovl
     ${PQXX_LIBRARIES} ${POSTGRES_LIBRARIES}
     ${MULTOVLIBS}
 )
-add_dependencies(pgmultovl always_rebuild)
 flag_fix(pgmultovl)
 
 # add to global app target list

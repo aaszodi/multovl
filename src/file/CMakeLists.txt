@@ -18,6 +18,7 @@ else()
 	add_library(movl_fileio SHARED ${movl_fileiosrc})
 endif()
 flag_fix(movl_fileio)
+add_dependencies(movl_fileio create_gitrevision)
 
 # basic set of libraries for all variants
 set(FILEMULTOVLIBS movl_fileio ${MULTOVLIBS})   # library order does matter in Linux/g++
@@ -28,7 +29,6 @@ endif()
 # "classic" Multovl, single-core variant
 add_executable(multovl multovl.cc classicpipeline.cc classicopts.cc)
 target_link_libraries(multovl ${FILEMULTOVLIBS})
-add_dependencies(multovl always_rebuild)
 flag_fix(multovl)
 
 # add to global app target list

@@ -24,7 +24,6 @@ foreach(PROBPROG ${PROBPROGS})
     else()
         target_link_libraries(${PROBPROG} ${MULTOVPROBLIBS})
     endif()
-    add_dependencies(${PROBPROG} always_rebuild)
     flag_fix(${PROBPROG})
     
     # add to global app target list
