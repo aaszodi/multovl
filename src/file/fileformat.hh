@@ -43,10 +43,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \date 2011-06-15.
  */
 
-// -- Own headers --
-
-#include "multovl_config.hh"
-
 // -- Standard headers --
 
 #include <string>

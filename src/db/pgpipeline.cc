@@ -39,7 +39,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pgpipeline.hh"
 #include "multioverlap.hh"
 #include "region.hh"
-#include "multovl_config.hh"
+// TODO
+// #include ....version.h? ....
 
 // -- Boost headers --
 
@@ -250,8 +251,8 @@ bool PgPipeline::write_output()
     }
     
     // Some general stats etc. will just be written to stdout as usual
-    std::cout << "# PgMultovl version " << MULTOVL_VER() << MULTOVL_BUILD() << std::endl
-        << "# Built with libpqxx version " << PQXX_VERSION << std::endl;
+    // TODO
+    // may add some version information
     std::cout << "# Parameters = " << opt_ptr()->param_str() << std::endl;
     std::cout << "# Input tracks = " << inputs().size() << std::endl;
     for (input_seq_t::const_iterator it = inputs().begin();

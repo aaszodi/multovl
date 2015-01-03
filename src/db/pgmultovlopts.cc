@@ -41,7 +41,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Own header --
 
 #include "pgmultovlopts.hh"
-#include "multovl_config.hh"
 
 // -- PQXX version --
 
@@ -90,7 +89,8 @@ std::string PgMultovlOpts::param_str() const
 std::ostream& PgMultovlOpts::version_info(std::ostream& out) const
 {
     MultovlOptbase::version_info(out);
-	out << "Built with libpqxx " << PQXX_VERSION << std::endl;
+    // TODO
+	/* out << "Built with libpqxx " << PQXX_VERSION << std::endl; */
 	return out;
 }
 

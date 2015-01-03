@@ -37,7 +37,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Own headers --
 
 #include "fileio.hh"
-#include "multovl_config.hh"
 #include "textio.hh"
 
 #if USE_BAMTOOLS

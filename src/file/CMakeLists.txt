@@ -11,14 +11,16 @@ if (BAMTOOLS_FOUND)
         ${BAMTOOLS_INCLUDE_DIRS}
     )
     list(APPEND movl_fileiosrc bamio.cc)
+    set_source_files_properties(fileformat.cc fileio.cc PROPERTIES 
+        COMPILE_DEFINITIONS "USE_BAMTOOLS")
 endif()
+
 if (MULTOVL_USE_STATIC_LIBS)
 	add_library(movl_fileio STATIC ${movl_fileiosrc})
 else()
 	add_library(movl_fileio SHARED ${movl_fileiosrc})
 endif()
 flag_fix(movl_fileio)
-add_dependencies(movl_fileio create_gitrevision)
 
 # basic set of libraries for all variants
 set(FILEMULTOVLIBS movl_fileio ${MULTOVLIBS})   # library order does matter in Linux/g++

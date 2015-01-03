@@ -1,6 +1,6 @@
 # == src/test/CMakeLists.txt for generic Multovl component testing ==
 
-include_directories(${SRCDIR} ${SRCDIR}/test)
+include_directories(${SRCDIR} ${SRCDIR}/config ${SRCDIR}/test)
 
 # -- Unit tests --
 
@@ -12,7 +12,7 @@ flag_fix(testhelper)
 # libraries that may be needed by the unit tests
 set (genericlibs
     testhelper
-    movl
+    cfg movl
 )
 if (BAMTOOLS_FOUND)
     list(APPEND genericlibs ${BAMTOOLS_LIBRARIES})

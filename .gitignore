@@ -1,4 +1,7 @@
-src/gitrevision.h
+# CMake-generated source files
+src/config/build.c
+src/config/thirdparty.c
+src/config/version.c
 
 # Build and project directories
 # By convention 'build' contains 'debug' and 'release'

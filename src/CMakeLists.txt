@@ -1,4 +1,8 @@
-# CMakeLists.txt for Multovl and variants, top-level source directory
+# -- src/CMakeLists.txt --
+# for Multovl and variants, top-level source directory
+
+# Configuration library
+add_subdirectory(config)
 
 # Sometimes the Intel compiler won't play nicely with the GNU-compiled boost::date_time
 # needs further investigation, here's a band-aid to fix the Timer module
@@ -19,10 +23,9 @@ else()
 	add_library(movl SHARED ${movlsrc})
 endif()
 flag_fix(movl)
-add_dependencies(movl create_gitrevision)
 
 # basic set of libraries for all variants
-set(MULTOVLIBS movl ${MULTOVL_BOOST_LIBS})   # library order does matter in Linux/g++
+set(MULTOVLIBS movl cfg ${MULTOVL_BOOST_LIBS})   # library order does matter in Linux/g++
 
 # basic module unit tests
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

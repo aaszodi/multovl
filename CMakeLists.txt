@@ -121,10 +121,10 @@ if (Boost_VERSION VERSION_GREATER "1.49")
 endif()
 
 # we always need the Boost headers
-# and the binary dir for config.hh
+# and the configs
 include_directories(
     ${SRCDIR}
-    ${PROJECT_BINARY_DIR}
+    ${SRCDIR}/config
     ${Boost_INCLUDE_DIRS}
 )
 
@@ -160,10 +160,6 @@ endif(POSTGRES_FOUND)
 # platform-specific settings
 include("${CMAKE_SOURCE_DIR}/cmake/platformspec.cmake")
 
-# Add a custom command to (re)generate "src/gitrevision.h" if the source tree
-# is under revision control. The file itself should be in .gitignore .
-include("${CMAKE_SOURCE_DIR}/cmake/gitrev.cmake")
-
 # -- SOURCE TREE --
 
 # we collect the app targets in this "truly global" variable
@@ -189,15 +185,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         message(STATUS "Coverage tests were set up.")
     endif()
 endif()
-
-# we add a config header
-# this stores, among other things, the version and the revision
-# and the versions of the supporting libraries
-# and the compiler data
-configure_file (
-  "${SRCDIR}/config.hh.in"
-  "${PROJECT_BINARY_DIR}/multovl_config.hh"
-)
 
 # Add the source directory and recursively everything under it
 # (see respective CMakeLists.txt files therein)
@@ -250,9 +237,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # packaging: common settings
     set(CPACK_PACKAGE_VERSION_MAJOR "${MULTOVL_VERSION_MAJOR}")
     set(CPACK_PACKAGE_VERSION_MINOR "${MULTOVL_VERSION_MINOR}")
-    if(NOT ${GITREVISION} STREQUAL "X")
-        set(CPACK_PACKAGE_VERSION_PATCH "${GITREVCNT}")
-    endif()
+    set(CPACK_PACKAGE_VERSION_PATCH "${GITREV_SHA1SHORT}")
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Multiple Overlaps of Genomic Regions")
     set(CPACK_PACKAGE_VENDOR "Andras Aszodi")

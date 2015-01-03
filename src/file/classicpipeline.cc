@@ -40,8 +40,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "fileio.hh"
 #include "multioverlap.hh"
 #include "region.hh"
-#include "multovl_config.hh"
 #include "linewriter.hh"
+#include "version.h"
+#include "build.h"
 
 // -- Boost headers --
 
@@ -237,8 +238,10 @@ bool ClassicPipeline::write_gff_output()
     std::cout << "##date " << boost::gregorian::to_iso_extended_string(d) << std::endl;
 
     // version information, GFF style
-    std::cout << "##source-version Multovl version " << MULTOVL_VER() << " "
-        << MULTOVL_BUILD() << std::endl;
+    std::cout << "##source-version Multovl version " << config_version() << ", "
+        << config_build_type() << " build, compiler: "
+        << config_build_compiler() 
+        << ", system: "<< config_build_system() << std::endl;
     
     // MultOvl standard comments
     write_comments();

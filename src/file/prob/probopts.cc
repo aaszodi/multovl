@@ -37,7 +37,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Own header --
 
 #include "probopts.hh"
-#include "multovl_config.hh"
+#include "thirdparty.h"
 
 // -- Boost headers --
 
@@ -122,22 +122,13 @@ std::ostream& ProbOpts::print_help(std::ostream& out) const
 	out << "Multiple Region Overlap Probabilities" << std::endl
 		<< "Usage: multovlprob [options] file1 [file2...]" << std::endl
         << "file1, file2, ... will be reshuffled, there must be at least one" << std::endl
-		<< "Accepted input file formats: BED, GFF/GTF" 
-#if USE_BAMTOOLS
-        << ", BAM"
-#endif
-        << " (detected from extension)" << std::endl
+		<< "Accepted input file formats: BED, GFF/GTF";
+    if (config_have_bamtools()) {
+        out << ", BAM";
+    }
+    out << " (detected from extension)" << std::endl
 		<< "Output goes to stdout" << std::endl;
 	Polite::print_help(out);
-	return out;
-}
-
-std::ostream& ProbOpts::version_info(std::ostream& out) const
-{
-    MultovlOptbase::version_info(out);
-#if USE_BAMTOOLS
-    out << "BAM file input supported" << std::endl;
-#endif
 	return out;
 }
 

@@ -43,7 +43,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "fileio.hh"
 #include "region.hh"
-#include "multovl_config.hh"
+#include "thirdparty.h"
 using namespace multovl;
 
 // -- Boost headers --
@@ -196,56 +196,59 @@ BOOST_AUTO_TEST_CASE(fromtextfile_test)
     test_goodfile("rega12.bed"); // hard-coded input file name!
 }
 
-#if USE_BAMTOOLS
 BOOST_AUTO_TEST_CASE(frombamfile_test)
 {
-    BOOST_TEST_MESSAGE("Running BAM file input test");  // these are expected to be OK
-    change_region_names("bam");
-    test_goodfile("rega12.bam"); // hard-coded input file name!
+    if (config_have_bamtools()) {
+        BOOST_TEST_MESSAGE("Running BAM file input test");  // these are expected to be OK
+        change_region_names("bam");
+        test_goodfile("rega12.bam"); // hard-coded input file name!
+    } else {
+        BOOST_TEST_MESSAGE("BAM file input test skipped");
+        BOOST_CHECK(true);
+    }
 }
-#endif
 
 // NOTE: Johanna was right (again)
 // the bad BED file needs to be tested, too!
 BOOST_AUTO_TEST_CASE(badbed_test)
 {
     BOOST_TEST_MESSAGE("Running bad BED file input test");
-        std::string inputname = locate_testfile("bad.bed");
-        bool ok = false;
-        io::FileReader fr(inputname);   // noncopyable, must make here...
-        ok = fr.errors().ok();
-        BOOST_CHECK(ok);
-        if (!ok)
-        {
-            fr.errors().print(std::cerr);
-            return; // just don't bother
-        }
+    std::string inputname = locate_testfile("bad.bed");
+    bool ok = false;
+    io::FileReader fr(inputname);   // noncopyable, must make here...
+    ok = fr.errors().ok();
+    BOOST_CHECK(ok);
+    if (!ok)
+    {
+        fr.errors().print(std::cerr);
+        return; // just don't bother
+    }
+    
+    std::string chrom;
+    Region reg;
+    // the errors tested here must correspond to bad.bed's content
+    std::vector<std::string> experrs;
+    boost::assign::push_back( experrs )
+        ("ERROR: At line 2: \"-100\": must not be negative")
+        ("ERROR: At line 3: \"-220\": must not be negative")
+        ("ERROR: At line 4: \"foo\": cannot parse to unsigned int")
+        ("ERROR: At line 5: Too few fields: 2");
         
-        std::string chrom;
-        Region reg;
-        // the errors tested here must correspond to bad.bed's content
-        std::vector<std::string> experrs;
-        boost::assign::push_back( experrs )
-            ("ERROR: At line 2: \"-100\": must not be negative")
-            ("ERROR: At line 3: \"-220\": must not be negative")
-            ("ERROR: At line 4: \"foo\": cannot parse to unsigned int")
-            ("ERROR: At line 5: Too few fields: 2");
-            
-        for (unsigned int i = 0; i < 4; ++i)
-        {
-            ok = fr.read_into(chrom, reg);
-            BOOST_CHECK(!ok);
-            BOOST_CHECK_EQUAL(fr.errors().last_error(), experrs[i]);
-        }
-        
-        // the last line is correct
+    for (unsigned int i = 0; i < 4; ++i)
+    {
         ok = fr.read_into(chrom, reg);
-        BOOST_CHECK(ok);
-        
-        // ...and the whole thing should be finished by now
-        ok = fr.read_into(chrom, reg);
-        BOOST_CHECK(ok);
-        BOOST_CHECK(fr.finished());
+        BOOST_CHECK(!ok);
+        BOOST_CHECK_EQUAL(fr.errors().last_error(), experrs[i]);
+    }
+    
+    // the last line is correct
+    ok = fr.read_into(chrom, reg);
+    BOOST_CHECK(ok);
+    
+    // ...and the whole thing should be finished by now
+    ok = fr.read_into(chrom, reg);
+    BOOST_CHECK(ok);
+    BOOST_CHECK(fr.finished());
 }
 
 BOOST_AUTO_TEST_CASE(badformat_test)

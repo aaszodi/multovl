@@ -41,7 +41,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Own header --
 
 #include "classicopts.hh"
-#include "multovl_config.hh"
+#include "thirdparty.h"
 
 // -- Boost headers --
 
@@ -97,23 +97,14 @@ std::ostream& ClassicOpts::print_help(std::ostream& out) const
 {
 	out << "Multiple Chromosome / Multiple Region Overlaps" << std::endl
 		<< "Usage: multovl [options] [<infile1> [ <infile2> ... ]]" << std::endl
-		<< "Accepted input file formats: BED, GFF/GTF" 
-#if USE_BAMTOOLS
-        << ", BAM"
-#endif
-        << " (detected from extension)" << std::endl
+		<< "Accepted input file formats: BED, GFF/GTF" ;
+    if (config_have_bamtools()) {
+        out << ", BAM";
+    }
+    out << " (detected from extension)" << std::endl
         << "<infileX> arguments are ignored if --load is set" << std::endl
 		<< "Output goes to stdout, select format with the -f option" << std::endl;
 	Polite::print_help(out);
-	return out;
-}
-
-std::ostream& ClassicOpts::version_info(std::ostream& out) const
-{
-    MultovlOptbase::version_info(out);
-#if USE_BAMTOOLS
-    out << "BAM file input supported" << std::endl;
-#endif
 	return out;
 }
 

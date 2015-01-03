@@ -85,9 +85,6 @@ class ClassicOpts : public MultovlOptbase
 	virtual
 	std::ostream& print_help(std::ostream& out) const;
 	
-	virtual
-	std::ostream& version_info(std::ostream& out) const;
-	
 	protected:
 	
 	virtual

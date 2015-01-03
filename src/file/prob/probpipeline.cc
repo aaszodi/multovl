@@ -38,7 +38,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "probpipeline.hh"
 #include "fileio.hh"
-#include "multovl_config.hh"
 
 // -- Boost headers --
 
