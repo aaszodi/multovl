@@ -1,0 +1,50 @@
+/* == MODULE thirdparty.c == */
+
+/* NOTE: This template will be filled in by CMake. Do not edit. */
+
+/* -- Own headers -- */
+
+#include "thirdparty.h"
+#include "stringify.h"
+
+/* -- Standard headers -- */
+
+#include <stdio.h>
+
+/* == Implementation == */
+
+/* Boost is always available */
+#include "boost/version.hpp"
+#define BOOST_PATCHLEVEL (BOOST_VERSION % 100)
+#define BOOST_VERSION_MINOR (BOOST_VERSION / 100 % 1000)
+#define BOOST_VERSION_MAJOR (BOOST_VERSION / 100000)
+
+const char* config_boost_version() {
+    static char boostver[14];    /* format is "Boost X.YY.Z" */
+    snprintf(boostver, 14, "Boost %d.%d.%d",
+        BOOST_VERSION_MAJOR,
+        BOOST_VERSION_MINOR,
+        BOOST_PATCHLEVEL
+    );
+    return boostver;
+}
+
+/* -- Optional third-party libraries -- */
+
+/* BamTools supplies no version macro */
+#define USE_BAMTOOLS @BAMTOOLS_FOUND@
+
+const char* config_bamtools() {
+#ifdef USE_BAMTOOLS
+    return "BAM file input supported";
+#else
+    return "No BAM file support";
+#endif
+}
+
+int config_have_bamtools() {
+    return USE_BAMTOOLS ;
+}
+
+/* == END MODULE thirdparty.c == */
+
