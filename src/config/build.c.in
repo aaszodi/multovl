@@ -7,16 +7,41 @@
 #include "build.h"
 #include "stringify.h"
 
+/* -- Standard headers -- */
+
+#include <string.h>
+#include <limits.h>
+#include <stdio.h>
+
+/* -- Private constants -- */
+
+#define BSYSLEN 1024	/* let's hope this is enough... */
+
+static const char
+	BUILD_TYPE[] = TOSTRING(@CMAKE_BUILD_TYPE@),
+	BUILD_COMPILER[] = TOSTRING(@CMAKE_CXX_COMPILER_ID@ version @CMAKE_CXX_COMPILER_VERSION@);
+static char BUILD_SYSTEM[BSYSLEN]; 
+	
+static const unsigned int BITSIZE = CHAR_BIT * sizeof(void*);
+	
 /* == Implementation == */
 
-const char* config_build_type() { return TOSTRING(@CMAKE_BUILD_TYPE@) ; }
+const char* config_build_type() { return  BUILD_TYPE; }
 
-const char* config_build_compiler() { 
-    return TOSTRING(@CMAKE_CXX_COMPILER_ID@ version @CMAKE_CXX_COMPILER_VERSION@) ;
-}
+const char* config_build_compiler() { return BUILD_COMPILER ; }
 
 const char* config_build_system() {
-    return TOSTRING(@CMAKE_SYSTEM_NAME@ @CMAKE_SYSTEM_VERSION@ @CMAKE_SYSTEM_PROCESSOR@) ;
+	static int done = 0;
+	
+	if (!done) {
+		memset(BUILD_SYSTEM, 0, BSYSLEN);
+		sprintf(BUILD_SYSTEM, "%s (%d-bit)",
+    		TOSTRING(@CMAKE_SYSTEM_NAME@ @CMAKE_SYSTEM_VERSION@ @CMAKE_SYSTEM_PROCESSOR@),
+    		BITSIZE
+    	);
+    	done = 1;
+    }
+    return (const char*)BUILD_SYSTEM;
 }
 
 /* == END MODULE build.c == */

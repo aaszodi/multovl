@@ -34,23 +34,23 @@ cmake_minimum_required(VERSION 2.8)
 project(multovl C CXX)
 
 # Directory layout:-
-#    multovl            <== ${CMAKE_SOURCE_DIR}: top-level
-#    |-cmake            <== extra CMake includes (finders, OS-specific hacks...)
-#    |-doc              <== ${DOCDIR}: Documentation
-#    | |-html           <== HTML docs under version control, e.g. user guide
-#    | |-doxygen        <== Doxygen input
-#    |
-#    |-src              <== ${SRCDIR}: generic multovl components
-#      |-file           <== file-based: "classic" multovl
-#      | |-test         <== unit tests for file-based multovl components (mainly I/O)
-#      | |-prob         <== overlap probabilities: [par]multovlprob
-#      |   |-test       <== unit tests for multovlprob components
-#      |-db             <== database-enabled: pgmultovl
-#      | |-test         <== unit tests for database-enabled pgmultovl components
-#      |
-#      |-test           <== unit tests for generic multovl components
-#      |-exercise       <== timing tests
-#      |-scripts        <== ${SCRIPTS}: helper scripts
+# multovl					<== ${CMAKE_SOURCE_DIR}: top-level
+# ├── cmake					<== extra CMake includes (finders, OS-specific hacks...)
+# ├── config				<== DB access configuration data
+# ├── doc					<== ${DOCDIR}: Documentation
+# │   ├── doxygen			<== Doxygen input
+# │   └── html				<== HTML docs under version control, e.g. user guide
+# └── src					<== ${SRCDIR}: generic multovl components
+#     ├── config			<== C source for the config/build information library
+#     ├── db				<== database-enabled: pgmultovl
+#     ├── exercise			<== timing tests
+#     ├── file				<== file-based: "classic" multovl
+#     │   ├── prob			<== overlap probabilities: [par]multovlprob
+#     │   │   └── test		<== unit tests for multovlprob components
+#     │   └── test			<== unit tests for file-based multovl components (mainly I/O)
+#     ├── scripts			<== ${SCRIPTS}: helper scripts
+#     └── test				<== unit tests for generic multovl components
+#         └── data			<== input files for unit tests
 
 # Brief system/compiler description
 message(STATUS "System = ${CMAKE_SYSTEM_NAME}")

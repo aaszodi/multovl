@@ -89,6 +89,8 @@ of Boost, which may lead to problems. You have to remove them fully and then com
 because CMake will link the system Boost libraries if it can find them, leading to all sorts of
 unpleasant linking errors.</li>
 <li>The <a href='www.cmake.org' target='_blank'>CMake</a> build system, Version 2.8 or above.</li>
+<li>An experimental Windows version, built with Visual Studio, also exists but 
+it is currently not fully supported.</li>
 </ul>
 
 <h4>Optional requirements</h4>
@@ -100,8 +102,9 @@ libraries are available:</p>
 <ul>
 <li>If you have the <a href='http://pezmaster31.github.com/bamtools' target='_blank'>BAMtools</a> library
 then the "classic" MULTOVL will support BAM-formatted binary input files. You will need
-at least Version 2 of BAMtools. Note that BAMtools can not be compiled with
-the Sun Studio 12 compiler at the time of this writing.</li>
+at least Version 2 of BAMtools. Note that BAMtools cannot be compiled with
+the Sun Studio 12 compiler under Solaris and with Visual Studio under Windows
+at the time of this writing.</li>
 <li>MULTOVL can also get its input data from PostgreSQL databases if you have the PostgreSQL
 development headers and libraries (at least Version 8.4) and the official PostgreSQL C++ library
 <a href=http://pqxx.org' target='_blank'>libpqxx</a>
@@ -180,6 +183,9 @@ make install
 <tt>-DCMAKE_BUILD_TYPE=Debug</tt> and omitting the
 <tt>-DCMAKE_INSTALL_PREFIX</tt> setting when invoking <tt>cmake</tt>.
 This is important only for developers.</p>
+
+<p>You can check the configuration and build details of the package 
+by invoking the program <tt>multovl_config</tt>.
 
 <h2><a name='tools'>Command-line tools</a></h2>
 
