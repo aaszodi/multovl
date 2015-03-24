@@ -11,6 +11,7 @@
 # BAMTOOLS_LIBRARY_DIRS => location of the BAMtools library, used in link_directories(...)
 # BAMTOOLS_LIBRARIES => the library plus "lz"
 # these should go in target_link_libraries(...)
+# Note that this module also tries to find the corresponding Zlib.
 # 
 # You can help if you define the BAMTOOLS_ROOT variable
 # e.g. if the installation is at /foo/bar/bamtools/{include,lib}
@@ -31,6 +32,11 @@ set(BAMTOOLS_LIBRARY_DIRS ${BAMTOOLS_TOPLEVEL}/lib)
 set(BAMTOOLS_CORE_NAME bamtools)
 if( UNIX AND BAMTOOLS_USE_STATIC_LIBS )
 	set(BAMTOOLS_CORE_NAME libbamtools.a)
+endif()
+
+# make sure Zlib is found in Unices
+if (UNIX)
+    find_package(ZLIB REQUIRED)
 endif()
 
 # MSVC-specific stuff, this is quite ad-hoc
