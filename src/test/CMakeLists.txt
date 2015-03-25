@@ -12,7 +12,7 @@ flag_fix(testhelper)
 # libraries that may be needed by the unit tests
 set (genericlibs
     testhelper
-    cfg movl
+    movl cfg
 )
 if (BAMTOOLS_FOUND)
     list(APPEND genericlibs ${BAMTOOLS_LIBRARIES})
