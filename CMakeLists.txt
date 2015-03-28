@@ -103,21 +103,34 @@ endif()
 # The minimum Boost version
 set(BOOST_MINIMUM_VERSION "1.44.0")
 
+# Note that Boost_FOUND might be set to NOTFOUND 
+# if the _optional_ library "chrono" is not found
+# although it is required only from V1.50 onwards
 find_package( Boost ${BOOST_MINIMUM_VERSION}
     COMPONENTS regex date_time filesystem system 
 	unit_test_framework program_options serialization thread
 	OPTIONAL_COMPONENTS chrono
 )
-	
+message(STATUS "Boost version = " 
+    ${Boost_MAJOR_VERSION} "." ${Boost_MINOR_VERSION} "." ${Boost_SUBMINOR_VERSION})
+
 # list of Boost libraries needed by apps
 set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} 
     ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     ${Boost_REGEX_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY}
 	${Boost_SERIALIZATION_LIBRARY} ${Boost_THREAD_LIBRARY}
 )
-# Turns out that from V1.50.0 on Boost.Thread depends on Boost.Chrono
-if (Boost_VERSION VERSION_GREATER "1.49")
-	list(APPEND MULTOVL_BOOST_LIBS ${Boost_CHRONO_LIBRARY})
+
+# Cannot use the VERSION_GREATER comparison
+# because FindBoost.cmake returns the 104900-style Boost_VERSION
+if (Boost_VERSION GREATER 104999)
+    if (${Boost_CHRONO_LIBRARY})
+	    list(APPEND MULTOVL_BOOST_LIBS ${Boost_CHRONO_LIBRARY})
+	else()
+	    message(FATAL_ERROR "Boost Chrono needed but not found")
+	endif()
+else()
+    message(STATUS "Boost Chrono library not required, ignore 'Could NOT find Boost' message")
 endif()
 
 # we always need the Boost headers
