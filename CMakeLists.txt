@@ -111,8 +111,6 @@ find_package( Boost ${BOOST_MINIMUM_VERSION}
 	unit_test_framework program_options serialization thread
 	OPTIONAL_COMPONENTS chrono
 )
-message(STATUS "Boost version = " 
-    ${Boost_MAJOR_VERSION} "." ${Boost_MINOR_VERSION} "." ${Boost_SUBMINOR_VERSION})
 
 # list of Boost libraries needed by apps
 set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} 
@@ -123,8 +121,9 @@ set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY}
 
 # Cannot use the VERSION_GREATER comparison
 # because FindBoost.cmake returns the 104900-style Boost_VERSION
+# in some older installations
 if (Boost_VERSION GREATER 104999)
-    if (${Boost_CHRONO_LIBRARY})
+    if (Boost_CHRONO_FOUND)
 	    list(APPEND MULTOVL_BOOST_LIBS ${Boost_CHRONO_LIBRARY})
 	else()
 	    message(FATAL_ERROR "Boost Chrono needed but not found")
