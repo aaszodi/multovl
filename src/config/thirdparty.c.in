@@ -35,7 +35,7 @@ const char* config_boost_version() {
 #define USE_BAMTOOLS @BAMTOOLS_FOUND@
 
 const char* config_bamtools() {
-#ifdef USE_BAMTOOLS
+#if USE_BAMTOOLS
     return "BAM file input supported";
 #else
     return "No BAM file support";
