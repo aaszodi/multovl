@@ -6,7 +6,7 @@
 <body>
 <h1 style="color:navy">MULTOVL: Multiple Region Overlap Guide</h1>
 
-<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.2, Spring 2012</em></center></p>
+<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.3, Spring 2015</em></center></p>
 
 <h2>Table of contents</h2>
 
@@ -60,67 +60,60 @@ be done in parallel in theory, leading to the following high-level schema:-</p>
 
 <a name='parallel'><div><img class='bordered' src="parallel.jpg" ALT="Parallelization schema"></div></a>
 
-<p>This is a planned feature which has not been implemented yet. I tried
-the <a href='http://www.openmp.org' _target='blank'>OpenMP</a> standard and Intel's
-<a href='http://'http://www.threadingbuildingblocks.org/' _target='blank'>Threading Building Blocks</a> (TBB).
-It turned out, however, that at least on the hardware platforms accessible to me the speedup was nowhere
-near the theoretical optimum. The current distribution therefore does not contain these
-experimental implementations.</p>
+<p>This is a planned feature which has not been implemented yet.</p>
+
+<h3>Reference</h3>
+
+<p>The MULTOVL algorithm and implementation have been published in the following
+Application Note: </p>
+
+<p>Asz&oacute;di, A. (2012): MULTOVL: Fast multiple overlaps of genomic regions. 
+<i>Bioinformatics</i> <b>28</b>: 3318-3319.</p>
+
+<p>Please include the above reference in scientific publications if you use
+MULTOVL.</p>
 
 <h2><a name='installation'>Installation</a></h2>
 
 <h3>Prerequisites</h3>
 
-<h4>Basic requirements</h4>
+<h4>Supported operating systems and architectures</h4>
 
 <ul>
-<li>A UNIX-like operating system. MULTOVL is developed and tested under
-Mac OS X "Leopard", "Snow Leopard", "Lion",
-Linux (Ubuntu, Debian, OpenSUSE), Solaris, and sometimes even IRIX.</li>
-<li>An ANSI-compliant C++ compiler. MULTOVL is developed and tested with the 
-<a href='gcc.gnu.org' target='_blank'>GNU G++</a>, the 
-<a href='http://software.intel.com/en-us/intel-compilers' _target='blank'>Intel C++</a>
-compilers and 
-<a href= 'http://www.oracle.com/technetwork/server-storage/solarisstudio/downloads/studio12-update1-136165.html' _target='blank'>SunStudio 12u1</a>
-under Solaris.</li>
-<li>The <a href='www.boost.org' target='_blank'>Boost C++ libraries</a>, at least Version 1.44.
-Note that Debian distros contain antediluvian versions
-of Boost, which may lead to problems. You have to remove them fully and then compile your own from source,
-because CMake will link the system Boost libraries if it can find them, leading to all sorts of
-unpleasant linking errors.</li>
-<li>The <a href='www.cmake.org' target='_blank'>CMake</a> build system, Version 2.8 or above.</li>
-<li>An experimental Windows version, built with Visual Studio, also exists but 
-it is currently not fully supported.</li>
-</ul>
-
-<h4>Optional requirements</h4>
-
-<p>If the basic requirements are met, then only the "classic" MULTOVL will be built that takes
-BED or GFF files as input. More functionality can be added, however, if the following tools and
-libraries are available:</p>
-
-<ul>
-<li>If you have the <a href='http://pezmaster31.github.com/bamtools' target='_blank'>BAMtools</a> library
-then the "classic" MULTOVL will support BAM-formatted binary input files. You will need
-at least Version 2 of BAMtools. Note that BAMtools cannot be compiled with
-the Sun Studio 12 compiler under Solaris and with Visual Studio under Windows
-at the time of this writing.</li>
-<li>MULTOVL can also get its input data from PostgreSQL databases if you have the PostgreSQL
-development headers and libraries (at least Version 8.4) and the official PostgreSQL C++ library
-<a href=http://pqxx.org' target='_blank'>libpqxx</a>
-available. At least version 3.1 is required, but version 4.0 or above is recommended.</li>
-</ul>
-
-<!--
-<h4>Requirements for the parallel MULTOVL versions</h4>
-
-<ul>
-<li>To build the OpenMP version, your compiler must support the OpenMP 2.0 standard.
-Most modern C++ compilers support at least OpenMP 2.5, g++ from Version 4.2 or above.</li>
-<li>To build the TBB version, you obviously need the TBB library. The open source variant
-is quite portable, I even got it working under OpenSolaris 2009.06.</li>
-</ul>
+<li>Mac OS X 10.5 and above on PowerPC (OS X 10.5 only), or on Intel X86</li>
+<li>Linux on Intel X86, ARMv7</li>
+<!-- fancy Unix platforms
+<li>Solaris 11 on Intel X86 or SPARC</li>
+<li>Irix 6.5 on SGI/MIPS</li>
 -->
+<li>Windows 7 and above on Intel X86</li>
+</ul>
+
+<h4>Compilers</h4>
+
+<p>Any decent C++ compiler supporting the C++98 version of the language can in principle
+be used, implementation quirks and potential incompatibilities notwithstanding.
+The following compilers have been used in building MULTOVL:</p>
+
+<ul>
+<li>G++, Version 4.5 or above</li>
+<li>LLVM Clang++, Version 3.3 or above</li>
+<li>Intel C++ XE 2015</li>
+<!-- platform-specific Unix:
+<li>Sun Studio 12.1 or above</li>
+<li>SGI MipsPro 7.4</li>
+-->
+<li>Microsoft Visual Studio 2013</li>
+</ul>
+
+<h4>Third-party libraries</h4>
+
+<p>MULTOVL needs the Boost C++ libraries, Version 1.44 or above.</p>
+
+<h4>Other tools</h4>
+
+<p>MULTOVL builds are configured with CMake, Version 2.8.8 or above.
+Documentation is generated with Doxygen, Version 1.7 or above.</p>
 
 <h3>Building MULTOVL</h3>
 
@@ -134,14 +127,12 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_CXX_COMPILER=your_favourite_C++_compiler \
     -DBOOST_ROOT=/path/to/boost \
-    -DBAMTOOLS_ROOT=/path/to/BAMtools \
-    -DPOSTGRES_ROOT=/path/to/postgresql \
-    -DPQXX_ROOT=/path/to/libpqxx \
+    -DBAMTOOLS_ROOT=/path/to/BAMtools
     -DCMAKE_INSTALL_PREFIX=/path/to/installdir ..
 </code></pre>
 
 <p>If the <tt>-DCMAKE_CXX_COMPILER</tt> parameter is omitted, the system default C++ compiler
-will be used. On Linux and OS X, this will be the GNU g++ compiler.</p>
+will be used.</p>
 
 <p>CMake's Boost detection script is not perfect. Sometimes it is not enough to specify
 <tt>-DBOOST_ROOT</tt>: for instance on 64-bit OpenSuSE, the Boost headers are in
@@ -152,23 +143,13 @@ you have to specify <tt>-DBOOST_INCLUDEDIR=/usr/include</tt> and
 <p>If the <tt>-DBAMTOOLS_ROOT</tt> parameter is specified, then BAM-formatted binary
 input files will be supported.</p>
 
-<p>The PostgreSQL-based version <tt>pgmultovl</tt> will be built if <tt>-DPQXX_ROOT</tt>
-specifies the location of the official PostgreSQL C++ library. The other necessary PostgreSQL
-development headers and libraries will be found automatically if the <tt>pg_config</tt> utility
-is in your <tt>PATH</tt>. If this is not the case, you can help CMake by specifying
-<tt>-DPOSTGRES_ROOT</tt> or by adding <tt>pg_config</tt> to your <tt>PATH</tt>.</p>
-
-<p>The external libraries will be linked statically by default. You can ask CMake to 
+<p>The libraries will be linked statically by default. You can ask CMake to 
 link all external libraries dynamically by specifying the option
-<tt>-DMULTOVL_USE_DYNAMIC_LIBS=ON</tt>. Or you can specify for each external library
+<tt>-DMULTOVL_USE_STATIC_LIBS=OFF</tt>. Or you can specify for each external library
 whether you want to have static or dynamic linking by setting the options
 <tt>-D&lt;lib&gt;_USE_STATIC_LIBS=ON</tt> where <tt>&lt;lib&gt;</tt>
-can be <tt>Boost, BAMTOOLS, POSTGRES, PQXX</tt>. (Although I do not know why
+can be <tt>Boost, BAMTOOLS</tt>. (Although I do not know why
 anyone in his/her right mind would do that...)</p>
-<!--
-<p>Additionally, you may need to specify the
-location of the TBB (see <tt>${MULTOVL}/FindTBB.cmake</tt>). </p>
--->
 
 <p>Assuming the configuration went well, you can compile and install the package and 
 its documentation:-</p>
@@ -380,184 +361,6 @@ the number of worker threads using the <tt>-T threadno</tt> option. Note that ea
 worker thread holds a private copy of the input track data structures: be aware of 
 the speed/memory tradeoff.</p>
 
-<h3>MULTOVL talking to a relational database</h3>
-
-<p>The <tt>pgmultovl</tt> version of the program can fetch input track/region information
-from a PostgreSQL database and write the results back. The coupling between <tt>pgmultovl</tt>
-and the database is implemented by a <span class="verb">configuration file</span> to keep things
-flexible. The configuration file is in <a href='http://www.json.org' target='_blank'>JSON format</a>.
-It specifies the database connection parameters and the SQL queries necessary to download and upload
-the tracks. Here is an example configuration file for my "RegAn" database which you can find
-in the <tt>config/regan.cfg</tt> file in your installation:</p>
-
-<pre><code>{
-    "conn":
-    {
-        "hostname": "localhost",
-        "database": "reg",
-        "read":
-        {
-            "user": "readonly",
-            "password": "rpass"
-        },
-        "write":
-        {
-            "user": "readwrite",
-            "password": "wpass"
-        }
-    },
-    "sql":
-    {
-        "download": "SELECT regionid, chrom, pb.iint_low(coords) AS first, \
-          pb.iint_high(coords) AS last, strand FROM reg.trackregview WHERE tracknm = $1",
-        "upload":
-        {
-            "track": "SELECT diag FROM reg.add_comb_operation($1, 'pgmultovl', 
-              $2, 'overlap',$3, $4)",
-            "region": "SELECT diag FROM reg.store_region($1, $2, $3, $4, $5,
-              'overlap', $6)"
-        }
-    }
-}
-</code></pre>
-
-<p>The <tt>"conn"</tt> group describes the connection parameters, these should be self-explanatory.
-<tt>pgmultovl</tt> requires one read-only and one read-write login to the DB, these are defined
-in the <tt>conn.read</tt> and <tt>conn.write</tt> parameter groups, respectively.</p>
-
-<p>The interesting bits are in the <tt>"sql"</tt> group. These contain SQL prepared statements
-that are supposed to obey certain conventions as described below.</p>
-
-<h4>The <tt>sql.download</tt> statement</h4>
-
-<p>This statement is used to fetch all regions for an input track. It takes a single text parameter
-<tt>$1</tt>, the name of the track (we assume that tracks are uniquely identifiable by a name).
-The statement shall return 5 columns as follows:-</p>
-
-<ol>
-<li><span class='verb'>regionid</span>: a unique identifier of the region. Can be text or integer.</li>
-<li><span class='verb'>chrom</span>: the name of the chromosome the current region is on (text).</li>
-<li><span class='verb'>first</span>: the first coordinate of the region (integer).</li>
-<li><span class='verb'>last</span>: the last coordinate of the region (integer).</li>
-<li><span class='verb'>strand</span>: the strand information, can be <tt>'+'</tt>, <tt>'-'</tt>, <tt>'.'</tt>
-(the latter for 'any' or 'unknown', as usual).</li>
-</ol>
-
-<h4>The <tt>sql.upload.track</tt> statement</h4>
-
-<p>This statement is used to create the result track, i.e. the set of overlap regions in the DB.
-It takes four input parameters:</p>
-
-<ol>
-<li><span class='verb'>user login</span> ($1): the login name of the user who ran <tt>pgmultovl</tt>.</li>
-<li><span class='verb'>parameters</span> ($2): the command-line parameters given to <tt>pgmultovl</tt>.</li>
-<li><span class='verb'>ancestor tracks</span> ($3): the names of the input tracks as a PostgreSQL
-    array literal such as <tt>'{track1, track2}'</tt>.</li>
-<li><span class='verb'>output track name</span> ($4): the name of the output track.</li>
-</ol>
-
-<p>This setup is admittedly inspired by the way how track combinations are handled in my RegAn DB,
-you may of course ignore some of these input parameters if your database schema does not support them.</p>
-
-<p>The track upload statement is expected to return a single text value called "diag". The value
-must be <tt>'OK'</tt> if the track upload operation was successful. Any other text will be 
-interpreted as an error message and will be printed to standard error by <tt>pgmultovl</tt>.</p>
-
-<h4>The <tt>sql.upload.region</tt> statement</h4>
-
-<p>This statement is used to upload one result region. It assumes that the track containing
-the output regions has been created already. It takes 6 input parameters:</p>
-
-<ol>
-<li><span class='verb'>output track name</span> ($1): the name of the output track.</li>
-<li><span class='verb'>chromosome name</span> ($2): the name of the chromosome containing the overlap region.</li>
-<li><span class='verb'>first, last, strand</span> ($3, $4, $5): the coordinates and strand information
-of the overlap region.</li>
-<li><span class='verb'>ancestor IDs</span> ($6): a PostgreSQL array literal listing the database IDs
-of the regions that generated the current overlap, e.g. <tt>'{35,78,112}'</tt>.</li>
-</ol>
-
-<p>The region upload statement is also expected to return a single "diag" text value which must be
-<tt>'OK'</tt> if all went well.</p>
-
-<h4>Running pgmultovl</h4>
-
-<p><tt>pgmultovl</tt> takes the following command-line parameters:</p>
-
-<pre><code>Multiple Region Overlaps in a PostgreSQL Database
-Usage: pgmultovl [options] &lt;trackname1&gt; [ &lt;trackname2&gt; ... ]
-Output will be inserted into the same database.
-Options:
-  -h [ --help ]            Print this help and exit
-  --version                Print version information and exit
-  -c [ --common-mult ] arg Find exactly arg-fold overlaps (default 2), -c 1 
-                           detects 'solitary regions', overrides -m, -M
-  -L [ --ovlen ] arg       Minimal overlap length (default 1), -c 1 forces -L 1
-  -m [ --minmult ] arg     Minimal multiplicity of the overlaps (default 2), 1 
-                           detects solitary regions,too
-  -M [ --maxmult ] arg     Maximal multiplicity of the overlaps, 0 (the 
-                           default) means no upper limit
-  -u [ --uniregion ]       List union of overlapping regions instead of each 
-                           overlap, ignored if -c 1 is set
-  -n [ --nointrack ]       Do not detect overlaps within the same track, 
-                           ignored if -c 1 or -u is set
-  -t [ --timing ]          List execution times only, no region output
-  -C [ --configfile ] arg  Configuration file, default is "./pgmultovl.cfg"
-  -o [ --outtrack ] arg    Output track name
-</code></pre>
-
-<p>The parameters are essentially the same as with the "classic" MULTOVL. Note the <tt>-C</tt>
-option for specifying the configuration file, and the mandatory <tt>-o</tt> option. The input 
-track names are specified as positional parameters, you'll need to specify at least one.</p>
-
-<p><tt>pgmultovl</tt> also prints some general information to standard output which corresponds
-to the comments written in the output file by the "classic" variant. Here is an example:</p>
-
-<pre><code># PgMultovl version 1.2 rev. 80 (Apr 18 2012), Debug build: GNU compiler on Darwin
-# Built with libpqxx version 4.0
-# Parameters =  -L 1 -m 2 -M 0 -o ovl -C ../config/regan.cfg
-# Input tracks = 2
-# rega = track 1, region count = 9
-# regb = track 2, region count = 8
-# Overlap count = 7
-# Multiplicity counts = 1,2:7
-</code></pre>
-
-<!--
-<h3>Parallel MULTOVL versions</h3>
-
-<p>These will come later whenever there is a pressing need (and time!) to implement them.</p>
-<pre><code>Multiple Chromosome / Multiple Region Overlaps
-Parallel OpenMP version
-Number of available CPU cores: 4
-Usage: ompmultovl [options] <regfile1> [<regfile2> ...]
-Output goes to stdout in GFF2 format.
-Options:
-  -h [ --help ]                  Print this help and exit
-  --version                      Print version information and exit
-  -c [ --common-mult ] arg (=0)  Find exactly arg-fold overlaps, -c 1 detects 
-                                 'solitary regions', overrides -m, -M
-  -L [ --ovlen ] arg (=1)        Minimal overlap length, -c 1 forces -L 1
-  -m [ --minmult ] arg (=1)      Minimal multiplicity of the overlaps, 1 
-                                 detects solitary regions,too
-  -M [ --maxmult ] arg (=0)      Maximal multiplicity of the overlaps, 0 means 
-                                 no upper limit
-  -u [ --uniregion ]             List union of overlapping regions instead of 
-                                 each overlap, ignored if -c 1 is set
-  -n [ --nointrack ]             Do not detect overlaps within the same track, 
-                                 ignored if -c 1 or -u is set
-  -t [ --timing ]                List execution times only, no region output
-  -s [ --source ] arg (=multovl) Source field in GFF output
-  -T [ --threadno ] arg (=4)     Number of threads to be used
-</code></pre>
--->
-<!--
-<p>Shown above is the help for the OpenMP-parallelized version <tt>ompmultovl</tt>;
-the Intel TBB-based parallel version <tt>tbbmultovl</tt> uses exactly the same settings.
-The only difference to the "classic" MULTOVL is that you can specify the number of
-parallel threads with the <tt>-T</tt> option, which is set to the number of available
-CPU cores by default.</p>
--->
 
 <h3><a name=bed2gff>BED-to-GFF format and coordinate conversion script <tt>bed2gff.sh</tt></a></h3>
 

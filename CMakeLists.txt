@@ -1,12 +1,11 @@
 # Top-level CMake file for the Multovl tools
-# 2010-08-10 Andras Aszodi
+# 2015-03-28 Andras Aszodi
 #
 # USAGE: you should invoke cmake in your build directory like this:-
 # cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \
 #   -DBOOST_ROOT=/path/to/boost \
 #	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ # <-- optional if not found automatically
-#   -DBAMTOOLS_ROOT=/path/to/bamtools \
-#   -DPQXX_ROOT=/path/to/pqxx \
+#   -DBAMTOOLS_ROOT=/path/to/bamtools
 #   ..
 #
 # The Debug build will contain the unit tests but no INSTALL or PACKAGE targets.
@@ -17,7 +16,7 @@
 #	-DMULTOVL_USE_STATIC_LIBS:BOOL=OFF
 #	You can specify dynamic linkage for each of the 3rd party libraries (not recommended)
 #	by setting 
-#	-D{Boost,BAMTOOLS,POSTGRES,PQXX}_USE_STATIC_LIBS:BOOL=OFF as appropriate.
+#	-D{Boost,BAMTOOLS}_USE_STATIC_LIBS:BOOL=OFF as appropriate.
 #
 # Optional parameters:-
 #   -DCMAKE_CXX_COMPILER=<compiler> for using a C++ compiler other than the system default
@@ -36,13 +35,11 @@ project(multovl C CXX)
 # Directory layout:-
 # multovl					<== ${CMAKE_SOURCE_DIR}: top-level
 # ├── cmake					<== extra CMake includes (finders, OS-specific hacks...)
-# ├── config				<== DB access configuration data
 # ├── doc					<== ${DOCDIR}: Documentation
 # │   ├── doxygen			<== Doxygen input
 # │   └── html				<== HTML docs under version control, e.g. user guide
 # └── src					<== ${SRCDIR}: generic multovl components
 #     ├── config			<== C source for the config/build information library
-#     ├── db				<== database-enabled: pgmultovl
 #     ├── exercise			<== timing tests
 #     ├── file				<== file-based: "classic" multovl
 #     │   ├── prob			<== overlap probabilities: [par]multovlprob
@@ -58,7 +55,7 @@ message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
 
 # Version string for the project
 set(MULTOVL_VERSION_MAJOR 1)
-set(MULTOVL_VERSION_MINOR 2)
+set(MULTOVL_VERSION_MINOR 3)
 
 # the source directory
 # The top-level dir will be CMAKE_SOURCE_DIR because this CMakeLists.txt is there
@@ -149,24 +146,6 @@ if (NOT BAMTOOLS_FOUND)
     message(STATUS "BAM file format will not be supported.")
 endif()
 
-# optional Postgres database access
-set(POSTGRES_ROOT "/usr/local/pgsql" CACHE PATH "Top-level PostgreSQL directory")
-set(POSTGRES_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
-    CACHE BOOL "Shall the Postgres libraries be linked statically?")
-find_package(Postgres QUIET)
-set(PQXX_FOUND 0)
-if (POSTGRES_FOUND)
-    set(PQXX_ROOT "/usr/local/pqxx" CACHE PATH "Top-level PQXX library directory")
-    set(PQXX_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
-        CACHE BOOL "Shall the PQXX library be linked statically?")
-    find_package(PQXX QUIET)
-    if (NOT PQXX_FOUND)
-        message(STATUS "Database access will not be supported because the PQXX library was not found.")
-    endif(NOT PQXX_FOUND)
-else(POSTGRES_FOUND)
-    message(STATUS "Database access will not be supported because Postgres was not found.")
-endif(POSTGRES_FOUND)
-
 # -- END OF LIBRARIES --
 
 # platform-specific settings
@@ -240,12 +219,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             DESTINATION ${MULTOVL_DESTDIR}/doc/doxygen)
     endif(DOXYGEN)
 
-    # optional Postgres example config file
-    if (PQXX_FOUND)
-        install(FILES "${PROJECT_SOURCE_DIR}/config/regan.cfg"
-            DESTINATION ${MULTOVL_DESTDIR}/config)
-    endif()
-    
     # packaging: common settings
     set(CPACK_PACKAGE_VERSION_MAJOR "${MULTOVL_VERSION_MAJOR}")
     set(CPACK_PACKAGE_VERSION_MINOR "${MULTOVL_VERSION_MINOR}")
