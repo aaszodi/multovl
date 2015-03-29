@@ -3,7 +3,7 @@ IMPORTANT NOTICE:
 This is a fork of the BamTools package, Version 2.3.0.
 The reason for the fork is that BamTools has not received 
 any updates since 2013 and some changes are necessary
-to compile it to non-Linux platforms such as Windows or Solaris.
+to build it on non-Linux platforms such as Windows or Solaris.
 The fork was created on 2015-03-29.
 
 The original README follows below:
