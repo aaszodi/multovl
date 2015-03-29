@@ -138,29 +138,37 @@ include_directories(
 )
 
 # BamTools now comes as a Multovl subtree
-# The BamTools subtree is here:
+# The repo of AA's BamTools for is at: ssh://git@bitbucket.org:aa117sdf/bamtools2.git
+# Note that its source is edited compared to the original V2.3.0
+# BamTools subtree location
 set(BAMTOOLS_TOPLEVEL "${CMAKE_SOURCE_DIR}/bamtools2")
+set(BAMTOOLS_BUILDDIR "${BAMTOOLS_TOPLEVEL}/build")
 
-# ***
-# TODO: remove this after transition
-# ***
+# We need the BamTools API only
+# "our" version's CMake setup understands this variable
+set(BAMTOOLS_API_ONLY "YES")
+
+set(BAMTOOLS_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS} 
+    CACHE BOOL "Shall the BamTools libraries be linked statically?")
+
 # These are the variables delivered by the old `cmake/FindBamTools.cmake` include.
 # During the transition we keep these variables but assign the "correct" values.
-# BAMTOOLS_FOUND => true if BAM tools is found
+# BAMTOOLS_FOUND => true if BAM tools is found. TODO: Delete after transition
 set(BAMTOOLS_FOUND 1)
-# BAMTOOLS_INCLUDE_DIRS => location of the BAMtools headers, used in include_directories(...):
-set(BAMTOOLS_INCLUDE_DIRS "${BAMTOOLS_TOPLEVEL}/include")
+# BAMTOOLS_INCLUDE_DIRS => location of the BAMtools API headers, used in include_directories(...):
+# the MultOvl source files include "api/XXX.h"
+set(BAMTOOLS_INCLUDE_DIRS "${BAMTOOLS_TOPLEVEL}/src")
 # BAMTOOLS_LIBRARY_DIRS => location of the BAMtools library, used in link_directories(...)
-set(BAMTOOLS_LIBRARY_DIRS "${BAMTOOLS_TOPLEVEL}/lib")
+set(BAMTOOLS_LIBRARY_DIRS "${BAMTOOLS_BUILDDIR}")
 
-# make sure Zlib is found in Unices
+# make sure Zlib is found
 if (UNIX)
     find_package(ZLIB REQUIRED)
 endif()
 # *** TODO *** MSVC
 
-# build BamTools
-add_subdirectory(${BAMTOOLS_TOPLEVEL} ${BAMTOOLS_TOPLEVEL}/build)
+# build BamTools API
+add_subdirectory(${BAMTOOLS_TOPLEVEL}/src/api ${BAMTOOLS_BUILDDIR})
 
 if (MULTOVL_USE_STATIC_LIBS)
     set(BAMTOOLS_CORE_LIBRARY "${BAMTOOLS_LIBRARY_DIRS}/libbamtools.a") # UNIX only

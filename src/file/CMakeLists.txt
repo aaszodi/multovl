@@ -13,7 +13,7 @@ list(APPEND movl_fileiosrc bamio.cc)
 set_source_files_properties(fileformat.cc fileio.cc PROPERTIES 
     COMPILE_DEFINITIONS "USE_BAMTOOLS")
 
-if (MULTOVL_USE_STATIC_LIBS)
+if (BAMTOOLS_USE_STATIC_LIBS)
 	add_library(movl_fileio STATIC ${movl_fileiosrc})
 	add_dependencies(movl_fileio "BamTools-static")
 else()
