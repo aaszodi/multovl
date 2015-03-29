@@ -35,28 +35,5 @@ endif()
 # classic multovl (the file-based variant) is always built
 add_subdirectory(file)
 
-# PQXX_FOUND implies that Postgres has also been found
-if (PQXX_FOUND)
-    # build pgmultovl as well
-    add_subdirectory(db)
-endif()
-
 # Exercising/timing, always built
 add_subdirectory(${SRCDIR}/exercise exercise)
-=======
-# ==========================
-# BamTools CMakeLists.txt
-# (c) 2010 Derek Barnett
-#
-# src/
-# ==========================
-
-add_subdirectory( api )
-add_subdirectory( third_party )
-add_subdirectory( toolkit )
-add_subdirectory( utils )
-
-# export shared headers
-include( ExportHeader.cmake )
-set( SharedIncludeDir "shared" )
-ExportHeader( SharedHeaders shared/bamtools_global.h ${SharedIncludeDir} )

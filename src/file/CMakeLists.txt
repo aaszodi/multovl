@@ -6,27 +6,24 @@
 set(movl_fileiosrc 
     fileformat.cc fileio.cc textio.cc linereader.cc linewriter.cc
 )
-if (BAMTOOLS_FOUND)
-    include_directories(
-        ${BAMTOOLS_INCLUDE_DIRS}
-    )
-    list(APPEND movl_fileiosrc bamio.cc)
-    set_source_files_properties(fileformat.cc fileio.cc PROPERTIES 
-        COMPILE_DEFINITIONS "USE_BAMTOOLS")
-endif()
+
+# BamTools is always there
+include_directories( ${BAMTOOLS_INCLUDE_DIRS} )
+list(APPEND movl_fileiosrc bamio.cc)
+set_source_files_properties(fileformat.cc fileio.cc PROPERTIES 
+    COMPILE_DEFINITIONS "USE_BAMTOOLS")
 
 if (MULTOVL_USE_STATIC_LIBS)
 	add_library(movl_fileio STATIC ${movl_fileiosrc})
+	add_dependencies(movl_fileio "BamTools-static")
 else()
 	add_library(movl_fileio SHARED ${movl_fileiosrc})
+	add_dependencies(movl_fileio "BamTools")
 endif()
 flag_fix(movl_fileio)
 
 # basic set of libraries for all variants
-set(FILEMULTOVLIBS movl_fileio ${MULTOVLIBS})   # library order does matter in Linux/g++
-if (BAMTOOLS_FOUND)
-    list(APPEND FILEMULTOVLIBS ${BAMTOOLS_LIBRARIES})
-endif()
+set(FILEMULTOVLIBS movl_fileio ${MULTOVLIBS} ${BAMTOOLS_LIBRARIES})   # library order does matter in Linux/g++
 
 # "classic" Multovl, single-core variant
 add_executable(multovl multovl.cc classicpipeline.cc classicopts.cc)

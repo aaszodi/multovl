@@ -5,7 +5,6 @@
 # cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \
 #   -DBOOST_ROOT=/path/to/boost \
 #	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ # <-- optional if not found automatically
-#   -DBAMTOOLS_ROOT=/path/to/bamtools
 #   ..
 #
 # The Debug build will contain the unit tests but no INSTALL or PACKAGE targets.
@@ -35,6 +34,7 @@ project(multovl C CXX)
 # Directory layout:-
 # multovl					<== ${CMAKE_SOURCE_DIR}: top-level
 # ├── cmake					<== extra CMake includes (finders, OS-specific hacks...)
+# ├── bamtools2				<== BamTools subtree
 # ├── doc					<== ${DOCDIR}: Documentation
 # │   ├── doxygen			<== Doxygen input
 # │   └── html				<== HTML docs under version control, e.g. user guide
@@ -137,14 +137,39 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
 )
 
-# optional BAM tools for the file-based I/O
-set(BAMTOOLS_ROOT "/usr/local/bamtools" CACHE PATH "Top-level BamTools directory")
-set(BAMTOOLS_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
-    CACHE BOOL "Shall the BAM tools be linked statically?")
-find_package(BamTools QUIET)
-if (NOT BAMTOOLS_FOUND)
-    message(STATUS "BAM file format will not be supported.")
+# BamTools now comes as a Multovl subtree
+# The BamTools subtree is here:
+set(BAMTOOLS_TOPLEVEL "${CMAKE_SOURCE_DIR}/bamtools2")
+
+# ***
+# TODO: remove this after transition
+# ***
+# These are the variables delivered by the old `cmake/FindBamTools.cmake` include.
+# During the transition we keep these variables but assign the "correct" values.
+# BAMTOOLS_FOUND => true if BAM tools is found
+set(BAMTOOLS_FOUND 1)
+# BAMTOOLS_INCLUDE_DIRS => location of the BAMtools headers, used in include_directories(...):
+set(BAMTOOLS_INCLUDE_DIRS "${BAMTOOLS_TOPLEVEL}/include")
+# BAMTOOLS_LIBRARY_DIRS => location of the BAMtools library, used in link_directories(...)
+set(BAMTOOLS_LIBRARY_DIRS "${BAMTOOLS_TOPLEVEL}/lib")
+
+# make sure Zlib is found in Unices
+if (UNIX)
+    find_package(ZLIB REQUIRED)
 endif()
+# *** TODO *** MSVC
+
+# build BamTools
+add_subdirectory(${BAMTOOLS_TOPLEVEL} ${BAMTOOLS_TOPLEVEL}/build)
+
+if (MULTOVL_USE_STATIC_LIBS)
+    set(BAMTOOLS_CORE_LIBRARY "${BAMTOOLS_LIBRARY_DIRS}/libbamtools.a") # UNIX only
+else()
+    set(BAMTOOLS_CORE_LIBRARY bamtools)    # UNIX only
+endif()
+
+# BAMTOOLS_LIBRARIES => the library plus "lz", used in target_link_libraries(...)
+set(BAMTOOLS_LIBRARIES ${BAMTOOLS_CORE_LIBRARY} ${ZLIB_LIBRARIES})
 
 # -- END OF LIBRARIES --
 
@@ -183,6 +208,7 @@ add_subdirectory(${SRCDIR} bin)
 
 # custom target to make all apps at once
 add_custom_target(apps DEPENDS ${app_targets})
+
 # ... and the unit tests
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_custom_target(unit_tests DEPENDS ${unit_test_targets})
@@ -245,69 +271,3 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_SOURCE_IGNORE_FILES "build/;debug/;release/;\\\\.DS_Store;\\\\.project;\\\\.git")
     include(CPack)
 endif()
-=======
-# ==========================
-# BamTools CMakeLists.txt
-# (c) 2010 Derek Barnett
-#
-# top-level
-# ==========================
-
-# set project name
-project( BamTools )
-
-# Cmake requirements
-cmake_minimum_required( VERSION 2.6.4 )
-
-# Force the build directory to be different from source directory
-macro( ENSURE_OUT_OF_SOURCE_BUILD MSG )
-    string( COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" insource )
-    get_filename_component( PARENTDIR ${CMAKE_SOURCE_DIR} PATH )
-    string( COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${PARENTDIR}" insourcesubdir )
-    IF( insource OR insourcesubdir )
-        message( FATAL_ERROR "${MSG}" )
-    ENDIF( insource OR insourcesubdir )
-endmacro( ENSURE_OUT_OF_SOURCE_BUILD )
-
-ensure_out_of_source_build( "
-  ${PROJECT_NAME} requires an out of source build.
-  $ mkdir build 
-  $ cd build
-  $ cmake ..
-  $ make 
-(or the Windows equivalent)\n" )
-
-# set BamTools version information
-set( BamTools_VERSION_MAJOR 2 )
-set( BamTools_VERSION_MINOR 3 )
-set( BamTools_VERSION_BUILD 0 )
-
-# set our library and executable destination dirs
-set( EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin" )
-set( LIBRARY_OUTPUT_PATH    "${CMAKE_SOURCE_DIR}/lib" )
-
-# define compiler flags for all code
-set( CMAKE_BUILD_TYPE Release )
-add_definitions( -Wall -D_FILE_OFFSET_BITS=64 )
-
-# -----------------------------------------------
-# handle platform-/environment-specific defines
-
-# If planning to run in Node.js environment, run:
-# cmake -DEnableNodeJS=true
-if( EnableNodeJS )
-    add_definitions( -DSYSTEM_NODEJS=1 )
-endif()
-
-# If running on SunOS
-if( "${CMAKE_SYSTEM_NAME}" MATCHES "SunOS" )
-    add_definitions( -DSUN_OS )
-endif()
-
-# -------------------------------------------
-
-# add our includes root path
-include_directories( src )
-
-# list subdirectories to build in
-add_subdirectory( src )
