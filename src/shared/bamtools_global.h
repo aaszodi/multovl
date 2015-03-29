@@ -61,7 +61,8 @@
 */
 #ifndef BAMTOOLS_TYPES
 #define BAMTOOLS_TYPES
-#  ifdef _MSC_VER
+/* This had to be fixed because it caused redefinition errors */
+#  if 0 /* was #ifdef _MSC_VER */
      typedef char                 int8_t;
      typedef unsigned char       uint8_t;
      typedef short               int16_t;

@@ -34,6 +34,17 @@ set( BamTools_VERSION_MAJOR 2 )
 set( BamTools_VERSION_MINOR 3 )
 set( BamTools_VERSION_BUILD 0 )
 
+# -- Find Zlib --
+# added by AA, 2015-03-29
+set(ZLIB_ROOT "/zlib/install" CACHE PATH "Top-level Zlib installation directory")
+find_package(ZLIB REQUIRED)
+if (ZLIB_FOUND)
+	message(STATUS "Zlib found")
+else()
+	message(FATAL_ERROR "Cannot build BamTools without Zlib. Set ZLIB_ROOT properly")
+endif()
+include_directories(${ZLIB_INCLUDE_DIRS})
+
 # set our library and executable destination dirs
 set( EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin" )
 set( LIBRARY_OUTPUT_PATH    "${CMAKE_SOURCE_DIR}/lib" )
