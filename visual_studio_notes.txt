@@ -48,3 +48,5 @@ To configure the build, use the Visual Studio command prompt. Create a build dir
 cmake -G "Visual Studio 12" -DCMAKE_BUILD_TYPE=Release -DZLIB_ROOT=\path\to\zlib\install ..
 
 This should create a Visual Studio solution called "BamTools". Open it, build the project "BamTools-static", before building change the GUI to "Release"!
+
+(note: the build did not succeed, VS hung...)
