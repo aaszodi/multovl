@@ -9,8 +9,7 @@ set(GITREV_DATE "(unknown)" CACHE INTERNAL "Git date" FORCE)
 find_program(GIT_SCM git DOC "Git version control")
 mark_as_advanced(GIT_SCM)
 find_file(GITDIR NAMES .git PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
-set(GIT_AVAILABLE ${GIT_SCM} AND ${GITDIR})
-if (GIT_AVAILABLE)
+if (${GIT_SCM} AND ${GITDIR})
     # Note that execute_process() runs only during config time
     # therefore the Git version info will NOT be updated after commit or pull
     # unless CMake is re-run

@@ -61,7 +61,8 @@
 */
 #ifndef BAMTOOLS_TYPES
 #define BAMTOOLS_TYPES
-#  ifdef _MSC_VER
+#if defined(_MSC_VER) && _MSC_VER < 1600
+	/* only for Visual Studio versions prior to 2010 */
      typedef char                 int8_t;
      typedef unsigned char       uint8_t;
      typedef short               int16_t;

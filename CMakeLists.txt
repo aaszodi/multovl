@@ -57,6 +57,15 @@ message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
 set(MULTOVL_VERSION_MAJOR 1)
 set(MULTOVL_VERSION_MINOR 3)
 
+# Set a default build type if none was specified (tip from Kitware)
+if(NOT CMAKE_BUILD_TYPE)
+  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+    "MinSizeRel" "RelWithDebInfo")
+endif()
+
 # the source directory
 # The top-level dir will be CMAKE_SOURCE_DIR because this CMakeLists.txt is there
 # the "real sources" are in SRCDIR underneath
