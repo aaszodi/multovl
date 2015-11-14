@@ -9,11 +9,11 @@ set(GITREV_DATE "(unknown)" CACHE INTERNAL "Git date" FORCE)
 find_program(GIT_SCM git DOC "Git version control")
 mark_as_advanced(GIT_SCM)
 find_file(GITDIR NAMES .git PATHS ${CMAKE_SOURCE_DIR} NO_DEFAULT_PATH)
-if (${GIT_SCM} AND ${GITDIR})
+if (GIT_SCM AND GITDIR)
     # Note that execute_process() runs only during config time
     # therefore the Git version info will NOT be updated after commit or pull
     # unless CMake is re-run
-    
+
     # full SHA1 revision checksum
     execute_process(
         COMMAND ${GIT_SCM} log -1 "--pretty=format:%H" 
@@ -21,11 +21,11 @@ if (${GIT_SCM} AND ${GITDIR})
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     set(GITREV_SHA1 ${_sha1} CACHE INTERNAL "Git SHA1" FORCE)
-    
+
     # short checksum (first 7 chars)
     string(SUBSTRING ${_sha1} 0 7 _sha1s)
     set(GITREV_SHA1SHORT ${_sha1s} CACHE INTERNAL "Git short SHA1" FORCE)
-    
+
     # Git revision date
     execute_process(
         COMMAND ${GIT_SCM} log -1 "--pretty=format:%ai" 
