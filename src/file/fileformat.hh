@@ -62,10 +62,8 @@ public:
         BED = 1,    // these are ASCII...
         GFF2 = 2,
         GFF3 = 4,   // also GTF
-        GFF = 6 // GFF2 | GFF3
-#if USE_BAMTOOLS
-        , BAM = 8     // this is binary
-#endif
+        GFF = 6, // GFF2 | GFF3
+        BAM = 8     // this is binary
     };
 
     /// Deduces the format from the filename extension.
