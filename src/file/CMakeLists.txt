@@ -10,14 +10,14 @@ set(movl_fileiosrc
 # BamTools is always there
 include_directories( ${BAMTOOLS_INCLUDE_DIRS} )
 list(APPEND movl_fileiosrc bamio.cc)
-set_source_files_properties(fileformat.cc fileio.cc PROPERTIES 
-    COMPILE_DEFINITIONS "USE_BAMTOOLS")
-
-if (BAMTOOLS_USE_STATIC_LIBS)
-	add_library(movl_fileio STATIC ${movl_fileiosrc})
-	add_dependencies(movl_fileio "BamTools-static")
+if (MULTOVL_USE_STATIC_LIBS)
+    add_library(movl_fileio STATIC ${movl_fileiosrc})
 else()
 	add_library(movl_fileio SHARED ${movl_fileiosrc})
+endif()
+if (BAMTOOLS_USE_STATIC_LIBS)
+	add_dependencies(movl_fileio "BamTools-static")
+else()
 	add_dependencies(movl_fileio "BamTools")
 endif()
 flag_fix(movl_fileio)

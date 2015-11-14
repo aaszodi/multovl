@@ -196,9 +196,10 @@ include_directories(
 
 # build BamTools API
 add_subdirectory(${BAMTOOLS_TOPLEVEL}/src/api ${BAMTOOLS_BUILDDIR})
-set(BAMTOOLS_CORE_LIBRARY bamtools)
-if (UNIX AND BAMTOOLS_USE_STATIC_LIBS)
-    set(BAMTOOLS_CORE_LIBRARY "${BAMTOOLS_LIBRARY_DIRS}/libbamtools.a")
+if (BAMTOOLS_USE_STATIC_LIBS)
+    set(BAMTOOLS_CORE_LIBRARY "BamTools-static")
+else()
+    set(BAMTOOLS_CORE_LIBRARY "BamTools")
 endif()
 
 # BAMTOOLS_LIBRARIES => the library plus "lz", used in target_link_libraries(...)

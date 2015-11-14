@@ -44,16 +44,9 @@ set_target_properties( BamTools-static PROPERTIES
                        OUTPUT_NAME "bamtools" 
                        PREFIX "lib" )
 
-# link libraries automatically with zlib (and Winsock2, if applicable)
-# commented out by AA, 2015-03-29
-# if( WIN32 )
-#    set( APILibs z ws2_32 )
-# else()
-#    set( APILibs z )
-# endif()
-
-target_link_libraries( BamTools        ${APILibs} )
-target_link_libraries( BamTools-static ${APILibs} )
+# link libraries automatically with zlib
+target_link_libraries( BamTools z)
+target_link_libraries( BamTools-static z)
 
 # set library install destinations
 install( TARGETS BamTools        LIBRARY DESTINATION "lib/bamtools" RUNTIME DESTINATION "bin")

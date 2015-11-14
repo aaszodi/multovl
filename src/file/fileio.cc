@@ -38,10 +38,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "fileio.hh"
 #include "textio.hh"
-
-#if USE_BAMTOOLS
 #include "bamio.hh"
-#endif
 
 #include "multioverlap.hh"
 
@@ -63,11 +60,9 @@ FileReader::FileReader(
          fmt = Fileformat::from_filename(infname);
 
     // select the appropriate track reader (factory pattern)
-#if USE_BAMTOOLS
     if (fmt == Fileformat::BAM)
         _reader = new BamReader(infname);
     else
-#endif
         _reader = new TextReader(infname, fmt);
 
     // maybe something went wrong...
