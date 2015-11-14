@@ -13,10 +13,8 @@ flag_fix(testhelper)
 set (genericlibs
     testhelper
     movl cfg
+    ${BAMTOOLS_LIBRARIES}
 )
-if (BAMTOOLS_FOUND)
-    list(APPEND genericlibs ${BAMTOOLS_LIBRARIES})
-endif()
 set(utestlibs
     ${utestlibs}
     ${genericlibs}

@@ -2,13 +2,15 @@
 # 2015-03-28 Andras Aszodi
 #
 # USAGE: you should invoke cmake in your build directory like this:-
-# cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \
+# cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \ <-- define for Makefile targets, not for Visual Studio or XCode
 #   -DBOOST_ROOT=/path/to/boost \
-#	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ # <-- optional if not found automatically
+#	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ <-- optional if not found automatically
+#	-DZLIB_ROOT=/path/to/zlib <- location of Zlib, usually not needed on UNIX platforms
 #   ..
 #
 # The Debug build will contain the unit tests but no INSTALL or PACKAGE targets.
 # The Release build will not contain the unit tests but will provide INSTALL and PACKAGE.
+# Generators for multi-configuration IDEs will enable both.
 #
 # Static vs shared/dynamic linking:-
 #	By default everything will be linked statically. To link everything dynamically, specify
@@ -57,13 +59,20 @@ message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
 set(MULTOVL_VERSION_MAJOR 1)
 set(MULTOVL_VERSION_MINOR 3)
 
-# Set a default build type if none was specified (tip from Kitware)
-if(NOT CMAKE_BUILD_TYPE)
-  message(STATUS "Setting build type to 'Debug' as none was specified.")
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-    "MinSizeRel" "RelWithDebInfo")
+# Multi-config environments (CMAKE_BUILD_TYPE not used)
+set(MULTICONFIG OFF)
+if (CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
+    message(STATUS "Multi-config environment: ${CMAKE_GENERATOR}")
+    set(MULTICONFIG ON)
+else()
+    # Set a default build type if none was specified in a single-config environment
+    if(NOT CMAKE_BUILD_TYPE)
+      message(STATUS "Setting build type to 'Debug' as none was specified.")
+      set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+      # Set the possible values of build type for cmake-gui
+      set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+        "MinSizeRel" "RelWithDebInfo")
+    endif()
 endif()
 
 # the source directory
@@ -79,11 +88,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 # the installation directory 
 set(MULTOVL_DESTDIR "multovl-${MULTOVL_VERSION_MAJOR}.${MULTOVL_VERSION_MINOR}")
 
-# make sure my DEBUG macro is defined if not release (don't rely on NDEBUG)
-set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG")
-
 # so that we see what goes wrong:-
 set(CMAKE_VERBOSE_MAKEFILE ON)
+
+# platform-specific settings
+include("${CMAKE_SOURCE_DIR}/cmake/platformspec.cmake")
 
 # -- LIBRARIES WE DEPEND ON --
 
@@ -93,6 +102,15 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # if you want to link all extra libraries dynamically, set this to OFF
 # this will set the defaults for the individual static/dynamic linker settings
 set(MULTOVL_USE_STATIC_LIBS ON CACHE BOOL "Shall all Multovl programs be linked statically?")
+
+# Visual Studio compile flags, runtime selection etc.
+if (MSVC)
+    if (MULTOVL_USE_STATIC_LIBS)
+        replace_cflags("/MD" "/MT")
+    else()
+        replace_cflags("/MT" "/MD")
+    endif()
+endif()
 
 # Boost
 set(BOOST_ROOT "/usr/local/boost" CACHE PATH "Top-level Boost directory")
@@ -138,20 +156,21 @@ else()
     message(STATUS "Boost Chrono library not required, ignore 'Could NOT find Boost' message")
 endif()
 
-# we always need the Boost headers
-# and the configs
-include_directories(
-    ${SRCDIR}
-    ${SRCDIR}/config
-    ${Boost_INCLUDE_DIRS}
-)
+# BamTools needs Zlib
+# set ZLIB_ROOT to help CMake, this is usually needed on Windows only
+find_package(ZLIB REQUIRED)
+if (ZLIB_FOUND)
+	message(STATUS "Zlib found")
+else()
+	message(FATAL_ERROR "Cannot build BamTools without Zlib. Set ZLIB_ROOT properly")
+endif()
 
 # BamTools now comes as a Multovl subtree
 # The repo of AA's BamTools for is at: ssh://git@bitbucket.org:aa117sdf/bamtools2.git
 # Note that its source is edited compared to the original V2.3.0
 # BamTools subtree location
 set(BAMTOOLS_TOPLEVEL "${CMAKE_SOURCE_DIR}/bamtools2")
-set(BAMTOOLS_BUILDDIR "${BAMTOOLS_TOPLEVEL}/build")
+set(BAMTOOLS_BUILDDIR "${CMAKE_BINARY_DIR}/bamtools2")
 
 # We need the BamTools API only
 # "our" version's CMake setup understands this variable
@@ -160,38 +179,32 @@ set(BAMTOOLS_API_ONLY "YES")
 set(BAMTOOLS_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS} 
     CACHE BOOL "Shall the BamTools libraries be linked statically?")
 
-# These are the variables delivered by the old `cmake/FindBamTools.cmake` include.
-# During the transition we keep these variables but assign the "correct" values.
-# BAMTOOLS_FOUND => true if BAM tools is found. TODO: Delete after transition
-set(BAMTOOLS_FOUND 1)
 # BAMTOOLS_INCLUDE_DIRS => location of the BAMtools API headers, used in include_directories(...):
 # the MultOvl source files include "api/XXX.h"
 set(BAMTOOLS_INCLUDE_DIRS "${BAMTOOLS_TOPLEVEL}/src")
 # BAMTOOLS_LIBRARY_DIRS => location of the BAMtools library, used in link_directories(...)
 set(BAMTOOLS_LIBRARY_DIRS "${BAMTOOLS_BUILDDIR}")
 
-# make sure Zlib is found
-if (UNIX)
-    find_package(ZLIB REQUIRED)
-endif()
-# *** TODO *** MSVC
+# All the include directories
+include_directories(
+    ${SRCDIR}
+    ${SRCDIR}/config
+    ${Boost_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIRS}
+    ${BAMTOOLS_INCLUDE_DIRS}
+)
 
 # build BamTools API
 add_subdirectory(${BAMTOOLS_TOPLEVEL}/src/api ${BAMTOOLS_BUILDDIR})
-
-if (MULTOVL_USE_STATIC_LIBS)
-    set(BAMTOOLS_CORE_LIBRARY "${BAMTOOLS_LIBRARY_DIRS}/libbamtools.a") # UNIX only
-else()
-    set(BAMTOOLS_CORE_LIBRARY bamtools)    # UNIX only
+set(BAMTOOLS_CORE_LIBRARY bamtools)
+if (UNIX AND BAMTOOLS_USE_STATIC_LIBS)
+    set(BAMTOOLS_CORE_LIBRARY "${BAMTOOLS_LIBRARY_DIRS}/libbamtools.a")
 endif()
 
 # BAMTOOLS_LIBRARIES => the library plus "lz", used in target_link_libraries(...)
 set(BAMTOOLS_LIBRARIES ${BAMTOOLS_CORE_LIBRARY} ${ZLIB_LIBRARIES})
 
 # -- END OF LIBRARIES --
-
-# platform-specific settings
-include("${CMAKE_SOURCE_DIR}/cmake/platformspec.cmake")
 
 # -- SOURCE TREE --
 
@@ -201,7 +214,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/platformspec.cmake")
 # http://stackoverflow.com/questions/4372512/global-variables-in-cmake-for-dependency-tracking
 set(app_targets CACHE INTERNAL "app targets" FORCE)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     include(CTest)
     enable_testing()
     
@@ -227,7 +240,7 @@ add_subdirectory(${SRCDIR} bin)
 add_custom_target(apps DEPENDS ${app_targets})
 
 # ... and the unit tests
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_custom_target(unit_tests DEPENDS ${unit_test_targets})
 endif()
 
@@ -242,7 +255,7 @@ endif(DOXYGEN_FOUND)
 
 # -- INSTALLATION --
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps are installed from their respective subdirs
     # see corresponding CMakeLists.txt files
     

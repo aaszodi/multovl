@@ -34,12 +34,12 @@ foreach(PROBPROG ${PROBPROGS})
     )
 endforeach()
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_subdirectory(test)
 endif()
 
 # install won't find non-toplevel targets
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
     install(TARGETS ${PROBPROGS} RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
 endif()

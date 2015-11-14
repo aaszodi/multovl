@@ -18,7 +18,11 @@
 #define BSYSLEN 1024	/* let's hope this is enough... */
 
 static const char
-	BUILD_TYPE[] = TOSTRING(@CMAKE_BUILD_TYPE@),
+#ifdef NDEBUG
+	BUILD_TYPE[] = "Release",
+#else
+    BUILD_TYPE[] = "Debug",
+#endif
 	BUILD_COMPILER[] = TOSTRING(@CMAKE_CXX_COMPILER_ID@ version @CMAKE_CXX_COMPILER_VERSION@);
 static char BUILD_SYSTEM[BSYSLEN]; 
 	

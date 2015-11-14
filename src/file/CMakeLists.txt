@@ -38,12 +38,12 @@ set(app_targets
 )
 
 # install won't find non-toplevel targets
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
     install(TARGETS multovl RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
 endif()
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_subdirectory(test)
 endif()
 

@@ -2,11 +2,28 @@
 
 # Depending on the architecture and the compiler,
 # certain compilation and link flags need to be added.
-# We define the 'flag_fix' macro that takes a 'targ' argument
+
+# Replace all occurrences of a C/C++ compiler flag
+macro(replace_cflags fromflag toflag)
+    set(cflags
+        CMAKE_C_FLAGS_DEBUG
+        CMAKE_C_FLAGS_MINSIZEREL
+        CMAKE_C_FLAGS_RELEASE
+        CMAKE_C_FLAGS_RELWITHDEBINFO
+        CMAKE_CXX_FLAGS_DEBUG
+        CMAKE_CXX_FLAGS_MINSIZEREL
+        CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    )
+    foreach(cflag ${cflags})
+        string(REPLACE ${fromflag} ${toflag} ${cflag} "${${cflag}}")
+    endforeach()
+endmacro(replace_cflags)
+
+# The 'flag_fix' macro that takes a 'targ' argument
 # (the current compile/link target) and fixes the corresponding
 # COMPILE_FLAGS and LINK_FLAGS settings.
 # Any additional platform-specific stuff can go here as well.
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "SunPro" AND ${CMAKE_SYSTEM_NAME} STREQUAL "SunOS")
     # [Open]Solaris, SunPro compiler (V>=5.10)
     # use STLport (also when compiling Boost!)
@@ -36,19 +53,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND ${CMAKE_SYSTEM_NAME} MATCHES "
             LINK_FLAGS "-use_asm -static-intel"
         )
     endmacro(flag_fix)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows" AND ${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-    # force static linking everywhere, overriding CMake's "/MD" by "/MT"
-    if(MULTOVL_USE_STATIC_LIBS)
-        macro(flag_fix targ)
-            set_target_properties(
-                ${targ} PROPERTIES COMPILE_FLAGS "/MT" 
-            )
-        endmacro(flag_fix)
-    else(MULTOVL_USE_STATIC_LIBS)
-		# empty macro
-        macro(flag_fix targ)
-        endmacro(flag_fix)
-    endif(MULTOVL_USE_STATIC_LIBS)
 else()
     # empty macro
     macro(flag_fix targ)

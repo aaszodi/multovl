@@ -32,26 +32,18 @@ ensure_out_of_source_build( "
 # set BamTools version information
 set( BamTools_VERSION_MAJOR 2 )
 set( BamTools_VERSION_MINOR 3 )
-set( BamTools_VERSION_BUILD 0 )
+set( BamTools_VERSION_BUILD 1 ) # indicates AA's fork
 
 # -- Find Zlib --
 # added by AA, 2015-03-29
-set(ZLIB_ROOT "/zlib/install" CACHE PATH "Top-level Zlib installation directory")
-find_package(ZLIB REQUIRED)
-if (ZLIB_FOUND)
-	message(STATUS "Zlib found")
-else()
-	message(FATAL_ERROR "Cannot build BamTools without Zlib. Set ZLIB_ROOT properly")
-endif()
-include_directories(${ZLIB_INCLUDE_DIRS})
 
 # set our library and executable destination dirs
 set( EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin" )
 set( LIBRARY_OUTPUT_PATH    "${CMAKE_SOURCE_DIR}/lib" )
 
 # define compiler flags for all code
-set( CMAKE_BUILD_TYPE Release )
-add_definitions( -Wall -D_FILE_OFFSET_BITS=64 )
+### set( CMAKE_BUILD_TYPE Release )
+### add_definitions( -Wall -D_FILE_OFFSET_BITS=64 )
 
 # -----------------------------------------------
 # handle platform-/environment-specific defines

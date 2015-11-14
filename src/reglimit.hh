@@ -129,7 +129,7 @@ public:
         return RegLimit(ancp, this->is_first()); 
     }
     
-    #ifdef DEBUG
+    #ifndef NDEBUG
         // these are used by the unit tests only
         const AncestorRegion* const_raw_region_ptr() const { return _regp.get(); }
         AncestorRegion* raw_region_ptr() { return _regp.get(); }

@@ -29,21 +29,13 @@ const char* config_boost_version() {
     return boostver;
 }
 
-/* -- Optional third-party libraries -- */
-
-/* BamTools supplies no version macro */
-#define USE_BAMTOOLS @BAMTOOLS_FOUND@
-
+/* BamTools is always available */
 const char* config_bamtools() {
-#if USE_BAMTOOLS
-    return "BAM file input supported";
-#else
-    return "No BAM file support";
-#endif
+	return "BamTools 2.3.1 (AA)";
 }
 
 int config_have_bamtools() {
-    return USE_BAMTOOLS ;
+    return 1 ;
 }
 
 /* == END MODULE thirdparty.c == */

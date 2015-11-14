@@ -28,7 +28,7 @@ flag_fix(movl)
 set(MULTOVLIBS movl cfg ${MULTOVL_BOOST_LIBS})   # library order does matter in Linux/g++
 
 # basic module unit tests
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_subdirectory(test)
 endif()
 

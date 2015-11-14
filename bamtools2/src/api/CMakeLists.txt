@@ -32,9 +32,10 @@ set( BamToolsAPISources
 )
 
 # create main BamTools API shared library
+# SO version updated to 2.3.1 by AA, 2015-11-14
 add_library( BamTools SHARED ${BamToolsAPISources} )
 set_target_properties( BamTools PROPERTIES
-                       SOVERSION "2.3.0"
+                       SOVERSION "2.3.1"
                        OUTPUT_NAME "bamtools" )
 
 # create main BamTools API static library
