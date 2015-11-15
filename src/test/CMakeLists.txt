@@ -13,18 +13,10 @@ flag_fix(testhelper)
 set (genericlibs
     testhelper
     movl cfg
-    ${BAMTOOLS_LIBRARIES}
 )
 set(utestlibs
-    ${utestlibs}
     ${genericlibs}
-    ${Boost_DATE_TIME_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_REGEX_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SERIALIZATION_LIBRARY}
-    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    ${utestlibs}
     CACHE INTERNAL "unit test libs"
 )
 

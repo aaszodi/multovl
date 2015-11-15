@@ -21,11 +21,6 @@ endif()
 
 # -- File I/O tests --
 
-if(BAMTOOLS_FOUND)
-    set_source_files_properties(fileformattest.cc PROPERTIES 
-        COMPILE_DEFINITIONS "USE_BAMTOOLS")
-endif()
-
 # File test programs
 set(filetestprogs
     fileformattest fileiotest

@@ -220,7 +220,17 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     enable_testing()
     
     # "truly global" variables
-    set(utestlibs CACHE INTERNAL "unit test libs" FORCE)
+    set(utestlibs 
+        ${BAMTOOLS_LIBRARIES}
+        ${Boost_DATE_TIME_LIBRARY}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        ${Boost_REGEX_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SERIALIZATION_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    CACHE INTERNAL "unit test libs" FORCE
+    )
     set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
     
     # Code coverage

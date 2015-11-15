@@ -4,21 +4,14 @@
 
 # File I/O convenience library
 set(movl_fileiosrc 
-    fileformat.cc fileio.cc textio.cc linereader.cc linewriter.cc
+    fileformat.cc fileio.cc textio.cc
+    linereader.cc linewriter.cc bamio.cc
 )
 
-# BamTools is always there
-include_directories( ${BAMTOOLS_INCLUDE_DIRS} )
-list(APPEND movl_fileiosrc bamio.cc)
 if (MULTOVL_USE_STATIC_LIBS)
     add_library(movl_fileio STATIC ${movl_fileiosrc})
 else()
 	add_library(movl_fileio SHARED ${movl_fileiosrc})
-endif()
-if (BAMTOOLS_USE_STATIC_LIBS)
-	add_dependencies(movl_fileio "BamTools-static")
-else()
-	add_dependencies(movl_fileio "BamTools")
 endif()
 flag_fix(movl_fileio)
 
@@ -37,14 +30,14 @@ set(app_targets
     CACHE INTERNAL "app targets"
 )
 
+if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(test)
+endif()
+
 # install won't find non-toplevel targets
 if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
     install(TARGETS multovl RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
-endif()
-
-if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_subdirectory(test)
 endif()
 
 # overlap probabilities

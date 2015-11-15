@@ -46,7 +46,7 @@ set_target_properties( BamTools-static PROPERTIES
 
 # link libraries automatically with zlib
 target_link_libraries( BamTools z)
-target_link_libraries( BamTools-static z)
+target_link_libraries( BamTools-static)
 
 # set library install destinations
 install( TARGETS BamTools        LIBRARY DESTINATION "lib/bamtools" RUNTIME DESTINATION "bin")
