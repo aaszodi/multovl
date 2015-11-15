@@ -67,7 +67,7 @@ static void sleep_seconds(int sec)
 static void check_approx_duration(
     const boost::posix_time::time_duration& actualdur,
     double expecteddur, // in seconds
-    double pctol=1.0    // percentage tolerance: 1.0% needed on Irix
+    double pctol=2.0    // percentage tolerance: 1.0% needed on Irix, 2.0% on Windows
 )
 {
     double ms = static_cast<double>(actualdur.total_milliseconds());
