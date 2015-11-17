@@ -25,7 +25,7 @@
 
 namespace BamTools {
 
-class BamAlignment;
+struct BamAlignment; // used to be 'class', now consistent with decl, 2015-11-17 AA
 
 namespace Internal {
 

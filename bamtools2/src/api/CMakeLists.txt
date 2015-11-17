@@ -10,7 +10,8 @@ include_directories( ${BamTools_SOURCE_DIR}/src )
 
 # add compiler definitions 
 add_definitions( -DBAMTOOLS_API_LIBRARY ) # (for proper exporting of library symbols)
-add_definitions( -fPIC ) # (attempt to force PIC compiling on CentOS, not being set on shared libs by CMake)
+### Note that this added only some MSVC complications with __declspec(dllexport|dllimport)
+### which turns out to be unnecessary with Visual Studio 2015. 
 
 # fetch all internal source files
 add_subdirectory( internal )
@@ -46,7 +47,7 @@ set_target_properties( BamTools-static PROPERTIES
 
 # link libraries automatically with zlib
 target_link_libraries( BamTools z)
-target_link_libraries( BamTools-static)
+target_link_libraries( BamTools-static ${ZLIB_LIBRARIES} )
 
 # set library install destinations
 install( TARGETS BamTools        LIBRARY DESTINATION "lib/bamtools" RUNTIME DESTINATION "bin")

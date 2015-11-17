@@ -25,7 +25,7 @@
 
 namespace BamTools {
 
-class SamHeader;
+struct SamHeader;	// used to be 'class', now fixed to be consistent with the decl, 2015-11-17 AA
 
 namespace Internal {
 

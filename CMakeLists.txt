@@ -160,7 +160,7 @@ endif()
 # set ZLIB_ROOT to help CMake, this is usually needed on Windows only
 find_package(ZLIB REQUIRED)
 if (ZLIB_FOUND)
-	message(STATUS "Zlib found")
+	message(STATUS "Zlib in ${ZLIB_LIBRARIES}")
 else()
 	message(FATAL_ERROR "Cannot build BamTools without Zlib. Set ZLIB_ROOT properly")
 endif()

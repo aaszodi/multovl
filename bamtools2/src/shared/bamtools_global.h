@@ -16,18 +16,19 @@
 */
 #ifndef BAMTOOLS_LIBRARY_EXPORT
 #  if defined(WIN32)
-#    define BAMTOOLS_LIBRARY_EXPORT __declspec(dllexport)
+#    define BAMTOOLS_LIBRARY_EXPORT /* __declspec(dllexport) */
 #  else
-#    define BAMTOOLS_LIBRARY_EXPORT __attribute__((visibility("default")))
+#    define BAMTOOLS_LIBRARY_EXPORT /* __attribute__((visibility("default"))) */
 #  endif
 #endif // BAMTOOLS_LIBRARY_EXPORT
 
 /*! \brief Library import macro
     \internal
 */
+
 #ifndef BAMTOOLS_LIBRARY_IMPORT
 #  if defined(WIN32)
-#    define BAMTOOLS_LIBRARY_IMPORT __declspec(dllimport)
+#    define BAMTOOLS_LIBRARY_IMPORT /* __declspec(dllimport) */
 #  else
 #    define BAMTOOLS_LIBRARY_IMPORT
 #  endif
@@ -61,7 +62,7 @@
 */
 #ifndef BAMTOOLS_TYPES
 #define BAMTOOLS_TYPES
-/* This had to be fixed because it caused redefinition errors */
+/* Since VS2010 there is NO NEED to redefine these types. */
 #  if 0 /* was #ifdef _MSC_VER */
      typedef char                 int8_t;
      typedef unsigned char       uint8_t;

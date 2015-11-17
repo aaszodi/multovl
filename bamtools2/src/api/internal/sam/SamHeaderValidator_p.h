@@ -26,9 +26,11 @@
 
 namespace BamTools {
 
-class SamHeader;
-class SamReadGroup;
-class SamSequence;
+// these forward decls were 'class XXX', were inconsistent with the actual decls which are 'struct'-s
+// changed 2015-11-17 AA
+struct SamHeader;
+struct SamReadGroup;
+struct SamSequence;
 
 namespace Internal {
 
