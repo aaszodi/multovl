@@ -156,26 +156,15 @@ else()
     message(STATUS "Boost Chrono library not required, ignore 'Could NOT find Boost' message")
 endif()
 
-# BamTools needs Zlib
-# set ZLIB_ROOT to help CMake, this is usually needed on Windows only
-find_package(ZLIB REQUIRED)
-if (ZLIB_FOUND)
-	message(STATUS "Zlib in ${ZLIB_LIBRARIES}")
-else()
-	message(FATAL_ERROR "Cannot build BamTools without Zlib. Set ZLIB_ROOT properly")
-endif()
-
-# BamTools now comes as a Multovl subtree
-# The repo of AA's BamTools for is at: ssh://git@bitbucket.org:aa117sdf/bamtools2.git
-# Note that its source is edited compared to the original V2.3.0
-# BamTools subtree location
+# BamTools V2.3.0 was integrated into the Multovl source
+# and edited so that it builds correctly under UNIX and MSVC
+# The inofficial version number is V2.3.1
 set(BAMTOOLS_TOPLEVEL "${CMAKE_SOURCE_DIR}/bamtools2")
 set(BAMTOOLS_BUILDDIR "${CMAKE_BINARY_DIR}/bamtools2")
 
 # We need the BamTools API only
 # "our" version's CMake setup understands this variable
 set(BAMTOOLS_API_ONLY "YES")
-
 set(BAMTOOLS_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS} 
     CACHE BOOL "Shall the BamTools libraries be linked statically?")
 
@@ -184,6 +173,21 @@ set(BAMTOOLS_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS}
 set(BAMTOOLS_INCLUDE_DIRS "${BAMTOOLS_TOPLEVEL}/src")
 # BAMTOOLS_LIBRARY_DIRS => location of the BAMtools library, used in link_directories(...)
 set(BAMTOOLS_LIBRARY_DIRS "${BAMTOOLS_BUILDDIR}")
+
+# BamTools needs Zlib
+# set ZLIB_ROOT to help CMake, this is usually needed on Windows only
+find_package(ZLIB REQUIRED)
+if (ZLIB_FOUND)
+	if (MSVC)
+		# CMake's built-in FindZLIB.cmake module does not look for zlibstatic.lib
+		if (BAMTOOLS_USE_STATIC_LIBS)
+			string(REPLACE "zlib.lib" "zlibstatic.lib" ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
+		endif()
+	endif()
+	message(STATUS "Zlib in ${ZLIB_LIBRARIES}")
+else()
+	message(FATAL_ERROR "Cannot build BamTools without Zlib. Set ZLIB_ROOT properly")
+endif()
 
 # All the include directories
 include_directories(
@@ -202,7 +206,7 @@ else()
     set(BAMTOOLS_CORE_LIBRARY "BamTools")
 endif()
 
-# BAMTOOLS_LIBRARIES => the library plus "lz", used in target_link_libraries(...)
+# BAMTOOLS_LIBRARIES => BamTools plus Zlib, used in target_link_libraries(...)
 set(BAMTOOLS_LIBRARIES ${BAMTOOLS_CORE_LIBRARY} ${ZLIB_LIBRARIES})
 
 # -- END OF LIBRARIES --

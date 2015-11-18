@@ -1,4 +1,4 @@
-MULTIPLE OVERLAP OF GENOMIC REGIONS
+﻿MULTIPLE OVERLAP OF GENOMIC REGIONS
 ===================================
 
 INSTRUCTIONS FOR DEVELOPERS AND OTHER NERDS
@@ -163,6 +163,28 @@ cmake -G "Visual Studio 12 Win64" -DCMAKE_INSTALL_PREFIX=..\install ..\zlib-x.y.
 
 Then open the solution build/zlib.sln, switch to Release in VS2013, build INSTALL. 
 This will put everything under the "install" directory which you can use later.
+
+*** === dev1.3 branch === ***
+
+Visual Studio 2015, Windows 10
+
+Building Zlib 1.2.8, 32-bit
+In the VS command prompt:
+
+cd (to the level containing zlib-1.2.8)
+mkdir build
+mkdir c:\local\zlib-1.2.8 (this will be the installation directory)
+cd build
+cmake -G "Visual Studio 14" -DCMAKE_INSTALL_PREFIX=c:\local\zlib-1.2.8 ..\zlib-1.2.8
+
+This built a nice little hierarchy, but the static version of Zlib is in lib/zlibstatic.lib
+which is not found by FindZlib.cmake. This can be fixed in the top-level CMakeLists.txt by 
+forcibly replacing libzlib.lib with libzlibstatic.lib. That leads to the error:
+
+MSVCRT.lib(_chandler4gs_.obj) : error LNK2019: unresolved external symbol __except_handler4_common referenced in function __except_handler4
+
+
+
 
 COVERAGE TESTING
 ----------------
