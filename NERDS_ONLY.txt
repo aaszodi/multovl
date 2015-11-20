@@ -169,22 +169,40 @@ This will put everything under the "install" directory which you can use later.
 Visual Studio 2015, Windows 10
 
 Building Zlib 1.2.8, 32-bit
-In the VS command prompt:
+
+We build a "debug" and "release" version separately. First create the installation directories:
+mkdir c:\local\zlib-1.2.8\debug
+mkdir c:\local\zlib-1.2.8\release
+
+Then in the VS command prompt:
 
 cd (to the level containing zlib-1.2.8)
-mkdir build
-mkdir c:\local\zlib-1.2.8 (this will be the installation directory)
-cd build
-cmake -G "Visual Studio 14" -DCMAKE_INSTALL_PREFIX=c:\local\zlib-1.2.8 ..\zlib-1.2.8
+(make the directories build/debug, build/release)
+cd build\debug
+cmake -G "Visual Studio 14" -DCMAKE_INSTALL_PREFIX=c:\local\zlib-1.2.8\debug ..\zlib-1.2.8
 
-This built a nice little hierarchy, but the static version of Zlib is in lib/zlibstatic.lib
-which is not found by FindZlib.cmake. This can be fixed in the top-level CMakeLists.txt by 
-forcibly replacing libzlib.lib with libzlibstatic.lib. That leads to the error:
+Open the VS solution zlib.sln, make sure the overall settings are "Debug" and "32 bit". 
+Go to the Properties of the "zlibstatic" target and make sure the C/C++ runtime switch is /MTd
+instead of /MDd.
+Then build the INSTALL target. In the debug installation directory there will be
+a lib\zlibstaticd.lib, a lib\zlibd.lib and a bin\zlibd.dll. Remove the trailing "d"-s
+from the library file basenames.
 
-MSVCRT.lib(_chandler4gs_.obj) : error LNK2019: unresolved external symbol __except_handler4_common referenced in function __except_handler4
+cd ..\release
+cmake -G "Visual Studio 14" -DCMAKE_INSTALL_PREFIX=c:\local\zlib-1.2.8\release ..\zlib-1.2.8
 
+(note the change in CMAKE_INSTALL_PREFIX!)
+Open the solution again, make sure the overall settings are this time "Release" and "32 bit",
+then build the INSTALL target. In the release installation directory there will be
+a lib\zlibstatic.lib, a lib\zlib.lib and a bin\zlib.dll.
 
+This beats the purpose of a multiconfig CMake setup. The idea is that when you want to 
+build MULTOVL as Debug, then you pass CMake the -DZLIB_ROOT=\path\to\zlib-1.2.8\debug so that the
+Debug-compiled Zlib versions are found. There must be a better way, but for now this is sufficient
+to build the Multovl unit tests and the apps.
 
+Todo: fix the Zlib compilation/installation so that the libraries are distinguished by appropriate
+suffixes like the Boost libraries are.
 
 COVERAGE TESTING
 ----------------
