@@ -72,8 +72,7 @@ using namespace prob;
 // Run this test with the cmdline setting --log_level=warning
 // to see the discrepancies.
 
-const double PCT_TOL=2.5,   // percentage tolerance for floating-point checks
-    ABS_TOL=0.01;          // ... and absolute tolerance for values that should be 0.0
+const double PCT_TOL=2.5;   // percentage tolerance for floating-point checks
 const unsigned int NTRIAL=10000;    // number of random trials
 
 static double norm_cdf(double m, double s, double x)

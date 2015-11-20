@@ -29,7 +29,7 @@ namespace BamTools {
 namespace Internal {
 
 class BamHttp;
-class TcpSocketEngine;
+struct TcpSocketEngine;
 
 class TcpSocket {
 

@@ -30,7 +30,7 @@ static const char COLON_CHAR   = ':';
 static const char DOT_CHAR     = '.';
 static const char NEWLINE_CHAR = '\n';
 static const char SPACE_CHAR   = ' ';
-static const char TAB_CHAR     = '\t';
+// unused: static const char TAB_CHAR     = '\t';
 
 static const string FIELD_NEWLINE   = "\r\n";
 static const string FIELD_SEPARATOR = ": ";
