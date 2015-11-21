@@ -36,7 +36,9 @@ project(multovl C CXX)
 # Directory layout:-
 # multovl					<== ${CMAKE_SOURCE_DIR}: top-level
 # ├── cmake					<== extra CMake includes (finders, OS-specific hacks...)
-# ├── bamtools2				<== BamTools subtree
+# ├── thirdparty			<== Third-party support libraries
+# │   ├── bamtools			<== BamTools V2.3.1 (AA) modified version
+# │   └── zlib				<== Zlib V1.2.8 to be compiled on Windows
 # ├── doc					<== ${DOCDIR}: Documentation
 # │   ├── doxygen			<== Doxygen input
 # │   └── html				<== HTML docs under version control, e.g. user guide
@@ -156,38 +158,12 @@ else()
     message(STATUS "Boost Chrono library not required, ignore 'Could NOT find Boost' message")
 endif()
 
-# BamTools V2.3.0 was integrated into the Multovl source
-# and edited so that it builds correctly under UNIX and MSVC
-# The inofficial version number is V2.3.1
-set(BAMTOOLS_TOPLEVEL "${CMAKE_SOURCE_DIR}/bamtools2")
-set(BAMTOOLS_BUILDDIR "${CMAKE_BINARY_DIR}/bamtools2")
+# -- Third-party libraries --
 
-# We need the BamTools API only
-# "our" version's CMake setup understands this variable
-set(BAMTOOLS_API_ONLY "YES")
-set(BAMTOOLS_USE_STATIC_LIBS ${MULTOVL_USE_STATIC_LIBS} 
-    CACHE BOOL "Shall the BamTools libraries be linked statically?")
-
-# BAMTOOLS_INCLUDE_DIRS => location of the BAMtools API headers, used in include_directories(...):
-# the MultOvl source files include "api/XXX.h"
-set(BAMTOOLS_INCLUDE_DIRS "${BAMTOOLS_TOPLEVEL}/src")
-# BAMTOOLS_LIBRARY_DIRS => location of the BAMtools library, used in link_directories(...)
-set(BAMTOOLS_LIBRARY_DIRS "${BAMTOOLS_BUILDDIR}")
-
-# BamTools needs Zlib
-# set ZLIB_ROOT to help CMake, this is usually needed on Windows only
-find_package(ZLIB REQUIRED)
-if (ZLIB_FOUND)
-	if (MSVC)
-		# CMake's built-in FindZLIB.cmake module does not look for zlibstatic.lib
-		if (BAMTOOLS_USE_STATIC_LIBS)
-			string(REPLACE "zlib.lib" "zlibstatic.lib" ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
-		endif()
-	endif()
-	message(STATUS "Zlib in ${ZLIB_LIBRARIES}")
-else()
-	message(FATAL_ERROR "Cannot build BamTools without Zlib. Set ZLIB_ROOT properly")
-endif()
+# Multovl now brings its own, slightly edited version of the BamTools library
+# and the source of Zlib V1.2.8 for the Windows platform.
+set(THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty")
+include("${THIRDPARTY_DIR}/CMakeLists.txt")
 
 # All the include directories
 include_directories(
@@ -197,17 +173,6 @@ include_directories(
     ${ZLIB_INCLUDE_DIRS}
     ${BAMTOOLS_INCLUDE_DIRS}
 )
-
-# build BamTools API
-add_subdirectory(${BAMTOOLS_TOPLEVEL}/src/api ${BAMTOOLS_BUILDDIR})
-if (BAMTOOLS_USE_STATIC_LIBS)
-    set(BAMTOOLS_CORE_LIBRARY "BamTools-static")
-else()
-    set(BAMTOOLS_CORE_LIBRARY "BamTools")
-endif()
-
-# BAMTOOLS_LIBRARIES => BamTools plus Zlib, used in target_link_libraries(...)
-set(BAMTOOLS_LIBRARIES ${BAMTOOLS_CORE_LIBRARY} ${ZLIB_LIBRARIES})
 
 # -- END OF LIBRARIES --
 
