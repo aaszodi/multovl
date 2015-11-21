@@ -3,6 +3,10 @@ src/config/build.c
 src/config/thirdparty.c
 src/config/version.c
 
+# Some Zlib headers created by the "build our own" procedure
+thirdparty/zlib-1.2.8/zconf.h
+thirdparty/zlib-1.2.8/zconf.h.included
+
 # Build and project directories
 # By convention 'build' contains 'debug' and 'release'
 build

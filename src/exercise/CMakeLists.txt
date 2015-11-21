@@ -23,7 +23,9 @@ endif()
 
 # make the 'runner' test script
 # use this to run the parallel multovls "forever" to catch multithreaded bugs
-configure_file( runner.${EXT}.in runner.${EXT} @ONLY)
+# Native conversion of the current bindir is needed for Windows and cannot hurt on Unix
+file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" EXERCISE_PATH)
+configure_file( runner.${EXT}.in ${CMAKE_CURRENT_BINARY_DIR}/runner.${EXT} @ONLY)
 
 # make the 'timer' test script
 # use this to collect timing data

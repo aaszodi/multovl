@@ -9,10 +9,10 @@ REM -- Directories --
 REM Note that VS projects have a more complex layout than the Unix compilers.
 REM Under the bin directory we still have file, exercise, prob, ...
 REM but within these build directories there is an extra level
-REM corresponding to the @CMAKE_BUILD_TYPE@.
+REM corresponding to the build configuration, usually "Debug" and "Release".
+REM CMake does not know about these settings :-(
 
-SET BINDIR=@PROJECT_BINARY_DIR@\bin
-SET EXERCISEDIR=%BINDIR%\exercise\@CMAKE_BUILD_TYPE@
+SET EXERCISEDIR=@EXERCISE_PATH@
 SET DATA=%EXERCISEDIR%\running
 
 REM Default values for script parameters.
@@ -29,7 +29,16 @@ REM Just make sure we have enough arguments
 SET /A ARGCNT=0
 FOR %%X IN (%*) DO SET /A ARGCNT+=1
 
-IF %ARGCNT% EQU 0 ECHO Usage: runner.bat ..\{file|prob}\{Debug|Release}\program [program options] & GOTO Done
+IF %ARGCNT% EQU 0 ECHO Usage: runner.bat program [program options] & GOTO Done
+
+REM check if the first parameter exists
+REM a .exe is appended if needed
+ECHO %1 | FINDSTR /C:".exe" >nul & IF ERRORLEVEL 1 (
+    SET PROGNAME="%1.exe"
+) ELSE (
+    SET PROGNAME=%1
+)
+if NOT EXIST %PROGNAME% ECHO Program %PROGNAME% not found & GOTO Done
 
 REM Setup
 SET OUTPUT_FILE=%DATA%\runner_output.txt
@@ -39,8 +48,22 @@ IF EXIST %DATA% (
     ECHO Creating exercise directory %DATA% & MKDIR %DATA%
 )
 
-ECHO Making input files...
-%EXERCISEDIR%\inputfiles -c %CHROM% -d %DELTA% -D %DATA% -t %TRACKNO% -g %GROUPCNT%
+REM Hack to figure out whether we are Debug or Release
+REM If the string Release is found in %1, then we are in Release
+REM otherwise Debug
+ECHO %PROGNAME% | FINDSTR /C:"Release" >nul & IF ERRORLEVEL 1 (
+    SET BUILDTYPE=Debug
+) else (
+    SET BUILDTYPE=Release
+)
+ECHO Making %BUILDTYPE% input files...
+SET IPF=%EXERCISEDIR%\%BUILDTYPE%\inputfiles.exe
+IF EXIST %IPF% (
+	%IPF% -c %CHROM% -d %DELTA% -D %DATA% -t %TRACKNO% -g %GROUPCNT%
+) ELSE (
+	ECHO %IPF% not found.
+	GOTO Done
+)
 
 REM Workaround to list the input BED files as CMD.EXE does not support wildcard expansion inline
 SET BEDFILES=
@@ -49,7 +72,7 @@ FOR /L %%X IN (0, 1, %MAXTRACKNO%) DO CALL SET BEDFILES=%%BEDFILES%% %%DATA%%\tr
 ECHO Run program %1 forever, (Ctrl-C to stop)...
 
 :Forever
-REM %* contains the cmdline params, i.e. the pgm name to be run
+REM %* contains the cmdline params, i.e. the pgm name and its parameters to be run
     %* %BEDFILES% > %OUTPUT_FILE% 2>&1
     IF ERRORLEVEL 1 ECHO Program failure, check %OUTPUT_FILE% & GOTO :Done
 GOTO Forever
