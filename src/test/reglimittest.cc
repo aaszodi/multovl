@@ -107,8 +107,10 @@ BOOST_AUTO_TEST_CASE(reglimitser_test)
         ia >> inrlf >> inrll;
         
         // The raw pointers should be the same...
+#ifdef REGLIMIT_RAWPTR
         BOOST_CHECK_EQUAL(inrlf.const_raw_region_ptr(), inrll.const_raw_region_ptr());
-        
+#endif
+
         // first & last
         BOOST_CHECK_EQUAL(inrlf.region().to_attrstring(), "9:a46:-:4-6");
         BOOST_CHECK(inrlf.is_first());
@@ -123,14 +125,18 @@ BOOST_AUTO_TEST_CASE(deepcopy_test)
     RegLimit rlcopy = rl.deep_copy();
     
     // contents same, raw ptrs different
+#ifdef REGLIMIT_RAWPTR
     BOOST_CHECK(rl.const_raw_region_ptr() != rlcopy.const_raw_region_ptr());
+#endif
     BOOST_CHECK_EQUAL(rl.region().to_attrstring(), rlcopy.region().to_attrstring());
     BOOST_CHECK(rlcopy.is_first());
     
     // change the copy's name, the original must stay unaffected
+#ifdef REGLIMIT_RAWPTR
     rlcopy.raw_region_ptr()->name("chgdname");
     BOOST_CHECK_EQUAL(rlcopy.region().name(), "chgdname");
     BOOST_CHECK_EQUAL(rl.region().name(), "a46");
+#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()

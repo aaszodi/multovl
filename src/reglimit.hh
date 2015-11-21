@@ -129,7 +129,11 @@ public:
         return RegLimit(ancp, this->is_first()); 
     }
     
-    #ifndef NDEBUG
+# if !defined(NDEBUG) || (defined(_MSC_VER) && defined(_DEBUG))
+#define REGLIMIT_RAWPTR
+#endif
+
+    #ifdef REGLIMIT_RAWPTR
         // these are used by the unit tests only
         const AncestorRegion* const_raw_region_ptr() const { return _regp.get(); }
         AncestorRegion* raw_region_ptr() { return _regp.get(); }
