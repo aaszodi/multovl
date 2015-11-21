@@ -5,7 +5,8 @@
 # cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \ <-- define for Makefile targets, not for Visual Studio or XCode
 #   -DBOOST_ROOT=/path/to/boost \
 #	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ <-- optional if not found automatically
-#	-DZLIB_ROOT=/path/to/zlib <- location of Zlib, usually not needed on UNIX platforms
+#   -DUSE_SYSTEM_ZLIB \ <-- optional, default ON under UNIX, OFF under Windows
+#	-DZLIB_ROOT=/path/to/zlib <- location of Zlib, ignored if USE_SYSTEM_ZLIB is OFF
 #   ..
 #
 # The Debug build will contain the unit tests but no INSTALL or PACKAGE targets.
@@ -161,7 +162,9 @@ endif()
 # -- Third-party libraries --
 
 # Multovl now brings its own, slightly edited version of the BamTools library
-# and the source of Zlib V1.2.8 for the Windows platform.
+# and the source of Zlib V1.2.8 for platforms that don't have it by default
+# (most notably Windows)
+set(USE_SYSTEM_ZLIB ${UNIX} CACHE BOOL "Use the system Zlib if available")
 set(THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty")
 include("${THIRDPARTY_DIR}/CMakeLists.txt")
 

@@ -21,13 +21,16 @@ set(BAMTOOLS_LIBRARY_DIRS "${BAMTOOLS_BUILDDIR}")
 # BamTools needs Zlib
 # On UNIX platforms Zlib is almost always provided by the system
 # set ZLIB_ROOT to help CMake to find it if needed
-find_package(ZLIB REQUIRED)
-if (NOT ZLIB_FOUND)
+if(USE_SYSTEM_ZLIB)
+    find_package(ZLIB QUIET)
+endif()
+if(NOT ZLIB_FOUND)
     # let's build it ourselves, this usually happens under Windows only
-    add_subdirectory(${THIRDPARTY_DIR}/zlib ${CMAKE_BINARY_DIR}/zlib)
-    if (BAMTOOLS_USE_STATIC_LIBS)
-        string(REPLACE "zlib.lib" "zlibstatic.lib" ZLIB_LIBRARIES ${ZLIB_LIBRARIES})
-    endif()
+    # the static-ness of Zlib follows BamTools
+    message(STATUS "Building our own Zlib...")
+    set(ZLIB_STATICLIB ${BAMTOOLS_USE_STATIC_LIBS})
+    add_subdirectory(${THIRDPARTY_DIR}/zlib-1.2.8 ${CMAKE_BINARY_DIR}/zlib)
+    set(ZLIB_LIBRARIES zlib)    # our own target
 endif()
 
 # build BamTools API

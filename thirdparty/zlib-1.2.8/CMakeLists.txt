@@ -1,18 +1,20 @@
-cmake_minimum_required(VERSION 2.4.4)
-set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
+# -- thirdparty/zlib-1.2.8/CMakeLists.txt --
 
-project(zlib C)
+# NOTE: This CMakeLists.txt file has been modified from the original Zlib CMakeLists.txt.
+# This is not a project now!
+# All commands related to installation have been removed.
 
-set(VERSION "1.2.8")
+# These are the variables normally defined by CMake's FindZLIB module.
+# We emulate some of them here.
+set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+set(ZLIB_VERSION_STRING "1.2.8")
+set(ZLIB_VERSION_MAJOR 1)
+set(ZLIB_VERSION_MINOR 2)
+set(ZLIB_VERSION_PATCH 8)
 
-option(ASM686 "Enable building i686 assembly implementation")
-option(AMD64 "Enable building amd64 assembly implementation")
-
-set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
-set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
-set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
-set(INSTALL_MAN_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Installation directory for manual pages")
-set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+# These two variables got a "ZLIB_" prefix from AA
+option(ZLIB_ASM686 "Enable building i686 assembly implementation")
+option(ZLIB_AMD64 "Enable building amd64 assembly implementation")
 
 include(CheckTypeSize)
 include(CheckFunctionExists)
@@ -60,7 +62,7 @@ endif()
 check_include_file(unistd.h Z_HAVE_UNISTD_H)
 
 if(MSVC)
-    set(CMAKE_DEBUG_POSTFIX "d")
+    ### set(CMAKE_DEBUG_POSTFIX "d")
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -129,10 +131,10 @@ if(NOT MINGW)
     )
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCC)
-    if(ASM686)
+if(CMAKE_C_COMPILER MATCHES "gcc") # was CMAKE_COMPILER_IS_GNUCC)
+    if(ZLIB_ASM686)
         set(ZLIB_ASMS contrib/asm686/match.S)
-    elseif (AMD64)
+    elseif (ZLIB_AMD64)
         set(ZLIB_ASMS contrib/amd64/amd64-match.S)
     endif ()
 
@@ -143,13 +145,13 @@ if(CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 if(MSVC)
-    if(ASM686)
+    if(ZLIB_ASM686)
 		ENABLE_LANGUAGE(ASM_MASM)
         set(ZLIB_ASMS
 			contrib/masmx86/inffas32.asm
 			contrib/masmx86/match686.asm
 		)
-    elseif (AMD64)
+    elseif (ZLIB_AMD64)
 		ENABLE_LANGUAGE(ASM_MASM)
         set(ZLIB_ASMS
 			contrib/masmx64/gvmat64.asm
@@ -183,67 +185,40 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
-add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
-set_target_properties(zlib PROPERTIES SOVERSION 1)
-
-if(NOT CYGWIN)
-    # This property causes shared libraries on Linux to have the full version
-    # encoded into their final filename.  We disable this on Cygwin because
-    # it causes cygz-${ZLIB_FULL_VERSION}.dll to be created when cygz.dll
-    # seems to be the default.
-    #
-    # This has no effect with MSVC, on that platform the version info for
-    # the DLL comes from the resource file win32/zlib1.rc
-    set_target_properties(zlib PROPERTIES VERSION ${ZLIB_FULL_VERSION})
+# Static or shared?
+# The result will always be called zlib, to differentiate from the system version
+if (ZLIB_STATICLIB)
+    add_library(zlib STATIC 
+        ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+else()
+    add_library(zlib SHARED 
+        ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+    set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
+    set_target_properties(zlib PROPERTIES SOVERSION 1)
+    if(NOT CYGWIN)
+        # This property causes shared libraries on Linux to have the full version
+        # encoded into their final filename.  We disable this on Cygwin because
+        # it causes cygz-${ZLIB_FULL_VERSION}.dll to be created when cygz.dll
+        # seems to be the default.
+        #
+        # This has no effect with MSVC, on that platform the version info for
+        # the DLL comes from the resource file win32/zlib1.rc
+        set_target_properties(zlib PROPERTIES VERSION ${ZLIB_FULL_VERSION})
+    endif()
 endif()
 
-if(UNIX)
-    # On unix-like platforms the library is almost always called libz
-   set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
-   if(NOT APPLE)
-     set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
-   endif()
-elseif(BUILD_SHARED_LIBS AND WIN32)
+
+#if(UNIX)
+#    # On unix-like platforms the library is almost always called libz
+#    set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
+#    set(ZLIB_LIBRARIES XXXX???????????)
+#   if(NOT APPLE)
+#     set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
+#   endif()
+#elseif(BUILD_SHARED_LIBS AND WIN32)
     # Creates zlib1.dll when building shared library version
-    set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
-endif()
+#    set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
+#endif()
 
-if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS zlib zlibstatic
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-endif()
-if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
-endif()
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
-endif()
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
-endif()
-
-#============================================================================
-# Example binaries
-#============================================================================
-
-add_executable(example test/example.c)
-target_link_libraries(example zlib)
-add_test(example example)
-
-add_executable(minigzip test/minigzip.c)
-target_link_libraries(minigzip zlib)
-
-if(HAVE_OFF64_T)
-    add_executable(example64 test/example.c)
-    target_link_libraries(example64 zlib)
-    set_target_properties(example64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
-    add_test(example64 example64)
-
-    add_executable(minigzip64 test/minigzip.c)
-    target_link_libraries(minigzip64 zlib)
-    set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
-endif()
+### Installation commands removed by AA
+### Example binaries removed by AA
