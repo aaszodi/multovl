@@ -6,7 +6,7 @@
 # ==========================
 
 # list include paths
-include_directories( ${BamTools_SOURCE_DIR}/src )
+include_directories( ${BamTools_SOURCE_DIR}/src ${ZLIB_INCLUDE_DIRS})
 
 # add compiler definitions 
 add_definitions( -DBAMTOOLS_API_LIBRARY ) # (for proper exporting of library symbols)
@@ -32,26 +32,21 @@ set( BamToolsAPISources
         ${InternalSources}
 )
 
-# create main BamTools API shared library
-# SO version updated to 2.3.1 by AA, 2015-11-14
-add_library( BamTools SHARED ${BamToolsAPISources} )
-set_target_properties( BamTools PROPERTIES
-                       SOVERSION "2.3.1"
-                       OUTPUT_NAME "bamtools" )
-
-# create main BamTools API static library
-add_library( BamTools-static STATIC ${BamToolsAPISources} )
-set_target_properties( BamTools-static PROPERTIES 
-                       OUTPUT_NAME "bamtools" 
-                       PREFIX "lib" )
-
-# link libraries automatically with zlib
-target_link_libraries( BamTools z)
-target_link_libraries( BamTools-static ${ZLIB_LIBRARIES} )
-
-# set library install destinations
-install( TARGETS BamTools        LIBRARY DESTINATION "lib/bamtools" RUNTIME DESTINATION "bin")
-install( TARGETS BamTools-static ARCHIVE DESTINATION "lib/bamtools")
+# create main BamTools API library
+if (BAMTOOLS_USE_STATIC_LIBS)
+    # create main BamTools API static library
+    add_library( BamTools-static STATIC ${BamToolsAPISources} )
+    set_target_properties( BamTools-static PROPERTIES 
+                           OUTPUT_NAME "bamtools" 
+                           PREFIX "lib" )
+    target_link_libraries( BamTools-static ${ZLIB_LIBRARIES} )
+else()
+    add_library( BamTools SHARED ${BamToolsAPISources} )
+    set_target_properties( BamTools PROPERTIES
+                           SOVERSION "2.3.1"
+                           OUTPUT_NAME "bamtools" )
+    target_link_libraries( BamTools ${ZLIB_LIBRARIES)
+endif()
 
 # export API headers
 include(../ExportHeader.cmake)

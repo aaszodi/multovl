@@ -6,7 +6,6 @@
 
 # These are the variables normally defined by CMake's FindZLIB module.
 # We emulate some of them here.
-set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 set(ZLIB_VERSION_STRING "1.2.8")
 set(ZLIB_VERSION_MAJOR 1)
 set(ZLIB_VERSION_MINOR 2)

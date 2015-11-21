@@ -26,10 +26,14 @@ if(USE_SYSTEM_ZLIB)
 endif()
 if(NOT ZLIB_FOUND)
     # let's build it ourselves, this usually happens under Windows only
-    # the static-ness of Zlib follows BamTools
+    # the static-ness of Zlib follows BamTools in this case
     message(STATUS "Building our own Zlib...")
     set(ZLIB_STATICLIB ${BAMTOOLS_USE_STATIC_LIBS})
-    add_subdirectory(${THIRDPARTY_DIR}/zlib-1.2.8 ${CMAKE_BINARY_DIR}/zlib)
+    set(ZLIB_SOURCE_DIR "${THIRDPARTY_DIR}/zlib-1.2.8")
+    add_subdirectory(${ZLIB_SOURCE_DIR} ${CMAKE_BINARY_DIR}/zlib)
+    
+    # these are normally set by FindZLIB
+    set(ZLIB_INCLUDE_DIRS ${ZLIB_SOURCE_DIR} ${CMAKE_BINARY_DIR}/zlib)
     set(ZLIB_LIBRARIES zlib)    # our own target
 endif()
 
