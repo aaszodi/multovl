@@ -6,7 +6,7 @@
 <body>
 <h1 style="color:navy">MULTOVL: Multiple Region Overlap Guide</h1>
 
-<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.3, Spring 2015</em></center></p>
+<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.3, Late 2015</em></center></p>
 
 <h2>Table of contents</h2>
 
@@ -84,7 +84,6 @@ MULTOVL.</p>
 <li>Linux on Intel X86, ARMv7</li>
 <!-- fancy Unix platforms
 <li>Solaris 11 on Intel X86 or SPARC</li>
-<li>Irix 6.5 on SGI/MIPS</li>
 -->
 <li>Windows 7 and above on Intel X86</li>
 </ul>
@@ -103,7 +102,7 @@ The following compilers have been used in building MULTOVL:</p>
 <li>Sun Studio 12.1 or above</li>
 <li>SGI MipsPro 7.4</li>
 -->
-<li>Microsoft Visual Studio 2013</li>
+<li>Microsoft Visual Studio 2015</li>
 </ul>
 
 <h4>Third-party libraries</h4>
@@ -117,6 +116,8 @@ Documentation is generated with Doxygen, Version 1.7 or above.</p>
 
 <h3>Building MULTOVL</h3>
 
+<h4>UNIX systems</h4>
+
 <p>Change to the top-level 
 directory which will be called <tt>${MULTOVL}</tt> from now on, make a directory called 
 <tt>build</tt>, change to it and configure your build with CMake:</p>
@@ -125,14 +126,14 @@ directory which will be called <tt>${MULTOVL}</tt> from now on, make a directory
 mkdir build 
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=your_favourite_C_compiler \
     -DCMAKE_CXX_COMPILER=your_favourite_C++_compiler \
     -DBOOST_ROOT=/path/to/boost \
-    -DBAMTOOLS_ROOT=/path/to/BAMtools
     -DCMAKE_INSTALL_PREFIX=/path/to/installdir ..
 </code></pre>
 
-<p>If the <tt>-DCMAKE_CXX_COMPILER</tt> parameter is omitted, the system default C++ compiler
-will be used.</p>
+<p>If the <tt>-DCMAKE_C_COMPILER</tt> or <tt>-DCMAKE_CXX_COMPILER</tt> parameters are omitted, 
+the system default C and C++ compilers will be used.</p>
 
 <p>CMake's Boost detection script is not perfect. Sometimes it is not enough to specify
 <tt>-DBOOST_ROOT</tt>: for instance on 64-bit OpenSuSE, the Boost headers are in
@@ -140,16 +141,12 @@ will be used.</p>
 you have to specify <tt>-DBOOST_INCLUDEDIR=/usr/include</tt> and 
 <tt>-DBOOST_LIBRARYDIR=/usr/lib64</tt> separately.</p>
 
-<p>If the <tt>-DBAMTOOLS_ROOT</tt> parameter is specified, then BAM-formatted binary
-input files will be supported.</p>
-
 <p>The libraries will be linked statically by default. You can ask CMake to 
 link all external libraries dynamically by specifying the option
 <tt>-DMULTOVL_USE_STATIC_LIBS=OFF</tt>. Or you can specify for each external library
 whether you want to have static or dynamic linking by setting the options
 <tt>-D&lt;lib&gt;_USE_STATIC_LIBS=ON</tt> where <tt>&lt;lib&gt;</tt>
-can be <tt>Boost, BAMTOOLS</tt>. (Although I do not know why
-anyone in his/her right mind would do that...)</p>
+can be <tt>Boost, BAMTOOLS</tt>.</p>
 
 <p>Assuming the configuration went well, you can compile and install the package and 
 its documentation:-</p>
@@ -158,7 +155,7 @@ its documentation:-</p>
 make install
 </code></pre>
 
-<p>The tools will be installed in <tt>/path/to/installdir/multovl-1.2/bin</tt>.</p>
+<p>The tools will be installed in <tt>/path/to/installdir/multovl-1.3/bin</tt>.</p>
 
 <p>Alternatively you can configure a debug build by specifying
 <tt>-DCMAKE_BUILD_TYPE=Debug</tt> and omitting the
@@ -167,6 +164,41 @@ This is important only for developers.</p>
 
 <p>You can check the configuration and build details of the package 
 by invoking the program <tt>multovl_config</tt>.
+
+<h4>Windows systems</h4>
+
+<p>These instructions have been tested on Windows 10 using Visual Studio 2015. It is quite likely
+that they work under Windows 8.x or Windows 7, and possibly with Visual Studio 2013 as well.
+It is recommended to install a pre-compiled binary distribution of the Boost libraries.</p>
+
+<p>The BamTools library, now integrated in Multovl, relies on the Zlib compression library which is 
+installed on most UNIX systems by default but not on Windows. Building it in all necessary variants
+is very tedious, so I decided to include the important bits from the latest version (1.2.8)
+in the Multovl source as well.
+If CMake does not find a system Zlib then it will build the Multovl-supplied version.</p>
+
+<p>Once you have CMake and Boost installed, launch a Visual Studio command prompt, navigate
+to the Multovl directory, create a build directory under it and run CMake:</p>
+
+<pre><code>
+mkdir build
+cd build
+cmake -G "Visual Studio 14" -DBOOST_ROOT=path\to\boost 
+    -DBoost_LIBRARY_DIR=path\to\boost\lib32-msvc-14.0 ..
+</code></pre>
+
+<p>Open the Visual Studio solution <tt>multovl.sln</tt> and build Multovl as usual. Choose
+the debug or release versions from the Visual Studio toolbar as needed.</p>
+
+<p>If you wish to build the 64-bit version then you have to invoke CMake a bit differently,
+instructing it to choose the 64-bit compilers amd the 64-bit Boost libraries:</p>
+
+<pre><code>
+mkdir build
+cd build
+cmake -G "Visual Studio 14 2015 Win64" -DBOOST_ROOT=path\to\boost
+    -DBoost_LIBRARY_DIR=path\to\boost\lib64-msvc-14.0 ..
+</code></pre>
 
 <h2><a name='tools'>Command-line tools</a></h2>
 
