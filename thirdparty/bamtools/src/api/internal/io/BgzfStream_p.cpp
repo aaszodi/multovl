@@ -25,6 +25,19 @@ using namespace BamTools::Internal;
 #include <sstream>
 using namespace std;
 
+// FIX for big-endian signed short unpacking
+// This ASSUMES 16-bit short values
+// AA 2016-05-16
+//
+unsigned short unpack_ushort(const char* buffer) {
+    char buf[2];
+    strncpy(buf, buffer, 2);
+    if (BamTools::SystemIsBigEndian()) {
+        BamTools::SwapEndian_16p(buf);
+    }
+    return(BamTools::UnpackUnsignedShort(buf));
+}
+
 // ---------------------------
 // BgzfStream implementation
 // ---------------------------
@@ -51,10 +64,10 @@ bool BgzfStream::CheckBlockHeader(char* header) {
             header[1] == Constants::GZIP_ID2 &&
             header[2] == Z_DEFLATED &&
             (header[3] & Constants::FLG_FEXTRA) != 0 &&
-            BamTools::UnpackUnsignedShort(&header[10]) == Constants::BGZF_XLEN &&
+            unpack_ushort(&header[10]) == Constants::BGZF_XLEN &&   // big-endian FIX
             header[12] == Constants::BGZF_ID1 &&
             header[13] == Constants::BGZF_ID2 &&
-            BamTools::UnpackUnsignedShort(&header[14]) == Constants::BGZF_LEN );
+            unpack_ushort(&header[14]) == Constants::BGZF_LEN );    // big-endian FIX
 }
 
 // closes BGZF file
@@ -367,7 +380,8 @@ void BgzfStream::ReadBlock(void) {
         throw BamException("BgzfStream::ReadBlock", "invalid block header contents");
 
     // copy header contents to compressed buffer
-    const size_t blockLength = BamTools::UnpackUnsignedShort(&header[16]) + 1;
+    // FIX: was BamTools::UnpackUnsignedShort(&header[16])
+    const size_t blockLength = unpack_ushort(&header[16]) + 1;
     memcpy(m_compressedBlock.Buffer, header, Constants::BGZF_BLOCK_HEADER_LENGTH);
 
     // read remainder of block
