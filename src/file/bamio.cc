@@ -55,11 +55,16 @@ BamReader::BamReader(const std::string& infname):
     // open the BAM reader
     if (!_bamreader.Open(infname))  // could not open
     {
-        add_error("Cannot open input file: " + infname);
+        add_error(_bamreader.GetErrorString());
+        add_error("Cannot open input BAM file: " + infname);
     }
     
     // get the reference sequence data (i.e. the chromosomes)
     _refs = _bamreader.GetReferenceData();
+    if (_refs.size() == 0)  // no data
+    {
+        add_error("Cannot read data from input BAM file: " + infname);
+    }
 }
 
 std::string BamReader::read_into(std::string& chrom, Region& reg)
