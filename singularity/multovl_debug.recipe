@@ -1,0 +1,25 @@
+Bootstrap: library
+From: ubuntu:focal
+
+%labels
+    Author András Aszódi
+    Version 1.3
+
+%help
+    Contains the various `multovl` executables. They are all statically linked
+    so no extra software installation should be needed.
+    The executables are the debug versions.
+
+%post
+    mkdir /multovl
+
+%files
+    # We _assume_ that the image will be built in the same directory as the executables
+    ${PWD}/bin/file/multovl /multovl
+    ${PWD}/bin/file/prob/*multovlprob /multovl
+
+%environment
+    PATH=/multovl:${PATH}
+
+%runscript
+    exec $@
