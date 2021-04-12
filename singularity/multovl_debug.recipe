@@ -6,20 +6,53 @@ From: ubuntu:focal
     Version 1.3
 
 %help
-    Contains the various `multovl` executables. They are all statically linked
-    so no extra software installation should be needed.
-    The executables are the debug versions.
-
-%post
-    mkdir /multovl
+    Invoke the apps like this:
+    `singularity run --app {multovl|multovlprob|parmultovlprob} <container_name> [options]`
 
 %files
-    # We _assume_ that the image will be built in the same directory as the executables
-    ${PWD}/bin/file/multovl /multovl
-    ${PWD}/bin/file/prob/*multovlprob /multovl
+    # This is executed before `%post`!
+    # Can copy files but only to existing directories.
+
+%post
+    # Here you may create directories, install software etc.
+    # We use %appinstall instead for the 3 different Multovl executables.
 
 %environment
-    PATH=/multovl:${PATH}
+    # set environment variables
 
-%runscript
-    exec $@
+# -- Apps --
+
+# The apps will be installed in the SCI-F hierarchy.
+# /scif/apps/
+#      foo/
+#         bin/
+#         lib/
+#         scif/
+#             runscript.help
+#             runscript
+#             environment.sh
+#      bar/
+
+# Classic Multovl
+%appfiles multovl
+    ./bin/file/multovl bin/multovl
+%apprun multovl
+    exec multovl $@
+%apphelp multovl
+    Multovl Classic
+
+# Multovl with null distribution approximation
+%appfiles multovlprob
+    ./bin/file/prob/multovlprob bin/multovlprob
+%apprun multovlprob
+    exec multovlprob $@
+%apphelp multovlprob
+    Multovl with null distribution approximation, serial version
+
+%appfiles parmultovlprob
+    ./bin/file/prob/parmultovlprob bin/parmultovlprob
+%apprun parmultovlprob
+    exec parmultovlprob $@
+%apphelp parmultovlprob
+    Multovl with null distribution approximation, multithreaded version
+
