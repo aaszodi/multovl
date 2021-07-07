@@ -249,6 +249,11 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${MULTOVL_DESTDIR}/bin)
     
+    # Dockerfile
+    # The installation directory ${MULTOVL_DESTDIR} will be the Docker build context
+    set(_dockerdir "${PROJECT_SOURCE_DIR}/containers/docker")
+    install(FILES "${_dockerdir}/Dockerfile" DESTINATION ${MULTOVL_DESTDIR})
+    
     # documentation
     install(FILES "${PROJECT_SOURCE_DIR}/README.md" "${PROJECT_SOURCE_DIR}/LICENSE" 
         DESTINATION ${MULTOVL_DESTDIR}/doc)

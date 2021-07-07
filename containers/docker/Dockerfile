@@ -5,6 +5,10 @@
 FROM ubuntu:focal-20210416
 
 # Install MULTOVL
-# because it is statically built, a simple COPY should be sufficient
-# TODO
+COPY bin/multovl /usr/local/bin/multovl
 
+# Run MULTOVL
+ENTRYPOINT [ "/usr/local/bin/multovl" ]
+
+# By default just print the help
+CMD [ "--help" ]
