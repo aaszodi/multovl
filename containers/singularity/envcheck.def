@@ -1,0 +1,27 @@
+# Build me in $MULTOVL/singularity!
+
+Bootstrap:library
+From: ubuntu:focal
+
+%labels
+    Author András Aszódi
+    Version 1.3
+
+%help
+    Learn how the environment looks like from within a container.
+
+%files
+    # This is executed before `%post`!
+    # Can copy files but only to existing directories.
+    # The <src> paths are relative to the host directory where
+    # the build is being done.
+    # As a test we copy the license file
+    ../LICENSE /srv
+
+%post
+    # Here you may create directories, install software etc.
+
+%test
+    # Runs at the end of the build.
+    echo "My home is ${HOME}, container work dir is ${PWD}"
+

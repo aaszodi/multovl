@@ -249,8 +249,13 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${MULTOVL_DESTDIR}/bin)
     
+    # Dockerfile
+    # The installation directory ${MULTOVL_DESTDIR} will be the Docker build context
+    set(_dockerdir "${PROJECT_SOURCE_DIR}/containers/docker")
+    install(FILES "${_dockerdir}/Dockerfile" DESTINATION ${MULTOVL_DESTDIR})
+    
     # documentation
-    install(FILES "${PROJECT_SOURCE_DIR}/README.txt" "${PROJECT_SOURCE_DIR}/LICENSE" 
+    install(FILES "${PROJECT_SOURCE_DIR}/README.md" "${PROJECT_SOURCE_DIR}/LICENSE" 
         DESTINATION ${MULTOVL_DESTDIR}/doc)
     install(DIRECTORY "${DOCDIR}/html" DESTINATION ${MULTOVL_DESTDIR}/doc)
     if(DOXYGEN)
@@ -265,7 +270,7 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Multiple Overlaps of Genomic Regions")
     set(CPACK_PACKAGE_VENDOR "Andras Aszodi")
-    set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
+    set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
     set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
     
     # Select package generators
