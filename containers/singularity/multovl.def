@@ -1,0 +1,97 @@
+# == MULTOVL build and production (staged build) ==
+
+# Run this in the $MULTOVL/containers/singularity directory
+# This is the directory where this recipe file is located
+
+# -- Build stage --
+
+### NOTE: change this to 
+###     Bootstrap: library
+###     From: ubuntu_devboost
+### after uploading the image to Sylabs
+Bootstrap: localimage
+From: ubuntu_devboost.sif
+Stage: build
+
+%setup
+    # Create `/multovl` and its subdir `containers/singularity` in the container
+    mkdir -p ${SINGULARITY_ROOTFS}/multovl/containers/singularity
+
+%files
+    # Copy the relevant source directories to /multovl in the container
+    # multovl <-- the root of the hierarchy
+    # ├── CMakeLists.txt    <-- top-level CMakeLists.txt, copied
+    # ├── cmake             <-- detection scripts, copied
+    # ├── containers        <-- Created by %setup
+    # │   ├── docker        <-- `make install` needs this (just a Dockerfile)
+    # │   └── singularity   <-- Created by %setup, we build the container here
+    # ├── doc		
+    # │   └── html	        <-- HTML docs under version control, needed by `make install`
+    # ...
+    # ├── include           <-- copied
+    # ├── src               <-- copied
+    # └── thirdparty        <-- copied
+    #
+    # On the host we are in $MULTOVL/containers/singularity
+    # In the container we are in /
+    # So the copy operations below use `../..` for the MULTOVL root on the host
+    ../../CMakeLists.txt /multovl
+    ../../cmake/* /multovl/cmake/
+    ../../include/* /multovl/include/
+    ../../src/* /multovl/src/
+    ../../thirdparty/* /multovl/thirdparty/
+    # Needed by `make install` to work properly
+    ../../LICENSE /multovl
+    ../../README.md /multovl
+    ../../doc/html /multovl/doc/html
+    ../../containers/docker/* /multovl/containers/docker/
+    
+# All build steps
+%post
+    MULTOVL_ROOT=/multovl
+    BUILDDIR=$MULTOVL_ROOT/build
+    mkdir -p $BUILDDIR
+    INSTALLDIR=/usr/local
+    
+    # Start building
+    cd $BUILDDIR
+    
+    # CMake, everything linked statically
+    cmake -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=${INSTALLDIR} ${MULTOVL_ROOT}
+    
+    # Build
+    make -j2
+    
+    # Install
+    make install
+
+# -- Production stage --
+
+Bootstrap: library
+From: ubuntu:focal
+Stage: prod
+
+# Variables set at runtime
+%environment
+    export LC_ALL="C"
+    export PATH=/usr/local/multovl-1.3/bin:${PATH}
+
+%files from build
+    # Copy the MULTOVL installation directory from the previous "build" stage
+    # to the same location in the "prod" stage
+    /usr/local/multovl-1.3
+
+# Information
+%labels
+    Author andras.aszodi
+    Version 1.3
+
+%help
+    MULTOVL: Multiple overlaps of genomic regions.
+    Usage: `singularity exec multovl.sif <PROG>`
+    where <PROG> = anctrack.awk | bed2gff.sh | multovl | multovl_config | multovlprob | parmultovlprob
+    See also:
+    https://github.com/aaszodi/multovl
+    https://bitbucket.org/interquadrat/multovl
+    

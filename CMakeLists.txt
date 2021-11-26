@@ -43,6 +43,9 @@ project(multovl C CXX)
 # ├── doc					<== ${DOCDIR}: Documentation
 # │   ├── doxygen			<== Doxygen input
 # │   └── html				<== HTML docs under version control, e.g. user guide
+# ├── containers            <== Containerization setup
+# │   ├── docker     
+# │   └── singularity
 # └── src					<== ${SRCDIR}: generic multovl components
 #     ├── config			<== C source for the config/build information library
 #     ├── exercise			<== timing tests
@@ -253,6 +256,8 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     # The installation directory ${MULTOVL_DESTDIR} will be the Docker build context
     set(_dockerdir "${PROJECT_SOURCE_DIR}/containers/docker")
     install(FILES "${_dockerdir}/Dockerfile" DESTINATION ${MULTOVL_DESTDIR})
+    
+    # Singularity-related stuff not installed
     
     # documentation
     install(FILES "${PROJECT_SOURCE_DIR}/README.md" "${PROJECT_SOURCE_DIR}/LICENSE" 
