@@ -5,12 +5,9 @@
 
 # -- Build stage --
 
-### NOTE: change this to 
-###     Bootstrap: library
-###     From: ubuntu_devboost
-### after uploading the image to Sylabs
-Bootstrap: localimage
-From: ubuntu_devboost.sif
+# https://cloud.sylabs.io/library/andras.aszodi/default/ubuntu_devboost
+Bootstrap: library
+From: andras.aszodi/default/ubuntu_devboost
 Stage: build
 
 %setup
@@ -84,7 +81,7 @@ Stage: prod
 
 # Information
 %labels
-    Author andras.aszodi
+    Author András Aszódi
     Version 1.3
 
 %help
