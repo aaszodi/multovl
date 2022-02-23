@@ -45,5 +45,5 @@ else()
     set_target_properties( BamTools PROPERTIES
                            SOVERSION "2.3.1"
                            OUTPUT_NAME "bamtools" )
-    target_link_libraries( BamTools ${ZLIB_LIBRARIES)
+    target_link_libraries( BamTools ${ZLIB_LIBRARIES} )
 endif()
