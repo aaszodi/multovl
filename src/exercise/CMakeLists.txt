@@ -12,7 +12,13 @@ else()
     add_executable(inputfiles inputfiles.cc)
 endif()
 flag_fix(inputfiles)
-target_link_libraries(inputfiles movl_fileio ${MULTOVLIBS})
+if (MULTOVL_USE_STATIC_LIBS)
+	target_link_libraries(inputfiles movl_fileio ${MULTOVLIBS})
+else()
+	# Even though `inputfiles` doesn't need BamTools,
+	# `movl_fileio` wants that when linking dynamically
+	target_link_libraries(inputfiles movl_fileio ${MULTOVLIBS} ${BAMTOOLS_LIBRARIES})
+endif()
 
 # Test scripts
 if(WIN32)
