@@ -167,6 +167,8 @@ endif()
 # Multovl now brings its own, slightly edited version of the BamTools library
 # and the source of Zlib V1.2.8 for platforms that don't have it by default
 # (most notably Windows)
+# The inofficial BamTools version number is V2.3.1
+set(BAMTOOLS_VERSION "2.3.1")
 set(USE_SYSTEM_ZLIB ${UNIX} CACHE BOOL "Use the system Zlib if available")
 set(THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty")
 include("${THIRDPARTY_DIR}/CMakeLists.txt")
@@ -244,6 +246,25 @@ endif(DOXYGEN_FOUND)
 if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps are installed from their respective subdirs
     # see corresponding CMakeLists.txt files
+    
+    # shared libraries
+    if(NOT MULTOVL_USE_STATIC_LIBS)
+    	install(FILES 
+    		${CMAKE_BINARY_DIR}/bamtools/libbamtools.so.${BAMTOOLS_VERSION}
+    		${CMAKE_BINARY_DIR}/bin/libmovl.so
+    		${CMAKE_BINARY_DIR}/bin/file/libmovl_fileio.so
+			PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE 
+				GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+			DESTINATION ${MULTOVL_DESTDIR}/lib
+    	)
+    	# BamTools shared object symlink
+		install(CODE "execute_process( \
+			COMMAND ${CMAKE_COMMAND} -E create_symlink \
+			${CMAKE_BINARY_DIR}/bamtools/libbamtools.so.${BAMTOOLS_VERSION} \
+			${CMAKE_BINARY_DIR}/bamtools/libbamtools.so   \
+			)"
+		)
+	endif()
     
     # scripts
     # Note: install(PROGRAMS... wouldn't add the exec permissions)
