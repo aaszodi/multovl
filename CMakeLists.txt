@@ -271,7 +271,7 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     
     # scripts
     # Note: install(PROGRAMS... wouldn't add the exec permissions)
-    install(FILES "${SCRIPTDIR}/anctrack.awk" "${SCRIPTDIR}/bed2gff.sh"
+    install(FILES "${SCRIPTDIR}/anctrack.awk" "${SCRIPTDIR}/bed2gff.sh" "${SCRIPTDIR}/multovltest.sh"
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE 
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${MULTOVL_DESTDIR}/bin)
@@ -315,6 +315,6 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_IGNORE_FILES "cmake/;src/;build/;debug/;release/;\\\\.project;\\\\.git;"/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store")
     
     # source package    
-    set(CPACK_SOURCE_IGNORE_FILES "build/;debug/;release/;\\\\.DS_Store;\\\\.project;\\\\.git")
+    set(CPACK_SOURCE_IGNORE_FILES "build/;debug/;containers/singularity/sandboxes;release/;\\\\.DS_Store;\\\\.project;\\\\.git")
     include(CPack)
 endif()
