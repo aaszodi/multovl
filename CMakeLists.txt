@@ -30,7 +30,7 @@
 #
 # By convention I put all the various build directories under multovl/build.
 #
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(multovl C CXX)
 
@@ -60,6 +60,9 @@ project(multovl C CXX)
 # Brief system/compiler description
 message(STATUS "System = ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
+
+# C++ language standard: C++98
+set(CMAKE_CXX_STANDARD 98)
 
 # Version string for the project
 set(MULTOVL_VERSION_MAJOR 1)
