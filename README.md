@@ -4,19 +4,33 @@ by András Aszódi
 
 _Version 1.3_
 
-See `doc/html/guide.html` for installation instructions
-and a detailed documentation.
-
 This program is licensed under the terms of the BSD Open Source license.
 See the file `LICENSE` for details.
 
 Pre-compiled binaries are provided for some popular architectures.
 If you want to build Multovl from scratch, keep on reading:
 
-## Building Instructions for the Impatient
+## Building instructions
 
-You will need `cmake` Version 2.8 or above, a C++98-compliant compiler, 
+See `doc/html/guide.html` for installation instructions
+and a detailed documentation.
+
+### Prerequisites
+
+You will need `cmake` Version 3.1 or above, a C++98-compliant compiler, 
 and the Boost libraries (1.44 or above) to build Multovl.
+
+### For the very impatient
+
+Run the `quickbuild.sh` script in the top-level Multovl directory.
+This will compile the package using static linkage, assuming a Linux
+platform, Boost libraries installed in the usual system location.
+The Multovl installation goes under `/usr/local`. You can pass the 
+installation prefix by providing a path as a command line argument.
+E.g. `quickbuild.sh $HOME/foo/bar` will install Multovl executables into
+`$HOME/foo/bar/multovl-1.3/bin`.
+
+### For the moderately impatient
 
 By default all these external libraries will be linked statically.
 To link all of them dynamically instead, specify the CMake option
