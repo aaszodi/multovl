@@ -25,9 +25,8 @@ and the Boost libraries (1.44 or above) to build Multovl.
 Run the `quickbuild.sh` script in the top-level Multovl directory.
 This will compile the package using static linkage, assuming a Linux
 platform, Boost libraries installed in the usual system location.
-The Multovl installation goes under `/usr/local`. You can pass the 
-installation prefix by providing a path as a command line argument.
-E.g. `quickbuild.sh $HOME/foo/bar` will install Multovl executables into
+You have to specify the installation prefix by providing a path as a command line argument.
+E.g. `quickbuild.sh $HOME/foo/bar` will install the Multovl executables into
 `$HOME/foo/bar/multovl-1.3/bin`.
 
 ### For the moderately impatient
