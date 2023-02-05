@@ -176,7 +176,7 @@ bool Linereader::empty_white(const string& str)
     return(str == "" || boost::regex_search(str, EMPTY_WHITE));
 }
 
-unsigned int Linereader::str_to_uint(std::string& str) throw (Linereader::Exception)
+unsigned int Linereader::str_to_uint(std::string& str)
 {
     boost::trim(str);   // "100" is OK, " 100 " is not...
     if (str[0] == '-')

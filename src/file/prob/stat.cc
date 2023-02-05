@@ -88,7 +88,7 @@ const Stat::Distr& Stat::distr(unsigned int multiplicity) const
 {
     distrs_t::const_iterator dit = _distrs.find(multiplicity);
     if (dit == _distrs.end())
-        throw(NotfoundException(multiplicity));
+        throw NotfoundException(multiplicity);
     return dit->second;
 }
 

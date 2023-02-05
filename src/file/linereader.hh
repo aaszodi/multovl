@@ -156,7 +156,7 @@ class Linereader
     
     /// Converts /str/ to an unsigned int
     /// generates meaningful error messages via Linereader::Exception
-    static unsigned int str_to_uint(std::string& str) throw (Exception);
+    static unsigned int str_to_uint(std::string& str);
     
     // these data members can be set during parsing by the derived classes
     Status _status;	///< the status after parsing
