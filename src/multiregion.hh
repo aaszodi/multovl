@@ -48,6 +48,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
+// fixing a Boost 1.74 bug
+#include "boost/version.hpp"
+#if BOOST_VERSION == 107400
+#include "boost/serialization/library_version_type.hpp"
+#endif
 #include "boost/serialization/set.hpp"  // other serialization headers come from [anc]region.hh
 
 // == CLASSES ==
