@@ -61,8 +61,8 @@ project(multovl C CXX)
 message(STATUS "System = ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
 
-# C++ language standard: C++98
-set(CMAKE_CXX_STANDARD 98)
+# C++ language standard: C++11
+set(CMAKE_CXX_STANDARD 11)
 
 # Version string for the project
 set(MULTOVL_VERSION_MAJOR 1)
@@ -134,7 +134,7 @@ if(MSVC AND Boost_USE_STATIC_LIBS)
 endif()
 
 # The minimum Boost version
-set(BOOST_MINIMUM_VERSION "1.44.0")
+set(BOOST_MINIMUM_VERSION "1.74.0")
 
 # Note that Boost_FOUND might be set to NOTFOUND 
 # if the _optional_ library "chrono" is not found
