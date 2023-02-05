@@ -188,7 +188,7 @@ public:
     /// \param multiplicity is the multiplicity
     /// \return the Distr object belonging to /multiplicity/
     /// \throw Stat::NotfoundException if /multiplicity/ has not been seen
-    const Distr& distr(unsigned int multiplicity) const throw(NotfoundException);
+    const Distr& distr(unsigned int multiplicity) const;
     
     /// \return the minimal multiplicity seen so far
     unsigned int min_mult() const { return _minmult; }

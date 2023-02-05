@@ -75,7 +75,7 @@ void EmpirDistr::evaluate()
     _dirty = false;
 }
 
-double EmpirDistr::low() const throw(Exception)
+double EmpirDistr::low() const
 {
     if (_dirty)
         throw Exception("low(): dirty");
@@ -84,7 +84,7 @@ double EmpirDistr::low() const throw(Exception)
     return _low;
 }
 
-double EmpirDistr::high() const throw(Exception)
+double EmpirDistr::high() const
 {
     if (_dirty)
         throw Exception("high(): dirty");
@@ -93,7 +93,7 @@ double EmpirDistr::high() const throw(Exception)
     return _high;
 }
     
-double EmpirDistr::mean() const throw(Exception)
+double EmpirDistr::mean() const
 {
     if (_dirty)
         throw Exception("mean(): dirty");
@@ -102,7 +102,7 @@ double EmpirDistr::mean() const throw(Exception)
     return boost::accumulators::mean(_acc);
 }
 
-double EmpirDistr::variance() const throw(Exception)
+double EmpirDistr::variance() const
 {
     if (_dirty)
         throw Exception("variance(): dirty");
@@ -111,7 +111,7 @@ double EmpirDistr::variance() const throw(Exception)
     return boost::accumulators::variance(_acc);
 }
 
-double EmpirDistr::std_dev() const throw(Exception)
+double EmpirDistr::std_dev() const
 {
     double var = variance();
     if (var < std::numeric_limits<double>::epsilon())
@@ -120,7 +120,7 @@ double EmpirDistr::std_dev() const throw(Exception)
         return std::sqrt(var);
 }
 
-double EmpirDistr::cdf(double x) const throw(Exception)
+double EmpirDistr::cdf(double x) const
 {
     if (_dirty)
 	    throw Exception("cdf(X)");

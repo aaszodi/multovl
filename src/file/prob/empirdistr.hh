@@ -99,12 +99,12 @@ public:
     /// \return the lowest value covered by the approximation.
     /// \throw Exception if evaluate() was not invoked beforehand
     /// or if there were no data
-    double low() const throw(Exception);
+    double low() const;
     
     /// \return the highest value covered by the approximation.
     /// \throw Exception if evaluate() was not invoked beforehand
     /// or if there were no data
-    double high() const throw(Exception);
+    double high() const;
     
     /// Interpolates the CDF.
     /// \param x the value at which the CDF is to be approximated.
@@ -112,21 +112,21 @@ public:
     /// if /x/ lies outside [low()..high()].
     /// \throw Exception if evaluate() was not invoked beforehand
     /// or if there were no data.
-    double cdf(double x) const throw(Exception);
+    double cdf(double x) const;
     
     /// \return the (estimated) mean of the distribution.
     /// \throw Exception if evaluate() was not invoked beforehand
     /// or if there were no data.
-    double mean() const throw(Exception);
+    double mean() const;
     
     /// \return the (estimated) variance of the distribution.
     /// \throw Exception if evaluate() was not invoked beforehand.
     /// or if less than 2 data points have been added to the calling object.
-    double variance() const throw(Exception);
+    double variance() const;
     
     /// \return the standard deviation (by taking the square root of variance()).
     /// \throw Exception if variance() throws.
-    double std_dev() const throw(Exception);
+    double std_dev() const;
 
     private: 
     
