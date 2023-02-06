@@ -48,13 +48,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Standard headers --
 
 #include <string>
+#include <regex>
 #include <map>
 #include <iostream>
 #include <stdexcept>
 
 // -- Boost headers --
-
-#include "boost/regex.hpp"
 
 namespace multovl {
 
@@ -171,7 +170,7 @@ class Linereader
     
     private:
     
-    boost::regex _comment_regex;    
+    std::regex _comment_regex;    
 };
 
 /**

@@ -129,7 +129,7 @@ namespace io {
 // -- Linereader methods --
 
 Linereader::Linereader(const string& commentchars):
-    _comment_regex("^[[:space:]]*["+commentchars+"][[:space:]]*", boost::regex::extended)
+    _comment_regex("^[[:space:]]*["+commentchars+"][[:space:]]*", std::regex::extended)
 {
     reset();
 }
@@ -143,6 +143,9 @@ void Linereader::reset()
 
 Linereader::Status Linereader::parse(const string& line)
 {
+    const auto COMMENTSTRIPFLAGS = std::regex_constants::match_default | 
+        std::regex_constants::format_sed | std::regex_constants::format_first_only;
+    
     reset();
     string tline = boost::trim_right_copy_if(line, boost::is_cntrl());
     
@@ -154,11 +157,10 @@ Linereader::Status Linereader::parse(const string& line)
     }
 
     // parse simple comments
-    if (boost::regex_search(tline, _comment_regex))
+    if (std::regex_search(tline, _comment_regex))
     {
         // strip leading ws and the comment chars
-        _comment = boost::regex_replace(tline, _comment_regex, "",
-            boost::match_default | boost::format_sed | boost::format_first_only);
+        _comment = std::regex_replace(tline, _comment_regex, "", COMMENTSTRIPFLAGS);
         _status = COMMENT;
         return _status;
     }
@@ -172,8 +174,8 @@ Linereader::Status Linereader::parse(const string& line)
 bool Linereader::empty_white(const string& str)
 {
     // SunPro with OpenMP does not like static init here (?)
-    const boost::regex EMPTY_WHITE("^[[:space:]]*$", boost::regex::extended);
-    return(str == "" || boost::regex_search(str, EMPTY_WHITE));
+    const std::regex EMPTY_WHITE("^[[:space:]]*$", std::regex::extended);
+    return(str == "" || std::regex_search(str, EMPTY_WHITE));
 }
 
 unsigned int Linereader::str_to_uint(std::string& str)

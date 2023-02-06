@@ -44,7 +44,6 @@ This is the Version 1.3/dev result on 2023-02-05:
 #include "boost/random/normal_distribution.hpp"
 #include "boost/random/uniform_real.hpp"
 #include "boost/random/variate_generator.hpp"
-#include "boost/regex.hpp"
 #include "boost/scoped_ptr.hpp"
 #include "boost/serialization/access.hpp"
 #include "boost/serialization/library_version_type.hpp"
@@ -72,6 +71,7 @@ This is very much "work in progress".
 
 ```
 #include "boost/foreach.hpp"
+#include "boost/regex.hpp"
 ```
 
 ## Boost V 1.74 deprecation messages
