@@ -31,7 +31,6 @@ This is the Version 1.3/dev result on 2023-02-05:
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
-#include "boost/foreach.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/make_shared.hpp"
 #include "boost/math/special_functions/erf.hpp"
@@ -71,6 +70,9 @@ This is the Version 1.3/dev result on 2023-02-05:
 I move the replaced dependencies from the list above here.
 This is very much "work in progress".
 
+```
+#include "boost/foreach.hpp"
+```
 
 ## Boost V 1.74 deprecation messages
 

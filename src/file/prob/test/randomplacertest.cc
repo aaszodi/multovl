@@ -44,8 +44,6 @@ using namespace prob;
 
 // -- Boost headers --
 
-#include "boost/foreach.hpp"
-
 // -- standard headers --
 
 #include <map>
@@ -84,7 +82,7 @@ struct RandomPlacerFixture
     {
         unsigned int rf = reg.first(), rl = reg.last();
         bool found = false;
-        BOOST_FOREACH(Region free, frees)
+        for(const Region& free: frees)
         {
             unsigned int ff = free.first(), fl = free.last();
             if (ff <= rf && rl <= fl)
@@ -112,7 +110,7 @@ struct RandomPlacerFixture
         for (unsigned int i=0; i<NTRIAL; ++i)
         {
             rp.random_placement(fr, rng);
-            BOOST_FOREACH(Region r, rp.get_regions())
+            for(const Region& r: rp.get_regions())
             {
                 count(r);
             }
@@ -139,7 +137,7 @@ BOOST_AUTO_TEST_CASE(randomplacer1_test)
     RandomPlacer rp;  // default init...
     
     // ...and then add the regions one by one
-    BOOST_FOREACH(Region r, regs)
+    for(const Region& r: regs)
     {
         rp.add(r.length());
     }
