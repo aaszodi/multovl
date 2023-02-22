@@ -41,12 +41,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/thread.hpp"
 #include "boost/lexical_cast.hpp"
 
 // -- Standard headers --
 
 #include <algorithm>
+#include <thread>
 
 // == Implementation ==
 
@@ -57,7 +57,7 @@ const unsigned int ParProbOpts::DEFAULT_THREADS = ParProbOpts::core_count();
 
 unsigned int ParProbOpts::core_count()
 {
-    unsigned int corecount = boost::thread::hardware_concurrency();
+    unsigned int corecount = std::thread::hardware_concurrency();
     if (corecount == 0)
         corecount = 1;  // could not find out core count, assume 1
     return corecount;

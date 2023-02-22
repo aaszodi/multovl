@@ -40,10 +40,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/thread.hpp"
 #include "boost/scoped_ptr.hpp"
 
 // -- Standard headers --
+
+#include <thread>
+#include <vector>
 
 // == Implementation ==
 
@@ -88,19 +90,14 @@ unsigned int ParProbPipeline::detect_overlaps()
     
     // now estimate the null distribution in parallel by reshuffling the shufflable tracks, 
     // and re-doing the overlaps with the same settings
-    boost::thread_group workers;
+    std::vector<std::thread> workers;
     unsigned int rndseed = opt_ptr()->random_seed();
     for (unsigned int i = 0; i < opt_ptr()->threads(); ++i)
     {
-        boost::thread *shuffleworker = 
-            new boost::thread(
-                &ParProbPipeline::shuffle, this,
-                rndseed, progress
-            );
-        workers.add_thread(shuffleworker);
+        workers.emplace_back(&ParProbPipeline::shuffle, this, rndseed, progress);
         ++rndseed;
     }
-    workers.join_all();
+    for (auto& worker : workers) { worker.join(); }
     
     // evaluate the stats
     stat().evaluate();
@@ -153,7 +150,7 @@ void ParProbPipeline::shuffle(
 
 unsigned int ParProbPipeline::check_update_shufflecounter(boost::progress_display* progressptr)
 {
-    boost::lock_guard<boost::mutex> lock(_shufflecounter_mutex);  // 1 thread only
+    std::lock_guard<std::mutex> lock(_shufflecounter_mutex);  // 1 thread only
     unsigned int oldcounter = _shufflecounter;
     if (_shufflecounter > 0)
     {

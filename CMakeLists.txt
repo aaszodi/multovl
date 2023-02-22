@@ -148,7 +148,7 @@ set(BOOST_MINIMUM_VERSION "1.74.0")
 # although it is required only from V1.50 onwards
 find_package( Boost ${BOOST_MINIMUM_VERSION}
     COMPONENTS date_time filesystem system 
-	unit_test_framework program_options serialization thread
+	unit_test_framework program_options serialization
 	OPTIONAL_COMPONENTS chrono
 )
 
@@ -156,7 +156,7 @@ find_package( Boost ${BOOST_MINIMUM_VERSION}
 set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} 
     ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-	${Boost_SERIALIZATION_LIBRARY} ${Boost_THREAD_LIBRARY}
+	${Boost_SERIALIZATION_LIBRARY}
 )
 
 # Cannot use the VERSION_GREATER comparison

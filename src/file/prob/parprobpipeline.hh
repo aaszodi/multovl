@@ -44,9 +44,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/thread.hpp"
 #include "boost/progress.hpp"
 
+// -- Standard headers --
+
+#include <thread>
+#include <mutex>
 
 namespace multovl {
 namespace prob {
@@ -88,7 +91,7 @@ protected:
     virtual
     Stat& stat()
     {
-        boost::lock_guard<boost::mutex> lock(_stat_mutex);  // 1 thread only
+        std::lock_guard<std::mutex> lock(_stat_mutex);  // 1 thread only
         return ProbPipeline::stat();
     }
     
@@ -108,7 +111,7 @@ private:
     unsigned int check_update_shufflecounter(boost::progress_display* progressptr=NULL);
 
     unsigned int _shufflecounter;
-    boost::mutex _shufflecounter_mutex, _stat_mutex;
+    std::mutex _shufflecounter_mutex, _stat_mutex;
     
 };
 
