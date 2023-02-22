@@ -21,6 +21,7 @@
 #	-D{Boost,BAMTOOLS}_USE_STATIC_LIBS:BOOL=OFF as appropriate.
 #
 # Optional parameters:-
+#   -DTOOLCHAIN=<toolchain> for choosing C and C++ compilers, see 'cmake/toolchain.cmake'
 #   -DCMAKE_CXX_COMPILER=<compiler> for using a C++ compiler other than the system default
 #	-DCMAKE_C_COMPILER=<compiler> for using a C compiler other than the system default
 #   -DCMAKE_INSTALL_PREFIX=/inst/path for defining the installation root,
@@ -31,8 +32,6 @@
 # By convention I put all the various build directories under multovl/build.
 #
 cmake_minimum_required(VERSION 3.1)
-
-project(multovl C CXX)
 
 # Directory layout:-
 # multovl					<== ${CMAKE_SOURCE_DIR}: top-level
@@ -56,6 +55,17 @@ project(multovl C CXX)
 #     ├── scripts			<== ${SCRIPTS}: helper scripts
 #     └── test				<== unit tests for generic multovl components
 #         └── data			<== input files for unit tests
+
+# Extra Find... modules, include files
+set(MYCMAKE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${MYCMAKE_PATH})
+
+# this must come before the project() setting
+option(TOOLCHAIN "Compiler toolchain" FALSE)
+if (TOOLCHAIN)
+    include("${MYCMAKE_PATH}/toolchain.cmake")
+endif()
+project(multovl C CXX)
 
 # Brief system/compiler description
 message(STATUS "System = ${CMAKE_SYSTEM_NAME}")
