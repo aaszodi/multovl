@@ -40,17 +40,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Standard headers --
 
 #include <vector>
-
-// -- Boost header --
-
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <chrono>
 
 // == Class ==
 
 namespace multovl {
 
-// This is a simple wrapper around Boost's POSIX time functionality,
-// basically a stopwatch that keeps track of a vector of time points internally
+// This class implements a stopwatch that keeps track of a vector of time points internally
 // and then evaluates the durations.
 class Timer
 {
@@ -62,16 +58,18 @@ class Timer
         add_timepoint();
     }
     
-    // Adds the current time with usec resolution as a new timepoint
+    // Adds the current time as a new timepoint
     void add_timepoint();
 
-    // Returns the time difference between the /later/-th and /earlier/-th timepoints.
-    // Returns /not_a_date_time/ if these indices are invalid.
-    boost::posix_time::time_duration interval(unsigned int later, unsigned int earlier = 0) const;
+    // Returns the time difference between the /later/-th and /earlier/-th timepoints
+    // as the number of milliseconds.
+    // Throws std::invalid_argument if these indices are invalid.
+    unsigned int interval(unsigned int later, unsigned int earlier = 0) const;
     
     private:
     
-    typedef std::vector<boost::posix_time::ptime> timevec_t;
+    typedef std::chrono::time_point<std::chrono::system_clock> timepoint_t;
+    typedef std::vector<timepoint_t> timevec_t;
     timevec_t _timepoints;
     
 };  // class Timer

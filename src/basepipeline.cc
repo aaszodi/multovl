@@ -96,8 +96,8 @@ bool BasePipeline::run()
         // timing results are printed to stdout
         std::cout << "Parameters: " << opt_ptr()->param_str() 
             << ", Timing: input = " << timer.interval(1) 
-            << ", multovl = " << timer.interval(2,1)
-            << ", total = " << timer.interval(2) << std::endl;
+            << " ms, multovl = " << timer.interval(2,1)
+            << " ms, total = " << timer.interval(2) << " ms" << std::endl;
         return true;    // OK
     }
     

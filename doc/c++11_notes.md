@@ -27,8 +27,6 @@ This is the Version 1.3/dev result on 2023-02-05:
 #include "boost/assign/list_inserter.hpp"
 #include "boost/assign/list_inserter.hpp"   // for insert() ()()()...()
 #include "boost/assign/list_of.hpp"
-#include "boost/date_time/gregorian/gregorian.hpp"  // needed by GFF output header
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
 #include "boost/lexical_cast.hpp"
@@ -65,6 +63,7 @@ This is the Version 1.3/dev result on 2023-02-05:
 
 I move the replaced dependencies from the list above here.
 This is very much "work in progress".
+Current state on 2023-02-22
 
 ```
 #include "boost/foreach.hpp"
@@ -72,6 +71,8 @@ This is very much "work in progress".
 #include "boost/thread.hpp"
 #include "boost/static_assert.hpp"
 #include "boost/type_traits.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/gregorian/gregorian.hpp"  // needed by GFF output header
 ```
 
 ## Boost V 1.74 deprecation messages

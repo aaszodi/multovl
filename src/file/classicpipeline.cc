@@ -46,7 +46,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/date_time/gregorian/gregorian.hpp"  // needed by GFF output header
 #include <boost/archive/binary_oarchive.hpp>    // serialization
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/archive_exception.hpp>
@@ -57,6 +56,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Standard headers --
 
 #include <fstream>
+#include <ctime>
 
 // == Implementation ==
 
@@ -234,8 +234,14 @@ bool ClassicPipeline::write_gff_output()
 {
     // GFF2 metainfo
     std::cout << "##gff-version 2" << std::endl;
-    boost::gregorian::date d(boost::gregorian::day_clock::local_day());
-    std::cout << "##date " << boost::gregorian::to_iso_extended_string(d) << std::endl;
+    
+    // get the current date, print in ISO-8601 format
+    // inspired by CPPreference.com
+    std::time_t time = std::time({});
+    const unsigned int TSTRLEN = 11;
+    char timestr[TSTRLEN];
+    std::strftime(timestr, TSTRLEN, "%Y-%m-%d", std::gmtime(&time));
+    std::cout << "##date " << timestr << std::endl;
 
     // version information, GFF style
     std::cout << "##source-version Multovl version " << config_version() << ", "

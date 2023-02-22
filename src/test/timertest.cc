@@ -65,12 +65,12 @@ static void sleep_seconds(int sec)
 #endif
 
 static void check_approx_duration(
-    const boost::posix_time::time_duration& actualdur,
+    unsigned int actualdur,
     double expecteddur, // in seconds
     double pctol=2.0    // percentage tolerance: 1.0% needed on Irix, 2.0% on Windows
 )
 {
-    double ms = static_cast<double>(actualdur.total_milliseconds());
+    double ms = static_cast<double>(actualdur);
     BOOST_CHECK_CLOSE(ms, 1000.0*expecteddur, pctol);
 }
 
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(timer_test)
     timer.add_timepoint();
     sleep_seconds(2);
     timer.add_timepoint();
-    boost::posix_time::time_duration actual_duration = timer.interval(1);
+    unsigned int actual_duration = timer.interval(1);
     check_approx_duration(actual_duration, 1);
     actual_duration = timer.interval(2, 1);
     check_approx_duration(actual_duration, 2);

@@ -143,13 +143,9 @@ endif()
 # The minimum Boost version
 set(BOOST_MINIMUM_VERSION "1.74.0")
 
-# Note that Boost_FOUND might be set to NOTFOUND 
-# if the _optional_ library "chrono" is not found
-# although it is required only from V1.50 onwards
 find_package( Boost ${BOOST_MINIMUM_VERSION}
-    COMPONENTS date_time filesystem system 
+    COMPONENTS filesystem system 
 	unit_test_framework program_options serialization
-	OPTIONAL_COMPONENTS chrono
 )
 
 # list of Boost libraries needed by apps
@@ -158,19 +154,6 @@ set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
 	${Boost_SERIALIZATION_LIBRARY}
 )
-
-# Cannot use the VERSION_GREATER comparison
-# because FindBoost.cmake returns the 104900-style Boost_VERSION
-# in some older installations
-if (Boost_VERSION GREATER 104999)
-    if (Boost_CHRONO_FOUND)
-	    list(APPEND MULTOVL_BOOST_LIBS ${Boost_CHRONO_LIBRARY})
-	else()
-	    message(FATAL_ERROR "Boost Chrono needed but not found")
-	endif()
-else()
-    message(STATUS "Boost Chrono library not required, ignore 'Could NOT find Boost' message")
-endif()
 
 # -- Third-party libraries --
 
@@ -209,9 +192,7 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     # "truly global" variables
     set(utestlibs 
         ${BAMTOOLS_LIBRARIES}
-        ${Boost_DATE_TIME_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SERIALIZATION_LIBRARY}
