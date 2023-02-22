@@ -40,12 +40,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <algorithm>
 #include <limits>
+#include <type_traits>
 
 using namespace std;
 
 // -- Boost headers --
 
-#include "boost/type_traits.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/algorithm/string.hpp"
 
@@ -80,7 +80,7 @@ void tokenizer(
 )
 {
     static_assert(
-        boost::is_convertible<std::string, typename Container::value_type>::value,
+        std::is_convertible<std::string, typename Container::value_type>::value,
         "Elements of `tokens` must be convertible to string"
     );
     

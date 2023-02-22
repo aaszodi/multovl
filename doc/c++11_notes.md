@@ -57,7 +57,6 @@ This is the Version 1.3/dev result on 2023-02-05:
 #include "boost/shared_ptr.hpp"
 #include "boost/test/floating_point_comparison.hpp"
 #include "boost/test/unit_test.hpp"
-#include "boost/type_traits.hpp"
 #include "boost/utility.hpp"    // for noncopyable
 #include "boost/version.hpp"
 ```
@@ -72,6 +71,7 @@ This is very much "work in progress".
 #include "boost/regex.hpp"
 #include "boost/thread.hpp"
 #include "boost/static_assert.hpp"
+#include "boost/type_traits.hpp"
 ```
 
 ## Boost V 1.74 deprecation messages
