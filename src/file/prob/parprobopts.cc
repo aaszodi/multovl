@@ -75,8 +75,9 @@ bool ParProbOpts::check_variables()
 {
 	ProbOpts::check_variables();
     
-    if (_threads == 0)
+    if (_threads == 0) {
         _threads = DEFAULT_THREADS;
+	}
 	
 	return (!error_status());
 }
