@@ -45,7 +45,6 @@ using namespace std;
 
 // -- Boost headers --
 
-#include "boost/static_assert.hpp"
 #include "boost/type_traits.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/algorithm/string.hpp"
@@ -80,9 +79,10 @@ void tokenizer(
     const bool trimEmpty = false
 )
 {
-    BOOST_STATIC_ASSERT((
-        boost::is_convertible<std::string, typename Container::value_type>::value
-    ));
+    static_assert(
+        boost::is_convertible<std::string, typename Container::value_type>::value,
+        "Elements of `tokens` must be convertible to string"
+    );
     
     std::string::size_type pos, lastPos = 0;
     const char* strdata = str.data();
