@@ -30,7 +30,6 @@ This is the Version 1.3/dev result on 2023-02-05:
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
 #include "boost/lexical_cast.hpp"
-#include "boost/make_shared.hpp"
 #include "boost/math/special_functions/erf.hpp"
 #include "boost/math/special_functions/next.hpp"    // minimal floating-point distance
 #include "boost/noncopyable.hpp"
@@ -72,6 +71,7 @@ Current state on 2023-02-22
 #include "boost/type_traits.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/date_time/gregorian/gregorian.hpp"  // needed by GFF output header
+#include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
 ```
 

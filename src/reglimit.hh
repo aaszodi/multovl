@@ -71,7 +71,7 @@ public:
     RegLimit(): _regp(), _isfirst(false) {}
     
     /// Init with a shared pointer to an ancestor region
-    /// \param regp shared pointer to an ancestor region, usually created with boost::make_shared
+    /// \param regp shared pointer to an ancestor region
     /// \param isfirst true if first position, false if last
     explicit RegLimit(const std::shared_ptr<AncestorRegion>& regp, 
         bool isfirst=true)
