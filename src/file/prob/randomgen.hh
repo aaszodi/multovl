@@ -37,12 +37,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ==== HEADER randomgen.hh ====
 
+// -- Standard headers --
+
+#include <random>
+
 // -- Boost headers --
 
 #include "boost/utility.hpp"    // for noncopyable
-#include "boost/random/mersenne_twister.hpp"
-#include "boost/random/uniform_real.hpp"
-#include "boost/random/variate_generator.hpp"
 
 namespace multovl {
 namespace prob {
@@ -58,8 +59,7 @@ class UniformGen: boost::noncopyable
     /// \param upper the upper bound of the uniform distribution, default 1.0
     UniformGen(unsigned int seed, double lower=0.0, double upper=1.0):
         _rng(seed),
-        _unidistr(lower, upper),
-        _unigen(_rng, _unidistr)
+        _unidistr(lower, upper)
     {}
     
     /// Generates a random variate.
@@ -67,18 +67,13 @@ class UniformGen: boost::noncopyable
     /// as set in the ctor.
     double operator()()
     {
-        return _unigen();
+        return _unidistr(_rng);
     }
     
     private:
     
-    typedef boost::mt19937 rng_t;    ///< Mersenne twister type
-    typedef boost::uniform_real<> unidistr_t;  ///< uniform distribution type
-    typedef boost::variate_generator<rng_t&, unidistr_t > unigen_t; ///< uniform generator type
-    
-    rng_t _rng;
-    unidistr_t _unidistr;
-    unigen_t _unigen;
+    std::mt19937 _rng;    ///< Mersenne twister
+    std::uniform_real_distribution<> _unidistr;  ///< continuous uniform distribution
 };
 
 }   // namespace prob

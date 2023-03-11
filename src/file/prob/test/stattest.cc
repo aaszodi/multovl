@@ -42,27 +42,17 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace multovl;
 using namespace prob;
 
-// -- Boost headers --
-
-// we test with normal random deviates
-#include "boost/random/mersenne_twister.hpp"
-#include "boost/random/variate_generator.hpp"
-#include "boost/random/normal_distribution.hpp"
-#include "boost/math/special_functions/erf.hpp"
-
 // -- standard headers --
 
 // NOTE: we boldly assume <cmath> provides the erf() function as per ISO/IEC 9899:1999(E).
-// MSVC doesn't.
-#if 0
 #include <cmath>
 #ifdef __SUNPRO_CC
 #include <math.h>
 #endif
-#endif
 
 #include <iostream>
 #include <string>
+#include <random>
 
 // -- Consts, useful functions, fixture... --
 
@@ -79,21 +69,10 @@ static double norm_cdf(double m, double s, double x)
 {
     static const double SQRT2 = std::sqrt(2.0);
     double t = (x - m)/(SQRT2*s);
-    return ((1.0+boost::math::erf(t))/2.0);
+    return ((1.0 + std::erf(t))/2.0);
 }
 
-struct StatFixture
-{
-    StatFixture()
-    {
-        for (unsigned int i=0; i<6; ++i)
-            dice.push_back(1.0*(i+1));
-    }
-    
-    std::vector<double> dice;
-};
-
-BOOST_FIXTURE_TEST_SUITE(statsuite, StatFixture)
+BOOST_AUTO_TEST_SUITE(statsuite)
 
 BOOST_AUTO_TEST_CASE(actual_test)
 {
@@ -121,22 +100,19 @@ BOOST_AUTO_TEST_CASE(actual_test)
 
 BOOST_AUTO_TEST_CASE(normrnd_test)
 {
-    // set up the RNG: spell out everything
-    typedef boost::mt19937 rng_t;
-    typedef boost::normal_distribution<double> normdistr_t;
-    rng_t rng(42u);
+    // set up the RNG
+    std::mt19937 rng(42u);
     const double EMEAN=3.2, EDEV=1.7;
-    normdistr_t normdistr(EMEAN, EDEV);
-    boost::variate_generator<rng_t&, normdistr_t > norm(rng, normdistr);
+    std::normal_distribution<> normdistr(EMEAN, EDEV);
 
     Stat st;
     // fill up nulldistr for multiplicities 3 and 5
     for (unsigned int i=0; i<NTRIAL; ++i)
     {
         double x;
-        x = norm();
+        x = normdistr(rng);
         st.add(3, x, false);
-        x = norm();
+        x = normdistr(rng);
         st.add(5, x, false);
     }
     // add actuals -/+ 1 SD from mean
