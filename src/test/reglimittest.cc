@@ -44,7 +44,6 @@ using namespace multovl;
 // -- Boost headers --
 
 #include "boost/lexical_cast.hpp"
-#include "boost/make_shared.hpp"
 #include "boost/archive/text_iarchive.hpp"
 #include "boost/archive/text_oarchive.hpp"
 
@@ -58,11 +57,11 @@ struct ReglimitFixture
 {
     ReglimitFixture():
         anc(4, 6, '-', "a46", 9),
-        ancp(boost::make_shared<AncestorRegion>(anc))
+        ancp(std::make_shared<AncestorRegion>(anc))
     {}
     
     AncestorRegion anc;
-    boost::shared_ptr<AncestorRegion> ancp;
+    std::shared_ptr<AncestorRegion> ancp;
 };
 
 BOOST_FIXTURE_TEST_SUITE(reglimitsuite, ReglimitFixture)

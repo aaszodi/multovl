@@ -45,7 +45,6 @@ using namespace multovl;
 
 #include "boost/archive/text_iarchive.hpp"
 #include "boost/archive/text_oarchive.hpp"
-#include "boost/shared_ptr.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/assign/list_of.hpp"
 using namespace boost::assign;
@@ -74,7 +73,7 @@ struct MultiReglimitFixture
     {
         Region r(first, last, strand, nm);
         mrl.add(r, trackid);
-        boost::shared_ptr<AncestorRegion> rp(new AncestorRegion(r, trackid));
+        std::shared_ptr<AncestorRegion> rp(new AncestorRegion(r, trackid));
         expl.push_back(RegLimit(rp, true));
         expl.push_back(RegLimit(rp, false));
     }
@@ -110,7 +109,7 @@ BOOST_AUTO_TEST_CASE(multireglimit_ctor_test)
     Region r(1, 5, '+', "r15");
     MultiRegLimit mrl(r, TRACKID);
     
-    boost::shared_ptr<AncestorRegion> rp(new AncestorRegion(r, TRACKID));
+    std::shared_ptr<AncestorRegion> rp(new AncestorRegion(r, TRACKID));
     rllist_t expl = list_of
         (RegLimit(rp, true))(RegLimit(rp, false));
     checker(mrl);

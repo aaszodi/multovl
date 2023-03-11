@@ -83,7 +83,7 @@ void MultiRegLimit::add(const Region& region, unsigned int trackid)
 {
     // Store /region/ twice in the region limit map /_reglim/
     // through smart pointers
-    boost::shared_ptr<AncestorRegion> regp(new AncestorRegion(region, trackid));
+    std::shared_ptr<AncestorRegion> regp(new AncestorRegion(region, trackid));
     // once as a "first position"
     RegLimit limfirst(regp, true);
     _reglim.insert(limfirst);

@@ -52,7 +52,6 @@ This is the Version 1.3/dev result on 2023-02-05:
 #include "boost/serialization/string.hpp"
 #include "boost/serialization/vector.hpp"
 #include "boost/serialization/version.hpp"
-#include "boost/shared_ptr.hpp"
 #include "boost/test/floating_point_comparison.hpp"
 #include "boost/test/unit_test.hpp"
 #include "boost/utility.hpp"    // for noncopyable
@@ -73,6 +72,7 @@ Current state on 2023-02-22
 #include "boost/type_traits.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/date_time/gregorian/gregorian.hpp"  // needed by GFF output header
+#include "boost/shared_ptr.hpp"
 ```
 
 ## Boost V 1.74 deprecation messages

@@ -44,10 +44,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// \date 2011-11-02
 
 // -- System headers --
-    
+
+#include <memory>
+
 // -- Boost headers --
 
-#include "boost/serialization/shared_ptr.hpp"
+#include "boost/serialization/shared_ptr.hpp"   // for serializing `std::shared_ptr`
 
 // -- Own headers --
 
@@ -71,7 +73,7 @@ public:
     /// Init with a shared pointer to an ancestor region
     /// \param regp shared pointer to an ancestor region, usually created with boost::make_shared
     /// \param isfirst true if first position, false if last
-    explicit RegLimit(const boost::shared_ptr<AncestorRegion>& regp, 
+    explicit RegLimit(const std::shared_ptr<AncestorRegion>& regp, 
         bool isfirst=true)
     : _regp(regp), _isfirst(isfirst) {}
     
@@ -120,12 +122,12 @@ public:
     /// Deep copy operation.
     /// The default copy ctor returns a shallow copy in the sense that 
     /// only the internal shared pointer is copied but not the AncestorRegion it is pointing to,
-    /// as it is to be expected from a boost::shared_ptr.
+    /// as it is to be expected from a std::shared_ptr.
     /// \return a new RegLimit object whose internal shared pointer points to a completely
     /// separate copy of the AncestorRegion.
     RegLimit deep_copy() const
     {
-        boost::shared_ptr<AncestorRegion> ancp(new AncestorRegion(this->region()));
+        std::shared_ptr<AncestorRegion> ancp(new AncestorRegion(this->region()));
         return RegLimit(ancp, this->is_first()); 
     }
     
@@ -142,7 +144,7 @@ public:
 private:
     
     // data
-    boost::shared_ptr<AncestorRegion> _regp;
+    std::shared_ptr<AncestorRegion> _regp;
     bool _isfirst;
     
     // serialization
