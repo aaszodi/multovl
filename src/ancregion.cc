@@ -41,7 +41,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/lexical_cast.hpp"
 #include "boost/algorithm/string.hpp"
 
 // -- Own header --
