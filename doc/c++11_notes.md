@@ -37,7 +37,6 @@ This is the Version 1.3/dev result on 2023-02-05:
 #include "boost/program_options.hpp"
 #include "boost/progress.hpp"
 #include "boost/progress.hpp"   // deprecated but pretty ASCII progress display
-#include "boost/scoped_ptr.hpp"
 #include "boost/serialization/access.hpp"
 #include "boost/serialization/library_version_type.hpp"
 #include "boost/serialization/set.hpp"
@@ -69,6 +68,7 @@ Current state on 2023-03-11
 #include "boost/date_time/gregorian/gregorian.hpp"  // needed by GFF output header
 #include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
 #include "boost/random/mersenne_twister.hpp"
 #include "boost/random/normal_distribution.hpp"
 #include "boost/random/uniform_real.hpp"
