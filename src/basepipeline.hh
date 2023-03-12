@@ -47,8 +47,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/noncopyable.hpp"
-
 // -- Standard headers --
 
 #include <string>
@@ -66,7 +64,8 @@ class MultovlOptbase;
 /// running the Multovl algorithm on one CPU or in parallel, estimating the probabilities of random overlaps etc.
 /// The BasePipeline class lays the foundation by providing a means of storing input track metadata,
 /// error handling and a run() method with optional timing information.
-class BasePipeline: private boost::noncopyable
+/// BasePipeline objects are non-copyable.
+class BasePipeline
 {
 public:
     
@@ -76,6 +75,10 @@ public:
         _inputs(),
         _errors()
     {}
+    
+    // non-copyable
+    BasePipeline(const BasePipeline&) = delete;
+    BasePipeline& operator=(const BasePipeline&) = delete;
     
     /// Go through the whole analysis.
     /// \return true on success, false if something went wrong.

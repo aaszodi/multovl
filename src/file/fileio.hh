@@ -52,8 +52,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/noncopyable.hpp"
-
 // -- Own headers --
 
 #include "fileformat.hh"
@@ -73,7 +71,8 @@ class TrackReader;
 /// Clients should instantiate a FileReader with a file name,
 /// then invoke its read_into() method repeatedly,
 /// and use the resulting Region immediately for building up a MultiOverlap object.
-class FileReader: private boost::noncopyable
+/// The class is non-copyable.
+class FileReader
 {
     public:
     
@@ -85,6 +84,10 @@ class FileReader: private boost::noncopyable
     explicit FileReader(
         const std::string& infname,
         Fileformat::Kind format = Fileformat::UNKNOWN);
+    
+    // Non-copyable class
+    FileReader(const FileReader&) = delete;
+    FileReader& operator=(const FileReader&) = delete;
     
     /// Attempts to read from the wrapped input file into a region.
     /// We keep reading the file so that the user gets all problems in one go.

@@ -50,8 +50,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/noncopyable.hpp"
-
 // -- Own headers --
 
 #include "errors.hh"
@@ -66,12 +64,17 @@ namespace io {
 
 /// Abstract base class for reading regions from a file.
 /// Subclasses contain implementations for reading text or binary files.
-class TrackReader: private boost::noncopyable
+/// TrackReader objects are non-copyable.
+class TrackReader
 {
 public:
     
     /// default init
     TrackReader(): _errors() {}
+    
+    // non-copyable
+    TrackReader(const TrackReader&) = delete;
+    TrackReader& operator=(const TrackReader&) = delete;
     
     /// Attempts to read from the wrapped input file into a region.
     /// \param chrom string to store the chromosome name for /reg/

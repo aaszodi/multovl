@@ -43,13 +43,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/utility.hpp"    // for noncopyable
-
 namespace multovl {
 namespace prob {
 
-/// Convenience class that wraps a uniform RND generator.
-class UniformGen: boost::noncopyable
+/// Non-copyable onvenience class that wraps a uniform RND generator.
+class UniformGen
 {
     public:
     
@@ -61,6 +59,10 @@ class UniformGen: boost::noncopyable
         _rng(seed),
         _unidistr(lower, upper)
     {}
+    
+    // non-copyable
+    UniformGen(const UniformGen&) = delete;
+    UniformGen& operator=(const UniformGen&) = delete;
     
     /// Generates a random variate.
     /// \return a uniformly distributed variate between /lower/ and /upper/

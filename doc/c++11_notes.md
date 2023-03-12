@@ -30,9 +30,7 @@ This is the Version 1.3/dev result on 2023-02-05:
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
 #include "boost/lexical_cast.hpp"
-#include "boost/math/special_functions/erf.hpp"
 #include "boost/math/special_functions/next.hpp"    // minimal floating-point distance
-#include "boost/noncopyable.hpp"
 #include "boost/operators.hpp"
 #include "boost/program_options.hpp"
 #include "boost/progress.hpp"
@@ -67,12 +65,14 @@ Current state on 2023-03-11
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/date_time/gregorian/gregorian.hpp"  // needed by GFF output header
 #include "boost/make_shared.hpp"
-#include "boost/shared_ptr.hpp"
-#include "boost/scoped_ptr.hpp"
+#include "boost/math/special_functions/erf.hpp"
+#include "boost/noncopyable.hpp"
 #include "boost/random/mersenne_twister.hpp"
 #include "boost/random/normal_distribution.hpp"
 #include "boost/random/uniform_real.hpp"
 #include "boost/random/variate_generator.hpp"
+#include "boost/scoped_ptr.hpp"
+#include "boost/shared_ptr.hpp"
 ```
 
 ## Boost V 1.74 deprecation messages
