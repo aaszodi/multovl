@@ -13,15 +13,14 @@ exitif_notinpath() {
     local missing=0
     
     # iterate over all arguments
-    until [ -z "$1" ]; do
-        which $1 &> /dev/null
-        if [  $? -ne 0 ]; then
+    until [[ -z "$1" ]]; do
+        if [[ ! -x "$(command -v $1)" ]]; then
             echo "No $1 in your PATH"
             let "missing += 1"
         fi
         shift
     done
-    if [ $missing -gt 0 ]; then
+    if [[ $missing -gt 0 ]]; then
         echo "Please install and then try again."
         exit 991
     fi
@@ -31,9 +30,12 @@ print_help() {
 	cat <<HELP
 MULTOVL quick build/install script. Works on Linux platforms only.
 Builds a Release version with static linkage.
-Usage: quickbuild.sh <INSTDIR>
-where <INSTDIR> is the installation directory path.
-MULTOVL will be installed in <INSTDIR>/multovl-1.3.
+Usage: quickbuild.sh INSTDIR [TOOLCHAIN]
+where INSTDIR is the installation directory path.
+MULTOVL will be installed in <INSTDIR>/multovl/X.Y where "X.Y" is the major.minor version string.
+By default the GNU C++ compiler is used. Optionally you can specify the toolchain
+as the second command-line argument. Currently 'clang','gnu','intel','sunpro','xlc','nvc' are supported.
+This depends on the platform and what's installed there.
 HELP
 }
 
@@ -57,20 +59,26 @@ if [ ! -w $INSTDIR ]; then
 	exit 993
 fi
 
+# Toolchain
+# cmake will complain if compiler is not available
+TOOLCHAIN=${2:-"gnu"}
+
 # Top-level MULTOVL directory (where this script is located)
 MULTOVLDIR=$( cd $(dirname $0) ; pwd -P )
 
 # Build in this subdirectory
-BUILDDIR=release
+BUILDDIR="release/${TOOLCHAIN}"
 
 # Build and install
 mkdir -p $BUILDDIR
 cd $BUILDDIR
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${INSTDIR} ..
+cmake -DCMAKE_BUILD_TYPE=Release -DTOOLCHAIN=${TOOLCHAIN} -DCMAKE_INSTALL_PREFIX=${INSTDIR} ../..
 make -j2 install
 
 # Test the installation
-cd ${INSTDIR}/multovl-1.3/bin
+majorver=$(sed -nr 's/^VERSION_MAJOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
+minorver=$(sed -nr 's/^VERSION_MINOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
+cd ${INSTDIR}/multovl/${majorver}.${minorver}/bin
 ./multovltest.sh ./multovl
 ./multovl --version
 

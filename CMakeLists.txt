@@ -75,8 +75,13 @@ message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
 set(CMAKE_CXX_STANDARD 11)
 
 # Version string for the project
-set(MULTOVL_VERSION_MAJOR 1)
-set(MULTOVL_VERSION_MINOR 3)
+# see https://stackoverflow.com/a/47084079
+file(READ "${CMAKE_SOURCE_DIR}/VERSION" ver)
+string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${ver})
+set(MULTOVL_VERSION_MAJOR ${CMAKE_MATCH_1})
+string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${ver})
+set(MULTOVL_VERSION_MINOR ${CMAKE_MATCH_1})
+set(MULTOVL_VERSION ${MULTOVL_VERSION_MAJOR}.${MULTOVL_VERSION_MINOR})
 
 # Multi-config environments (CMAKE_BUILD_TYPE not used)
 set(MULTICONFIG OFF)
@@ -102,7 +107,7 @@ set(SCRIPTDIR "${SRCDIR}/scripts")
 set(DOCDIR "${PROJECT_SOURCE_DIR}/doc")
 
 # the installation directory 
-set(MULTOVL_DESTDIR "multovl-${MULTOVL_VERSION_MAJOR}.${MULTOVL_VERSION_MINOR}")
+set(MULTOVL_DESTDIR "multovl/${MULTOVL_VERSION}")
 
 # so that we see what goes wrong:-
 set(CMAKE_VERBOSE_MAKEFILE ON)
