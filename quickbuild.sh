@@ -74,7 +74,7 @@ if [[ $# -lt 1 ]]; then
 	print_help
 	exit 91
 fi
-INSTDIR=$(real_path $1)
+INSTDIR=$(real_path $1/dummy) # adds dummy file to get the directory part
 if [ ! -d $INSTDIR ]; then
 	echo "Installation directory $INSTDIR does not exist"
 	exit 92
