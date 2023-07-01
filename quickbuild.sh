@@ -26,6 +26,19 @@ exitif_notinpath() {
     fi
 }
 
+# Returns the number of CPUs.
+# In doubt it returns 1 :-)
+cpu_count() {
+    local ncpu=1
+    if [[ -x "$(command -v lscpu)" ]]; then
+        ncpu=$(lscpu -p=cpu | egrep -vc '^#')
+    else
+        # if all else fails, one CPU must still be there, right?
+        ncpu=1
+    fi
+    echo $ncpu
+}
+
 print_help() {
 	cat <<HELP
 MULTOVL quick build/install script. Works on Linux platforms only.
@@ -69,11 +82,15 @@ MULTOVLDIR=$( cd $(dirname $0) ; pwd -P )
 # Build in this subdirectory
 BUILDDIR="release/${TOOLCHAIN}"
 
-# Build and install
+# Configure
 mkdir -p $BUILDDIR
 cd $BUILDDIR
 cmake -DCMAKE_BUILD_TYPE=Release -DTOOLCHAIN=${TOOLCHAIN} -DCMAKE_INSTALL_PREFIX=${INSTDIR} ../..
-make -j2 install
+
+# Build and install
+ncpu=$(cpu_count)
+echo "Building on $ncpu CPU(s)"
+make -j$ncpu install
 
 # Test the installation
 majorver=$(sed -nr 's/^VERSION_MAJOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
