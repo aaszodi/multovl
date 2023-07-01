@@ -2,7 +2,6 @@
 
 # Quick build script
 # Release build, static linkage.
-# Works on Linux platforms.
 # 2022-05-11 Andras Aszodi
 
 # -- Functions --
@@ -26,11 +25,24 @@ exitif_notinpath() {
     fi
 }
 
+# `realpath` replacement (absolute path with symlinks resolved)
+# all UNIX, not just Linux + GNU coreutils
+real_path() {
+    echo $( cd $(dirname $1) ; pwd -P )
+}
+
 # Returns the number of CPUs.
 # In doubt it returns 1 :-)
 cpu_count() {
     local ncpu=1
-    if [[ -x "$(command -v lscpu)" ]]; then
+    if [[ -x "$(command -v getconf)" ]]; then
+        # Linux and MacOS
+        ncpu=$(getconf _NPROCESSORS_ONLN)
+        if [[ "$ncpu" == "undefined" ]]; then
+            ncpu=1
+        fi
+    elif [[ -x "$(command -v lscpu)" ]]; then
+        # Linux
         ncpu=$(lscpu -p=cpu | egrep -vc '^#')
     else
         # if all else fails, one CPU must still be there, right?
@@ -58,18 +70,18 @@ HELP
 exitif_notinpath make cmake
 
 # Installation directory
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
 	print_help
-	exit 1
+	exit 91
 fi
-INSTDIR=$(realpath $1)
+INSTDIR=$(real_path $1)
 if [ ! -d $INSTDIR ]; then
 	echo "Installation directory $INSTDIR does not exist"
-	exit 992
+	exit 92
 fi
 if [ ! -w $INSTDIR ]; then
 	echo "Installation directory $INSTDIR is not writable by you"
-	exit 993
+	exit 93
 fi
 
 # Toolchain
@@ -77,7 +89,7 @@ fi
 TOOLCHAIN=${2:-"gnu"}
 
 # Top-level MULTOVL directory (where this script is located)
-MULTOVLDIR=$( cd $(dirname $0) ; pwd -P )
+MULTOVLDIR=$(real_path $0)
 
 # Build in this subdirectory
 BUILDDIR="release/${TOOLCHAIN}"
@@ -85,12 +97,18 @@ BUILDDIR="release/${TOOLCHAIN}"
 # Configure
 mkdir -p $BUILDDIR
 cd $BUILDDIR
-cmake -DCMAKE_BUILD_TYPE=Release -DTOOLCHAIN=${TOOLCHAIN} -DCMAKE_INSTALL_PREFIX=${INSTDIR} ../..
+if ! cmake -DCMAKE_BUILD_TYPE=Release -DTOOLCHAIN=${TOOLCHAIN} -DCMAKE_INSTALL_PREFIX=${INSTDIR} ../.. ; then
+    echo "Could not configure build, exiting"
+    exit 94
+fi
 
 # Build and install
 ncpu=$(cpu_count)
 echo "Building on $ncpu CPU(s)"
-make -j$ncpu install
+if ! make -j$ncpu install ; then
+    echo "Could not build/install, exiting"
+    exit 95
+fi
 
 # Test the installation
 majorver=$(sed -nr 's/^VERSION_MAJOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
@@ -98,6 +116,3 @@ minorver=$(sed -nr 's/^VERSION_MINOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
 cd ${INSTDIR}/multovl/${majorver}.${minorver}/bin
 ./multovltest.sh ./multovl
 ./multovl --version
-
-# Go back
-cd $MULTOVLDIR
