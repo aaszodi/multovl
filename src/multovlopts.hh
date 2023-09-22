@@ -64,6 +64,7 @@ class MultovlOptbase : public virtual Polite
     bool solitary() const { return _minmult == 1; }
     bool nointrack() const { return _nointrack; }
     unsigned int ovlen() const { return _ovlen; }
+    unsigned int extension() const { return _extension; }
     bool uniregion() const { return _uniregion; }
     bool timing() const { return _timing; }
 	
@@ -83,7 +84,7 @@ class MultovlOptbase : public virtual Polite
 	
 	private:
 	
-	unsigned int _minmult, _maxmult, _ovlen, _copt;
+	unsigned int _minmult, _maxmult, _ovlen, _extension, _copt;
 	bool _uniregion, _nointrack, _timing;
 };
 

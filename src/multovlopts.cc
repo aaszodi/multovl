@@ -57,6 +57,8 @@ MultovlOptbase::MultovlOptbase():
 		"Find exactly arg-fold overlaps (default 2), -c 1 detects 'solitary regions', overrides -m, -M", 'c');
 	add_option<unsigned int>("ovlen", &_ovlen, 1, 
 		"Minimal overlap length (default 1), -c 1 forces -L 1", 'L');
+	add_option<unsigned int>("extension", &_extension, 0, 
+		"Extend the region boundaries by this many nucleotides (default 0 = don't extend)", 'E');
 	add_option<unsigned int>("minmult", &_minmult, 2, 
 		"Minimal multiplicity of the overlaps (default 2), 1 detects solitary regions,too", 'm');
 	add_option<unsigned int>("maxmult", &_maxmult, 0, 
@@ -73,6 +75,8 @@ std::string MultovlOptbase::param_str() const
 {
     std::string outstr = " -L ";
     outstr += boost::lexical_cast<std::string>(ovlen());
+    if (option_seen("extension"))
+        outstr += " -E " + boost::lexical_cast<std::string>(extension());
     if (uniregion()) outstr += " -u";
     if (nointrack()) outstr += " -n";
     if (option_seen("common-mult"))

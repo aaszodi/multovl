@@ -6,7 +6,7 @@
 <body>
 <h1 style="color:navy">MULTOVL: Multiple Region Overlap Guide</h1>
 
-<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.3, Late 2015</em></center></p>
+<p><center><em>Andr&aacute;s Asz&oacute;di<br>Version 1.4, 2023</em></center></p>
 
 <h2>Table of contents</h2>
 
@@ -80,39 +80,40 @@ MULTOVL.</p>
 <h4>Supported operating systems and architectures</h4>
 
 <ul>
-<li>Mac OS X 10.5 and above on PowerPC (OS X 10.5 only), or on Intel X86</li>
-<li>Linux on Intel X86, ARMv7</li>
+<li>MacOS Intel or ARM</li>
+<li>Linux on Intel, ARM, IBM Power</li>
 <!-- fancy Unix platforms
 <li>Solaris 11 on Intel X86 or SPARC</li>
 -->
-<li>Windows 7 and above on Intel X86</li>
+<li>Windows 7 and above on Intel</li>
 </ul>
 
 <h4>Compilers</h4>
 
-<p>Any decent C++ compiler supporting the C++98 version of the language can in principle
+<p>Any decent C++ compiler supporting the C++11 version of the language or above can in principle
 be used, implementation quirks and potential incompatibilities notwithstanding.
 The following compilers have been used in building MULTOVL:</p>
 
 <ul>
-<li>G++, Version 4.5 or above</li>
-<li>LLVM Clang++, Version 3.3 or above</li>
-<li>Intel C++ XE 2015</li>
+<li>GNU G++</li>
+<li>LLVM Clang++</li>
+<li>Intel C++</li>
+<li>Nvidia HPC</li>
 <!-- platform-specific Unix:
 <li>Sun Studio 12.1 or above</li>
 <li>SGI MipsPro 7.4</li>
 -->
-<li>Microsoft Visual Studio 2015</li>
+<li>Microsoft Visual Studio</li>
 </ul>
 
 <h4>Third-party libraries</h4>
 
-<p>MULTOVL needs the Boost C++ libraries, Version 1.44 or above.</p>
+<p>MULTOVL needs the Boost C++ libraries, Version 1.74 or above.</p>
 
 <h4>Other tools</h4>
 
-<p>MULTOVL builds are configured with CMake, Version 2.8.8 or above.
-Documentation is generated with Doxygen, Version 1.7 or above.</p>
+<p>MULTOVL builds are configured with CMake, Version 3.1 or above.
+Documentation can be generated with Doxygen, Version 1.7 or above.</p>
 
 <h3>Building MULTOVL</h3>
 
@@ -155,7 +156,7 @@ its documentation:-</p>
 make install
 </code></pre>
 
-<p>The tools will be installed in <tt>/path/to/installdir/multovl-1.3/bin</tt>.</p>
+<p>The tools will be installed in <tt>/path/to/installdir/multovl-1.4/bin</tt>.</p>
 
 <p>Alternatively you can configure a debug build by specifying
 <tt>-DCMAKE_BUILD_TYPE=Debug</tt> and omitting the
@@ -215,6 +216,15 @@ overlaps, then specify <tt>-m 3 -M 5</tt> on the commandline. The special settin
 <tt>-M 0</tt> means "any multiplicity". Union overlaps can be
 requested by specifying the <tt>-u</tt> switch.</p>
 
+<p>The region boundaries can be "extended" by a number of nucleotides to force
+regions "close to each other" to overlap. You can specify the extension length
+with the <tt>-E</tt> option. For instance the <tt>-E 10</tt> setting will subtract
+10 units from each region start coordinate and adds 10 units to each region end coordinate.
+The coordinates are extended only temporarily during overlap detection;
+in the output the ancestors of the overlaps will retain their original coordinates
+to avoid confusion.
+</p>
+
 <p><tt>-c 1</tt> requests solitary region detection. Note that "solitaryness"
 is always relative to the set of input tracks: what you get as "solitary" regions
 is a list of regions that do not overlap with any other region <em>within the
@@ -254,6 +264,8 @@ Options:
   -c [ --common-mult ] arg Find exactly arg-fold overlaps (default 2), -c 1 
                            detects 'solitary regions', overrides -m, -M
   -L [ --ovlen ] arg       Minimal overlap length (default 1), -c 1 forces -L 1
+  -E [ --extension ] arg   Extend the region boundaries by this many 
+                           nucleotides (default 0 = don't extend)
   -m [ --minmult ] arg     Minimal multiplicity of the overlaps (default 2), 1 
                            detects solitary regions,too
   -M [ --maxmult ] arg     Maximal multiplicity of the overlaps, 0 (the 
@@ -325,6 +337,8 @@ Options:
                             detects 'solitary regions', overrides -m, -M
   -L [ --ovlen ] arg        Minimal overlap length (default 1), -c 1 forces -L 
                             1
+  -E [ --extension ] arg   Extend the region boundaries by this many 
+                           nucleotides (default 0 = don't extend)
   -m [ --minmult ] arg      Minimal multiplicity of the overlaps (default 2), 1
                             detects solitary regions,too
   -M [ --maxmult ] arg      Maximal multiplicity of the overlaps, 0 (the 
