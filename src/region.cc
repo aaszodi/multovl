@@ -42,6 +42,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace multovl {
 
+// by default the region limits are not extended
+unsigned int Region::_extension = 0;
+
 // -- Public methods
 
 Region::Region(unsigned int f, unsigned int l,
@@ -78,8 +81,6 @@ bool Region::operator<(const Region& rhs) const
     return false;
 }
 
-// -- Protected methods
-
 void Region::set_coords(unsigned int f, unsigned int l)
 {
     if (f <= l)
@@ -93,7 +94,6 @@ void Region::set_coords(unsigned int f, unsigned int l)
         _first = l;
         _last = f;
     }
-    _length = _last - _first + 1;
 }
 
 void Region::strand(char s)

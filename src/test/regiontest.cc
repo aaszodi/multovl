@@ -93,6 +93,20 @@ BOOST_AUTO_TEST_CASE(length_test)
     BOOST_CHECK(r15.length() == 5);
 }
 
+BOOST_AUTO_TEST_CASE(extension_test)
+{
+    // by default the extension is 0
+    BOOST_CHECK_EQUAL(Region::extension(), 0);
+    // change it
+    Region::set_extension(3);
+    BOOST_CHECK_EQUAL(r15.first(), 0); // because extension > first
+    BOOST_CHECK_EQUAL(r46.first(), 1); // here extension could be subtracted
+    BOOST_CHECK_EQUAL(r15.last(), 8);
+    BOOST_CHECK_EQUAL(r15.length(), 9);
+    // set back to 0
+    Region::set_extension(0);
+}
+
 // Instead of separately testing the < operator,
 // we just build a vector of Coord objects in descending order,
 // then sort into ascending order and then test.

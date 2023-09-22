@@ -61,6 +61,8 @@ namespace multovl {
 /**
  * \brief Instances of the Region class represent regions on a sequence.
  * They have first and last coordinates, strand information and a name.
+ * The coordinates may be "extended" symmetrically in all Region instances
+ * by invoking the `set_extension()` static method.
  */
 class Region:
     boost::less_than_comparable< Region,
@@ -70,7 +72,7 @@ class Region:
     
     /// Inits to empty (makes sense when using as input buffer)
     Region(): 
-        _first(0), _last(0), _length(0),
+        _first(0), _last(0),
         _strand(0), _name("")
     {}
     
@@ -92,32 +94,23 @@ class Region:
     /// empty virtual dtor
     virtual ~Region() {}
     
-    // -- Setters --
-    
-    /// Sets the coordinates.
-    /// Enforces f<=l. Sets the length as well.
-    void set_coords(unsigned int f, unsigned int l);
-    
-    /// Sets the strand
-    void strand(char s);
-    
-    /// Changes the name of the region
-    /// \return old name.
-    std::string name(const std::string& nm);
-    
     // -- Getters --
     
-    /// Returns the first coordinate.
-    const unsigned int& first() const { return _first; }
+    /// Returns the extension
+    static
+    const unsigned int& extension() { return _extension; }
     
-    /// Returns the last coordinate.
-    const unsigned int& last() const { return _last; }
+    /// Returns the (possibly extended) first coordinate.
+    unsigned int first() const { return extension() > _first? 0: _first - extension(); }
     
-    /// Returns the length.
-    const unsigned int& length() const { return _length; }
+    /// Returns the (possibly extended) last coordinate.
+    unsigned int last() const { return _last + extension(); }
     
-    /// Zero-length regions are considered empty.
-    bool is_empty() const { return (_length == 0); }
+    /// Returns the length (possibly extended).
+    unsigned int length() const { return is_empty()? 0: last() - first() + 1; }
+    
+    /// Empty region (0,0)
+    bool is_empty() const { return (first() == 0 && last() == 0); }
     
     /// Returns the strand information.
     const char& strand() const { return _strand; }
@@ -132,7 +125,6 @@ class Region:
         return (this->first() == rhs.first() && this->last() == rhs.last());
     }
     
-    /// Equality. All fields must be equal.
     /// Equality. Positions and strands must be equal.
     bool operator==(const Region& rhs) const
     {
@@ -147,10 +139,29 @@ class Region:
     /// Sorted on first,last coords, strand ('+' < '-' < '.') and the name (lexicographically).
     bool operator<(const Region& rhs) const;
     
+    // -- Setters --
+    
+    /// Sets the region coordinate extension.
+    static
+    void set_extension(unsigned int ext) { _extension = ext; }
+    
+    /// Sets the coordinates.
+    /// Enforces f<=l.
+    void set_coords(unsigned int f, unsigned int l);
+    
+    /// Sets the strand
+    void strand(char s);
+    
+    /// Changes the name of the region
+    /// \return old name.
+    std::string name(const std::string& nm);
+    
     private:
     
     // data
-    unsigned int _first, _last, _length;
+    static unsigned int _extension; // region limits are artificially "extendable"
+    
+    unsigned int _first, _last;
     char _strand;
     std::string _name;
 
