@@ -47,10 +47,6 @@ if(DOXYFILE_IN_FOUND)
 	set_property(DIRECTORY APPEND PROPERTY
 			ADDITIONAL_MAKE_CLEAN_FILES "${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_HTML_DIR}")
 
-	get_target_property(DOC_TARGET doc TYPE)
-	if(NOT DOC_TARGET)
-		add_custom_target(doc ALL)
-	endif()
-		
+	add_custom_target(doc ALL)
 	add_dependencies(doc doxygen)
 endif()
