@@ -5,10 +5,17 @@
 
 # -- Build stage --
 
-# https://cloud.sylabs.io/library/andras.aszodi/default/ubuntu_devboost:latest
+# https://cloud.sylabs.io/library/andras.aszodi/default/ubuntu_devboost:1.5
 Bootstrap: library
-From: andras.aszodi/default/ubuntu_devboost:latest
+From: andras.aszodi/default/ubuntu_devboost:1.5
 Stage: build
+
+### For the future:
+### Singularity >=4.0CE and Apptainer >=1.2 support this section
+### You can refer to the value set here by using `{{ MULTOVL_VERSION }}`
+### anywhere in the definition file.
+### %arguments
+###    MULTOVL_VERSION=1.4
 
 %setup
     # Create `/multovl` and its subdir `containers/singularity` in the container
@@ -33,6 +40,7 @@ Stage: build
     # In the container we are in /
     # So the copy operations below use `../..` for the MULTOVL root on the host
     ../../CMakeLists.txt /multovl
+    ../../VERSION /multovl/VERSION
     ../../cmake/* /multovl/cmake/
     ../../include/* /multovl/include/
     ../../src/* /multovl/src/
@@ -65,23 +73,31 @@ Stage: build
 
 # -- Production stage --
 
+# Docker parent image of 'devboost'
+# Bootstrap: docker
+# From: ubuntu:jammy-20230816
 Bootstrap: library
-From: ubuntu:focal
+From: ubuntu:jammy
 Stage: prod
+
+### NOTE: You may use `{{ MULTOVL_VERSION }}` instead of `1.4` in this section
+### when Apptainer >= 1.2 gets available on the cluster of your choice
+### See note to the `%arguments` section on top
 
 # Variables set at runtime
 %environment
     export LC_ALL="C"
-    export PATH=/usr/local/multovl-1.3/bin:${PATH}
+    export 
+    export PATH=/usr/local/multovl/1.4/bin:${PATH}
 
 %files from build
     # Copy the MULTOVL installation directory from the previous "build" stage
     # to the same location in the "prod" stage
-    /usr/local/multovl-1.3
+    /usr/local/multovl/1.4
 
 %test
 	# A very simple test harness to check if the main 'multovl' executable is working
-	/usr/local/multovl-1.3/bin/multovltest.sh /usr/local/multovl-1.3/bin/multovl
+	/usr/local/multovl/1.4/bin/multovltest.sh /usr/local/multovl/1.4/bin/multovl
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi
@@ -89,7 +105,7 @@ Stage: prod
 # Information
 %labels
     Author András Aszódi
-    Version 1.3
+    Version 1.4
 
 %help
     MULTOVL: Multiple overlaps of genomic regions.
