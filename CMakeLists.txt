@@ -3,7 +3,8 @@
 #
 # USAGE: you should invoke cmake in your build directory like this:-
 # cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \ <-- define for Makefile targets, not for Visual Studio or XCode
-#   -DBOOST_ROOT=/path/to/boost \
+#   -DBOOST_ROOT=/path/to/boost \ <-- default is "/usr/local/boost"
+#   -DBoost_INCLUDE_DIR=/path/to/boost/include \ <-- optional if not found automatically, note the "Boost_..." spelling
 #	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ <-- optional if not found automatically
 #   -DUSE_SYSTEM_ZLIB \ <-- optional, default ON under UNIX, OFF under Windows
 #	-DZLIB_ROOT=/path/to/zlib <- location of Zlib, ignored if USE_SYSTEM_ZLIB is OFF
@@ -175,7 +176,7 @@ include("${THIRDPARTY_DIR}/CMakeLists.txt")
 include_directories(
     ${SRCDIR}
     ${SRCDIR}/config
-    ${Boost_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIR}
     ${ZLIB_INCLUDE_DIRS}
     ${BAMTOOLS_INCLUDE_DIRS}
 )
