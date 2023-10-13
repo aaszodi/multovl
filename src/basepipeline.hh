@@ -44,7 +44,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Own headers --
 
 #include "errors.hh"
-#include "multovlopts.hh"
 
 // -- Boost headers --
 
@@ -53,6 +52,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 namespace multovl {
+
+/// Fwd declaration for command-line option processing
+class MultovlOptbase;
 
 // -- Classes --
 

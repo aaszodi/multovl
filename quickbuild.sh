@@ -4,7 +4,7 @@
 # Release build, static linkage.
 # 2022-05-11 Andras Aszodi
 
-# -- Functions --
+# -- Functions and globals --
 
 # Checks whether the arguments (program names) are in the user's $PATH,
 # exits if not found. 
@@ -31,6 +31,17 @@ real_path() {
     echo $( cd $(dirname $1) ; pwd -P )
 }
 
+# Top-level MULTOVL directory (where this script is located)
+MULTOVLDIR=$(real_path $0)
+
+# Prints the version string as "X.Y"
+# depends on a file called "VERSION" in the top-level Multovl directory
+version_str() {
+    local majorver=$(sed -nr 's/^VERSION_MAJOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
+    local minorver=$(sed -nr 's/^VERSION_MINOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
+    echo "${majorver}.${minorver}"
+}
+
 # Returns the number of CPUs.
 # In doubt it returns 1 :-)
 cpu_count() {
@@ -53,14 +64,12 @@ cpu_count() {
 
 print_help() {
 	cat <<HELP
-MULTOVL quick build/install script. Works on Linux platforms only.
+MULTOVL Version $(version_str) quick build/install script. 
+Works on Linux platforms only.
 Builds a Release version with static linkage.
 Usage: quickbuild.sh INSTDIR [TOOLCHAIN]
-where INSTDIR is the installation directory path.
-MULTOVL will be installed in <INSTDIR>/multovl/X.Y where "X.Y" is the major.minor version string.
-By default the GNU C++ compiler is used. Optionally you can specify the toolchain
-as the second command-line argument. Currently 'clang','gnu','intel','sunpro','xlc','nvc' are supported.
-This depends on the platform and what's installed there.
+    INSTDIR is the installation directory path. MULTOVL will be installed in <INSTDIR>/multovl/$(version_str)
+    TOOLCHAIN: one of 'clang','gnu','intel','sunpro','xlc','nvc', default 'gnu'
 HELP
 }
 
@@ -88,16 +97,13 @@ fi
 # cmake will complain if compiler is not available
 TOOLCHAIN=${2:-"gnu"}
 
-# Top-level MULTOVL directory (where this script is located)
-MULTOVLDIR=$(real_path $0)
-
 # Build in this subdirectory
-BUILDDIR="release/${TOOLCHAIN}"
+BUILDDIR="quickbuild/${TOOLCHAIN}/release"
 
 # Configure
 mkdir -p $BUILDDIR
 cd $BUILDDIR
-if ! cmake -DCMAKE_BUILD_TYPE=Release -DTOOLCHAIN=${TOOLCHAIN} -DCMAKE_INSTALL_PREFIX=${INSTDIR} ../.. ; then
+if ! cmake -DCMAKE_BUILD_TYPE=Release -DTOOLCHAIN=${TOOLCHAIN} -DCMAKE_INSTALL_PREFIX=${INSTDIR} ../../.. ; then
     echo "Could not configure build, exiting"
     exit 94
 fi
@@ -111,8 +117,6 @@ if ! make -j$ncpu install ; then
 fi
 
 # Test the installation
-majorver=$(sed -nr 's/^VERSION_MAJOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
-minorver=$(sed -nr 's/^VERSION_MINOR ([0-9]+)$/\1/p' $MULTOVLDIR/VERSION)
-cd ${INSTDIR}/multovl/${majorver}.${minorver}/bin
+cd ${INSTDIR}/multovl/$(version_str)/bin
 ./multovltest.sh ./multovl
 ./multovl --version
