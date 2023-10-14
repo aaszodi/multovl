@@ -64,7 +64,7 @@ namespace multovl {
  * Use this for file-based "multovl" where it is important that the objects can be
  * written to a text file.
  */
-class MultiRegion: public Region
+class MultiRegion: public BaseRegion
 {
     public:
     
@@ -76,7 +76,7 @@ class MultiRegion: public Region
      * a (multi)set of regions as its "ancestry". Note that multiregions
      * have unspecified ('.') strands and a name "overlap" by default,
      * but these can be changed using the strand(char) and name(const std::string&) methods
-     * inherited from Region.
+     * inherited from BaseRegion.
      * \param first start of the multiregion
      * \param last end of the multiregion
      * \param ancestors multiset of AncestorRegion objects, empty if omitted
@@ -126,7 +126,7 @@ class MultiRegion: public Region
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version)
     {
-        ar & boost::serialization::base_object<Region>(*this);
+        ar & boost::serialization::base_object<BaseRegion>(*this);
         ar & _ancestors & _solitary & _mult;
     }
     

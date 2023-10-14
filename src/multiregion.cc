@@ -53,7 +53,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace multovl {
 
 MultiRegion::MultiRegion():
-    Region(0, 0, '.', "overlap"),
+    BaseRegion(0, 0, '.', "overlap"),
     _ancestors(),
     _solitary(false),
     _mult(0)
@@ -61,7 +61,7 @@ MultiRegion::MultiRegion():
 
 MultiRegion::MultiRegion(unsigned int first, unsigned int last, 
     const ancregset_t& ancestors, unsigned int mult):
-    Region(first, last, '.', "overlap"), 
+    BaseRegion(first, last, '.', "overlap"), 
     _ancestors(ancestors),
     _mult(mult>0? mult: ancestors.size())
 {

@@ -32,7 +32,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </LICENSE> */
-#define BOOST_TEST_MODULE regiontest
+#define BOOST_TEST_MODULE baseregiontest
 #include "boost/test/unit_test.hpp"
 
 // -- Own headers --
@@ -58,19 +58,19 @@ using namespace multovl;
 
 // -- Fixture
 
-struct RegionFixture
+struct BaseRegionFixture
 {
-    RegionFixture():
+    BaseRegionFixture():
         r_empty(), 
         r15(1, 5, '+', "r15"),
         r46(6, 4, '-', "r46")  // checks limit swapping
     {}
     
-    Region r_empty, r15, r46;
+    BaseRegion r_empty, r15, r46;
 };
 
 static
-std::string reg_tostr(const Region& reg)
+std::string reg_tostr(const BaseRegion& reg)
 {
     std::string s = boost::lexical_cast<std::string>(reg.first()) + ":"
         + boost::lexical_cast<std::string>(reg.last()) + ":"
@@ -78,9 +78,8 @@ std::string reg_tostr(const Region& reg)
     return s;
 }
 
-BOOST_FIXTURE_TEST_SUITE(regionsuite, RegionFixture)
+BOOST_FIXTURE_TEST_SUITE(baseregionsuite, BaseRegionFixture)
 
-// same as BaseRegion
 BOOST_AUTO_TEST_CASE(empty_test)
 {
     BOOST_CHECK(r_empty.first() == 0);
@@ -88,25 +87,42 @@ BOOST_AUTO_TEST_CASE(empty_test)
     BOOST_CHECK(r_empty.is_empty());
 }
 
-// same as BaseRegion
 BOOST_AUTO_TEST_CASE(length_test)
 {
     BOOST_CHECK(r_empty.length() == 0);
     BOOST_CHECK(r15.length() == 5);
 }
 
-BOOST_AUTO_TEST_CASE(extension_test)
+// Instead of separately testing the < operator,
+// we just build a vector of Coord objects in descending order,
+// then sort into ascending order and then test.
+BOOST_AUTO_TEST_CASE(coordsort_test)
 {
-    // by default the extension is 0
-    BOOST_CHECK_EQUAL(Region::extension(), 0);
-    // change it
-    Region::set_extension(3);
-    BOOST_CHECK_EQUAL(r15.first(), 0); // because extension > first
-    BOOST_CHECK_EQUAL(r46.first(), 1); // here extension could be subtracted
-    BOOST_CHECK_EQUAL(r15.last(), 8);
-    BOOST_CHECK_EQUAL(r15.length(), 9);
-    // set back to 0
-    Region::set_extension(0);
+    std::vector<BaseRegion> desc;
+    boost::assign::push_back(desc)
+        (BaseRegion(3, 5, '-',"z"))
+        (BaseRegion(3, 6, '-', "foo"))
+        (BaseRegion(3, 6, '-', "aardvark"))
+        (BaseRegion(2, 3, '.',"z"))
+        (BaseRegion(2, 3, '-',"z"))
+        (BaseRegion(2, 3, '+',"z"))
+        (BaseRegion(1, 2, '+',"z"));
+    std::vector<BaseRegion> asc = desc;
+    std::sort(asc.begin(), asc.end());
+    
+    std::vector<BaseRegion>::iterator fwdit = asc.begin();
+    std::vector<BaseRegion>::reverse_iterator revit = desc.rbegin();
+    for ( ; fwdit != asc.end() && revit != desc.rend(); fwdit++, revit++)
+    {
+        BOOST_CHECK_EQUAL( reg_tostr(*fwdit), reg_tostr(*revit) );
+    }
+}
+
+BOOST_AUTO_TEST_CASE(name_test)
+{
+    std::string oldname = r15.name("newr15");
+    BOOST_CHECK_EQUAL(oldname, "r15");
+    BOOST_CHECK_EQUAL("newr15", r15.name());
 }
 
 BOOST_AUTO_TEST_CASE(regionser_test)
@@ -121,7 +137,7 @@ BOOST_AUTO_TEST_CASE(regionser_test)
     {
         std::ifstream ifs(tempfile.name());
         boost::archive::text_iarchive ia(ifs);
-        Region inr;
+        BaseRegion inr;
         ia >> inr;
         BOOST_CHECK_EQUAL(reg_tostr(inr), reg_tostr(r15));
     }

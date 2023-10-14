@@ -42,26 +42,23 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace multovl {
 
-// by default the region limits are not extended
-unsigned int Region::_extension = 0;
+// -- BaseRegion methods
 
-// -- Public methods
-
-Region::Region(unsigned int f, unsigned int l,
+BaseRegion::BaseRegion(unsigned int f, unsigned int l,
     char s, const std::string& nm): _name(nm)
 {
     set_coords(f, l);
     strand(s);
 }
 
-std::string Region::name(const std::string& nm)
+std::string BaseRegion::name(const std::string& nm)
 {
     std::string oldname = _name;
     _name = nm;
     return oldname;
 }
 
-bool Region::operator<(const Region& rhs) const
+bool BaseRegion::operator<(const BaseRegion& rhs) const
 {
     if (this->first() < rhs.first()) return true;
     if (this->first() == rhs.first())
@@ -81,7 +78,7 @@ bool Region::operator<(const Region& rhs) const
     return false;
 }
 
-void Region::set_coords(unsigned int f, unsigned int l)
+void BaseRegion::set_coords(unsigned int f, unsigned int l)
 {
     if (f <= l)
     {
@@ -96,12 +93,27 @@ void Region::set_coords(unsigned int f, unsigned int l)
     }
 }
 
-void Region::strand(char s)
+void BaseRegion::strand(char s)
 {
     if (s == '+' || s == '-')
         _strand = s;
     else
         _strand = '.';
 }
+
+// -- Region
+
+// by default the region limits are not extended
+unsigned int Region::_extension = 0;
+
+unsigned int Region::first() const {
+    unsigned int realfirst = BaseRegion::first();
+    return extension() > realfirst? 0: realfirst - extension(); 
+}
+
+unsigned int Region::last() const {
+    return BaseRegion::last() + extension();
+}
+
 
 }   // namespace multovl

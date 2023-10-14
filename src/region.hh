@@ -55,23 +55,23 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boost/serialization/string.hpp"
 #include "boost/serialization/version.hpp"
 #include "boost/serialization/split_member.hpp"
+#include "boost/serialization/base_object.hpp"
 
 namespace multovl {
 
 /**
- * \brief Instances of the Region class represent regions on a sequence.
+ * \brief Instances of the BaseRegion class represent regions on a sequence.
  * They have first and last coordinates, strand information and a name.
- * The coordinates may be "extended" symmetrically in all Region instances
- * by invoking the `set_extension()` static method.
+ * This class serves as the base class for all other classes that represent genomic regions.
  */
-class Region:
-    boost::less_than_comparable< Region,
-    boost::equality_comparable<Region> >
+class BaseRegion:
+    boost::less_than_comparable< BaseRegion,
+    boost::equality_comparable<BaseRegion> >
 {
     public:
     
     /// Inits to empty (makes sense when using as input buffer)
-    Region(): 
+    BaseRegion(): 
         _first(0), _last(0),
         _strand(0), _name("")
     {}
@@ -88,25 +88,23 @@ class Region:
      * \param nm the feature name for the region
      * Note: the parameters f,l,s will be fixed for the lifetime of the object.
      */
-    Region(unsigned int f, unsigned int l,
+    BaseRegion(unsigned int f, unsigned int l,
         char s, const std::string& nm);
     
     /// empty virtual dtor
-    virtual ~Region() {}
+    virtual ~BaseRegion() {}
     
     // -- Getters --
     
-    /// Returns the extension
-    static
-    const unsigned int& extension() { return _extension; }
+    /// Returns the first coordinate.
+    virtual
+    unsigned int first() const { return _first; }
     
-    /// Returns the (possibly extended) first coordinate.
-    unsigned int first() const { return extension() > _first? 0: _first - extension(); }
+    /// Returns the last coordinate.
+    virtual
+    unsigned int last() const { return _last; }
     
-    /// Returns the (possibly extended) last coordinate.
-    unsigned int last() const { return _last + extension(); }
-    
-    /// Returns the length (possibly extended).
+    /// Returns the length
     unsigned int length() const { return is_empty()? 0: last() - first() + 1; }
     
     /// Empty region (0,0)
@@ -120,13 +118,13 @@ class Region:
     
     /// \return true if the positions of /*this/ and /other/
     /// are the same, strand information is not considered.
-    bool equal_pos(const Region& rhs) const
+    bool equal_pos(const BaseRegion& rhs) const
     {
         return (this->first() == rhs.first() && this->last() == rhs.last());
     }
     
     /// Equality. Positions and strands must be equal.
-    bool operator==(const Region& rhs) const
+    bool operator==(const BaseRegion& rhs) const
     {
         return (
             equal_pos(rhs) && 
@@ -137,13 +135,9 @@ class Region:
         
     /// Ordering.
     /// Sorted on first,last coords, strand ('+' < '-' < '.') and the name (lexicographically).
-    bool operator<(const Region& rhs) const;
+    bool operator<(const BaseRegion& rhs) const;
     
     // -- Setters --
-    
-    /// Sets the region coordinate extension.
-    static
-    void set_extension(unsigned int ext) { _extension = ext; }
     
     /// Sets the coordinates.
     /// Enforces f<=l.
@@ -157,9 +151,6 @@ class Region:
     std::string name(const std::string& nm);
     
     private:
-    
-    // data
-    static unsigned int _extension; // region limits are artificially "extendable"
     
     unsigned int _first, _last;
     char _strand;
@@ -182,6 +173,78 @@ class Region:
         this->set_coords(first, last);  // sets _length, too
         ar >> _strand;
         ar >> _name;
+    }
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+};  // class BaseRegion
+
+/**
+ * \brief Instances of the Region class represent regions on a sequence.
+ * The coordinates may be "extended" symmetrically in all Region instances
+ * by invoking the `set_extension()` static method.
+ */
+class Region: public BaseRegion {
+    public:
+    
+    /// Inits to empty (makes sense when using as input buffer)
+    Region(): 
+        BaseRegion()
+    {}
+    
+    /**
+     * Inits to contain the genomic region with positions [f..l],
+     * strand /s/, name /nm/.
+     * Enforces the invariance f<=l
+     * If f>l, then the values are swapped silently.
+     * \param f the first position of the region
+     * \param l the last position of the region
+     * \param s the strand indicator. Anything else than '+' or '-' will be
+     * converted to '.'
+     * \param nm the feature name for the region
+     * Note: the parameters f,l,s will be fixed for the lifetime of the object.
+     */
+    Region(unsigned int f, unsigned int l,
+        char s, const std::string& nm):
+        BaseRegion(f, l, s, nm)
+    {}
+    
+    // -- Getters --
+    
+    /// Returns the extension
+    static
+    const unsigned int& extension() { return _extension; }
+    
+    /// Returns the (possibly extended) first coordinate.
+    virtual 
+    unsigned int first() const override final;
+    
+    /// Returns the (possibly extended) last coordinate.
+    virtual
+    unsigned int last() const override final;
+    
+    // -- Setters --
+    
+    /// Sets the region coordinate extension.
+    static
+    void set_extension(unsigned int ext) { _extension = ext; }
+    
+    private:
+    
+    // data
+    static unsigned int _extension; // region limits are artificially "extendable"
+    
+    // serialization
+    // no new members, use base class serialization
+    friend class boost::serialization::access;
+    template <class Archive>
+    void save(Archive& ar, const unsigned int version) const
+    {
+        ar << boost::serialization::base_object<BaseRegion>(*this);
+    }
+    
+    template <class Archive>
+    void load(Archive& ar, const unsigned int version)
+    {
+        ar >> boost::serialization::base_object<BaseRegion>(*this);
     }
     BOOST_SERIALIZATION_SPLIT_MEMBER()
 };  // class Region
