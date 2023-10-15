@@ -32,11 +32,11 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </LICENSE> */
-// == MODULE region.cc ==
+// == MODULE baseregion.cc ==
 
 // -- Own header --
 
-#include "region.hh"
+#include "baseregion.hh"
 
 // -- Implementation --
 
@@ -44,17 +44,61 @@ namespace multovl {
 
 // -- BaseRegion methods
 
-// by default the region limits are not extended
-unsigned int Region::_extension = 0;
-
-unsigned int Region::first() const {
-    unsigned int realfirst = BaseRegion::first();
-    return extension() > realfirst? 0: realfirst - extension(); 
+BaseRegion::BaseRegion(unsigned int f, unsigned int l,
+    char s, const std::string& nm): _name(nm)
+{
+    set_coords(f, l);
+    strand(s);
 }
 
-unsigned int Region::last() const {
-    return BaseRegion::last() + extension();
+std::string BaseRegion::name(const std::string& nm)
+{
+    std::string oldname = _name;
+    _name = nm;
+    return oldname;
 }
 
+bool BaseRegion::operator<(const BaseRegion& rhs) const
+{
+    if (this->first() < rhs.first()) return true;
+    if (this->first() == rhs.first())
+    {
+        if (this->last() > rhs.last()) return true;
+        if (this->last() == rhs.last())
+        {
+            if (this->strand() < rhs.strand()) return true;
+            if (this->strand() == rhs.strand())
+            {
+                return (this->name() < rhs.name());
+            }
+            else return false;
+        }
+        else return false;
+    }
+    return false;
+}
+
+void BaseRegion::set_coords(unsigned int f, unsigned int l)
+{
+    if (f <= l)
+    {
+        _first = f;
+        _last = l;
+    }
+    else
+    {
+        // swap silently
+        _first = l;
+        _last = f;
+    }
+}
+
+void BaseRegion::strand(char s)
+{
+    if (s == '+' || s == '-')
+        _strand = s;
+    else
+        _strand = '.';
+}
 
 }   // namespace multovl

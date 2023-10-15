@@ -32,14 +32,13 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </LICENSE> */
-#ifndef MULTOVL_REGION_HEADER
-#define MULTOVL_REGION_HEADER
+#ifndef MULTOVL_BASEREGION_HEADER
+#define MULTOVL_BASEREGION_HEADER
 
-// == HEADER region.hh ==
+// == HEADER baseregion.hh ==
 
 /** \file 
- * \brief Genomic regions with coordinates and a name
- * The region limits may be extended.
+ * \brief Base class representing genomic regions with coordinates and a name.
  * \author Andras Aszodi
  * \date 2023-10-15.
  */
@@ -58,23 +57,23 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "boost/serialization/split_member.hpp"
 #include "boost/serialization/base_object.hpp"
 
-// -- Own headers --
-
-#include "baseregion.hh"
-
 namespace multovl {
 
 /**
- * \brief Instances of the Region class represent regions on a sequence.
- * The coordinates may be "extended" symmetrically in all Region instances
- * by invoking the `set_extension()` static method.
+ * \brief Instances of the BaseRegion class represent regions on a sequence.
+ * They have first and last coordinates, strand information and a name.
+ * This class serves as the base class for all other classes that represent genomic regions.
  */
-class Region: public BaseRegion {
+class BaseRegion:
+    boost::less_than_comparable< BaseRegion,
+    boost::equality_comparable<BaseRegion> >
+{
     public:
     
     /// Inits to empty (makes sense when using as input buffer)
-    Region(): 
-        BaseRegion()
+    BaseRegion(): 
+        _first(0), _last(0),
+        _strand(0), _name("")
     {}
     
     /**
@@ -89,53 +88,95 @@ class Region: public BaseRegion {
      * \param nm the feature name for the region
      * Note: the parameters f,l,s will be fixed for the lifetime of the object.
      */
-    Region(unsigned int f, unsigned int l,
-        char s, const std::string& nm):
-        BaseRegion(f, l, s, nm)
-    {}
+    BaseRegion(unsigned int f, unsigned int l,
+        char s, const std::string& nm);
+    
+    /// empty virtual dtor
+    virtual ~BaseRegion() {}
     
     // -- Getters --
     
-    /// Returns the extension
-    static
-    const unsigned int& extension() { return _extension; }
-    
-    /// Returns the (possibly extended) first coordinate.
-    virtual 
-    unsigned int first() const override final;
-    
-    /// Returns the (possibly extended) last coordinate.
+    /// Returns the first coordinate.
     virtual
-    unsigned int last() const override final;
+    unsigned int first() const { return _first; }
+    
+    /// Returns the last coordinate.
+    virtual
+    unsigned int last() const { return _last; }
+    
+    /// Returns the length
+    unsigned int length() const { return is_empty()? 0: last() - first() + 1; }
+    
+    /// Empty region (0,0)
+    bool is_empty() const { return (first() == 0 && last() == 0); }
+    
+    /// Returns the strand information.
+    const char& strand() const { return _strand; }
+    
+    /// Returns the name of the region.
+    const std::string& name() const { return _name; }
+    
+    /// \return true if the positions of /*this/ and /other/
+    /// are the same, strand information is not considered.
+    bool equal_pos(const BaseRegion& rhs) const
+    {
+        return (this->first() == rhs.first() && this->last() == rhs.last());
+    }
+    
+    /// Equality. Positions and strands must be equal.
+    bool operator==(const BaseRegion& rhs) const
+    {
+        return (
+            equal_pos(rhs) && 
+            this->strand() == rhs.strand() &&
+            this->name() == rhs.name()
+        );
+    }
+        
+    /// Ordering.
+    /// Sorted on first,last coords, strand ('+' < '-' < '.') and the name (lexicographically).
+    bool operator<(const BaseRegion& rhs) const;
     
     // -- Setters --
     
-    /// Sets the region coordinate extension.
-    static
-    void set_extension(unsigned int ext) { _extension = ext; }
+    /// Sets the coordinates.
+    /// Enforces f<=l.
+    void set_coords(unsigned int f, unsigned int l);
+    
+    /// Sets the strand
+    void strand(char s);
+    
+    /// Changes the name of the region
+    /// \return old name.
+    std::string name(const std::string& nm);
     
     private:
     
-    // data
-    static unsigned int _extension; // region limits are artificially "extendable"
-    
-    // serialization
-    // no new members, use base class serialization
+    unsigned int _first, _last;
+    char _strand;
+    std::string _name;
+
+    // "split" serialization
     friend class boost::serialization::access;
     template <class Archive>
     void save(Archive& ar, const unsigned int version) const
     {
-        ar << boost::serialization::base_object<BaseRegion>(*this);
+        ar << _first << _last 
+            << _strand << _name;
     }
     
     template <class Archive>
     void load(Archive& ar, const unsigned int version)
     {
-        ar >> boost::serialization::base_object<BaseRegion>(*this);
+        unsigned int first, last;
+        ar >> first >> last;
+        this->set_coords(first, last);  // sets _length, too
+        ar >> _strand;
+        ar >> _name;
     }
     BOOST_SERIALIZATION_SPLIT_MEMBER()
-};  // class Region
+};  // class BaseRegion
 
 }   // namespace multovl
 
-#endif  // MULTOVL_REGION_HEADER
+#endif  // MULTOVL_BASEREGION_HEADER
