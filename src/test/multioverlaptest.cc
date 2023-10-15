@@ -109,17 +109,18 @@ struct MultovlFixture
         exp2.add(440, 450, 2, "1:REGb:+:350-450|2:REGb:-:440-500");
         
         // regions for triple overlaps (hence mo3)
+        // src/test/data/triple[a-c].bed
         mo3.add(Region(100, 600, '+', "REGa"), 1);
         mo3.add(Region(200, 500, '+', "REGb"), 2); 
         mo3.add(Region(300, 400, '+', "REGc"), 3);
-    
+        
         mo3.add(Region(700, 800, '+', "REGa"), 1);
         mo3.add(Region(700, 800, '+', "REGb"), 2);
         mo3.add(Region(700, 800, '+', "REGc"), 3);
         
-        // in track 2, there is an intra-track overlap
-        mo3.add(Region(1000, 1200, '-', "REGbi"), 2);
-        mo3.add(Region(1100, 1300, '-', "REGbi"), 2);
+        // in tripleb.bed, there is an intra-track overlap
+        mo3.add(Region(1000, 1200, '-', "REGbi1"), 2);
+        mo3.add(Region(1100, 1300, '-', "REGbi2"), 2);
     }
     
     MultiOverlap mo2, mo3;
@@ -246,9 +247,32 @@ BOOST_AUTO_TEST_CASE(multioverlap3_test)
     check_results(regcnt, exp, mo3.overlaps());
     
     // intra-track overlap allowed by default
-    exp.add(1100, 1200, 2, "2:REGbi:-:1000-1200|2:REGbi:-:1100-1300");
+    exp.add(1100, 1200, 2, "2:REGbi1:-:1000-1200|2:REGbi2:-:1100-1300");
     regcnt = mo3.find_overlaps(1, 2, 0);
     check_results(regcnt, exp, mo3.overlaps());
+}
+
+BOOST_AUTO_TEST_CASE(extension_mo3_test)
+{
+    // "short" extension of 50 that makes 100-600 and 700-800 "touch"
+    ExpectedResult expshort;
+    expshort.add(150, 249, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
+    expshort.add(250, 450, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:REGc:+:300-400");
+    expshort.add(451, 550, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
+    expshort.add(650, 850, 3, "1:REGa:+:700-800|2:REGb:+:700-800|3:REGc:+:700-800");
+
+    // overlaps without intra-track overlap
+    Region::set_extension(50);
+    unsigned int regcnt = mo3.find_overlaps(1, 2, 0, false); // up to any overlap
+    Region::set_extension(0);   // important to reset
+    check_results(regcnt, expshort, mo3.overlaps());
+    
+    // now allow overlap
+    Region::set_extension(50);  // must set again
+    regcnt = mo3.find_overlaps(1, 2, 0);
+    Region::set_extension(0);   // ... and reset again
+    expshort.add(1050, 1250, 2, "2:REGbi1:-:1000-1200|2:REGbi2:-:1100-1300");
+    check_results(regcnt, expshort, mo3.overlaps());
 }
 
 BOOST_AUTO_TEST_CASE(unionoverlap3_test)
