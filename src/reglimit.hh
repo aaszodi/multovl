@@ -45,8 +45,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- System headers --
 
-#include <memory>
-
 // -- Boost headers --
 
 #include "boost/serialization/shared_ptr.hpp"   // for serializing `std::shared_ptr`
@@ -62,7 +60,6 @@ namespace multovl {
 /// Each ancestor region to be overlapped is stored twice in MultiRegion's lookup;
 /// once as a "first pos", and once as a "last pos".
 /// The RegLimit class implements these "region limit" objects.
-/// It can also be serialized.
 class RegLimit
 {
 public:
@@ -70,12 +67,12 @@ public:
     /// Init to empty
     RegLimit(): _regp(), _isfirst(false) {}
     
-    /// Init with a shared pointer to an ancestor region
-    /// \param regp shared pointer to an ancestor region
+    /// Init with an ancestor region
+    /// \param const reference to an ancestor region (managed by somebody else)
     /// \param isfirst true if first position, false if last
-    explicit RegLimit(const std::shared_ptr<AncestorRegion>& regp, 
+    explicit RegLimit(const AncestorRegion& reg, 
         bool isfirst=true)
-    : _regp(regp), _isfirst(isfirst) {}
+    : _regp{&reg}, _isfirst{isfirst} {}
     
     // -- Accessors --
     
@@ -119,42 +116,11 @@ public:
     /// Ordering according to position, or first before last if the same position.
     bool operator<(const RegLimit& other) const;
     
-    /// Deep copy operation.
-    /// The default copy ctor returns a shallow copy in the sense that 
-    /// only the internal shared pointer is copied but not the AncestorRegion it is pointing to,
-    /// as it is to be expected from a std::shared_ptr.
-    /// \return a new RegLimit object whose internal shared pointer points to a completely
-    /// separate copy of the AncestorRegion.
-    RegLimit deep_copy() const
-    {
-        std::shared_ptr<AncestorRegion> ancp(new AncestorRegion(this->region()));
-        return RegLimit(ancp, this->is_first()); 
-    }
-    
-# if !defined(NDEBUG) || (defined(_MSC_VER) && defined(_DEBUG))
-#define REGLIMIT_RAWPTR
-#endif
-
-    #ifdef REGLIMIT_RAWPTR
-        // these are used by the unit tests only
-        const AncestorRegion* const_raw_region_ptr() const { return _regp.get(); }
-        AncestorRegion* raw_region_ptr() { return _regp.get(); }
-    #endif
-    
 private:
     
     // data
-    std::shared_ptr<AncestorRegion> _regp;
+    const AncestorRegion* _regp;    // not supposed to modify underlying object ("view ptr")
     bool _isfirst;
-    
-    // serialization
-    friend class boost::serialization::access;
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int version)
-    {
-        ar & _regp;
-        ar & _isfirst;
-    }
     
 };  // class RegLimit
     

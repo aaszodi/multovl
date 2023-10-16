@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(multioverlap3_test)
     expres.add(700, 800, 3, "1:REGa:+:700-800|2:REGb:+:700-800|3:REGc:+:700-800");
 
     // overlaps without intra-track overlap
-    unsigned int regcnt = mo3.find_overlaps(1, 2, 0, false); // up to any overlap
+    unsigned int regcnt = mo3.find_overlaps(1, 2, 0, 0, false); // up to any overlap
     check_results(regcnt, expres, mo3.overlaps());
     
     // intra-track overlap allowed by default
@@ -281,36 +281,27 @@ BOOST_AUTO_TEST_CASE(extension_test)
     check_results(regcnt, expres, mo0.overlaps());
     
     // extend the regions "by hand"
-    //// MultiOverlap mo60 = setup_mo_ext(60);
+    MultiOverlap mo60 = setup_mo_ext(60);
     
     // ext=60 r1:r2, r2:r3 will partially overlap, too
     expres.reset();
     expres.add(1140, 1160, 2, "1:r1:+:940-1160|1:r2:+:1140-1360");
     expres.add(1340, 1360, 2, "1:r2:+:1140-1360|1:r3:+:1340-1560");
     expres.add(1390, 1560, 2, "1:r3:+:1340-1560|1:r4:+:1390-1660");
-    //// std::cout << "%%% starting MANUALLY extended overlaps" << std::endl;
-    //// regcnt = mo60.find_overlaps(1, 2, 0);
-    //// check_results(regcnt, expres, mo60.overlaps());
+    std::cout << "%%% starting MANUALLY extended overlaps" << std::endl;
+    regcnt = mo60.find_overlaps(1, 2, 0);
+    check_results(regcnt, expres, mo60.overlaps());
 
-    /***
-    ! this will not work as the MultiRegLimit order cannot be changed
-    ! and that's what setting the extensions would do...
-    // should get the same result on `mo0` but setting the region extension globally
-    std::cout << "%%% starting extended overlaps" << std::endl;
-    Region::set_extension(60);
-    regcnt = mo0.find_overlaps(1, 2, 0);
-    Region::set_extension(0);
-    check_results(regcnt, expres, mo0.overlaps());
-    ***/
-    
-    // change the extension length, THEN set up a MultiOverlap object
-    Region::set_extension(60);
+    // change the extension length in `find_overlaps`
     MultiOverlap moex = setup_mo_ext(0);    // NOT extending here
+    // the ancestor regions in the output should have their original coordinates
+    expres.reset();
+    expres.add(1140, 1160, 2, "1:r1:+:1000-1100|1:r2:+:1200-1300");
+    expres.add(1340, 1360, 2, "1:r2:+:1200-1300|1:r3:+:1400-1500");
+    expres.add(1390, 1560, 2, "1:r3:+:1400-1500|1:r4:+:1450-1600");
     std::cout << "%%% starting GLOBALLY extended overlaps" << std::endl;
-    regcnt = moex.find_overlaps(1, 2, 0);
+    regcnt = moex.find_overlaps(1, 2, 0, 60);
     check_results(regcnt, expres, moex.overlaps());
-    Region::set_extension(0);
-    
 }
 
 BOOST_AUTO_TEST_CASE(unionoverlap3_test)
@@ -364,7 +355,7 @@ BOOST_AUTO_TEST_CASE(complexintra_test)
     expres.add(251,260, 2, "1:Track1:+:220-270|2:Track2:-:230-260");
     
     // overlaps without intra-track overlap
-    unsigned int regcnt = mo.find_overlaps(1, 2, 2, false); // pairwise overlap
+    unsigned int regcnt = mo.find_overlaps(1, 2, 2, 0, false); // pairwise overlap
     check_results(regcnt, expres, mo.overlaps());
 }
 
@@ -379,7 +370,7 @@ BOOST_AUTO_TEST_CASE(counter_test)
     // two 1,2 and two 1,2,3 overlaps
     // same as in multioverlap3_test
     unsigned int regcnt;
-    regcnt = mo3.find_overlaps(1, 2, 0, false);
+    regcnt = mo3.find_overlaps(1, 2, 0, 0, false);
     BOOST_CHECK_EQUAL(regcnt, 4);
     mo3.overlap_stats(counter);
     BOOST_CHECK_EQUAL(counter.total(), 4);

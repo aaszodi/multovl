@@ -59,76 +59,16 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "multireglimit.hh"
+#include "reglimit.hh"
 #include "multiregion.hh"
 
 // == Classes ==
 
 namespace multovl {
 
-/**
- * Objects of the MultiOverlap class generate and store multiple overlaps of genomic regions.
- * The class is derived from MultiRegLimit which is responsible for keeping track
- * of where the ancestor regions begin or end.
- * The MultiOverlap::find_* methods iterate along the limits and detect the overlaps.
- */
-class MultiOverlap: public MultiRegLimit
+/// Objects of the MultiOverlap class generate and store multiple overlaps of genomic regions.
+class MultiOverlap
 {
-private:
-	
-    typedef std::pair<unsigned int, unsigned int> uintpair_t;
-    typedef std::vector<uintpair_t> uintpairvec_t;
-    
-	// -- internal classes --
-	
-    /**
-     * Encapsulates the parameters according to which the generated multiregions
-     * should be filtered: the minimal overlap length, the minimal and maximal
-     * multiplicity. Provides a method to filter nascent multiregions.
-     */
-    class Filter
-    {
-    public:
-        
-        /**
-         * Constructs a Filter.
-         * \param ovlen must be >=1, adjusted silently
-         * \param minmult minimal multiplicity, must be >=1 
-         * \param maxmult must be >=0, 0 means any multiplicity >= minmult is accepted; 
-         * if /minmult/ > /maxmult/ then they are swapped silently
-         * \param checksoli if /true/, then only solitary regions will be accepted
-         * if /minmult/ == 1
-         * (this sets /intrack/ to /true/, and /ovlen/ to 1)
-         * \param intrack if /true/, then overlaps within the same track are accepted as well,
-         * otherwise overlaps within the same track only are filtered out.
-         */
-        Filter(unsigned int ovlen, unsigned int minmult, 
-                unsigned int maxmult, bool checksoli, bool intrack = true);
-        
-        /**
-         * Checks whether a "nascent" multiregion (not yet constructed)
-         * should be accepted as new multiregion.
-         * \param mrstart the first position of the new multiregion
-         * \param mrend the last position of the new multiregion
-         * \param ancestors the set of ancestor regions
-         * \param mult the desired multiplicity of the new multiregion.
-         * This is usually ancestors.size(), but you need to specify a different value
-         * for union regions. Moreover, this method may override /mult/ if
-         * intra-track filtering is switched on.
-         * \return /true/ if the multiregion may be accepted.
-         */
-        bool accept_new_region(unsigned int mrstart, unsigned int mrend,
-            const ancregset_t& ancestors, unsigned int& mult) const;
-            
-    private:
-        
-        static unsigned int distinct_track_count(const ancregset_t& ancestors);
-        
-        unsigned int _ovlen, _minmult, _maxmult;
-        bool _solitary, _intrack;
-        
-    };  // class Filter
-    
 public: 
 	
     /**
@@ -172,18 +112,32 @@ public:
         
     };  // class Counter
     
+    typedef std::multiset<RegLimit> reglims_t;
 	typedef std::vector<MultiRegion> multiregvec_t;
 	
 	// -- methods --
            
     /// Init to empty 
-    MultiOverlap(): MultiRegLimit(), _multiregions() {}
+    MultiOverlap(): _ancregions{}, _reglims{}, _multiregions{} {}
     
     /// Init to contain a region and trackid 
     MultiOverlap(const Region& region, unsigned int trackid): 
-        MultiRegLimit(region, trackid), _multiregions()
-    {}
+        MultiOverlap()
+    { add(region, trackid); }
     
+    // can serve as base class
+    virtual
+    ~MultiOverlap() = default;
+    
+    /**
+     * Adds a region from a track.
+     * \param region A Region object
+     * \param trackid The track ID of the object
+     */
+    void add(const Region& region, unsigned int trackid) {
+        _ancregions.emplace_back(region, trackid);
+    }
+
     /**
      * Finds multiple overlaps. Whenever the multiplicity of the overlap
      * changes, there will be a new MultiRegion in the returned vector.
@@ -197,24 +151,26 @@ public:
      * \param minmult the minimum multiplicity required, >=1,  if 0 --> solitaries also required
      * \param maxmult the maximum multiplicity required, >=2, or if 0 --> any multiplicity accepted
      * if /minmult/ > /maxmult/ then they are swapped silently, except when /maxmult/ == 0
+     * \param ext "fake" extension of the input region boundaries, 0 by default
      * \param intrack if /true/ (default), then overlaps within the same track are accepted
      * \return the total count of the overlaps found
      */
     unsigned int find_overlaps(unsigned int ovlen, 
-        unsigned int minmult = 1, unsigned int maxmult = 0, bool intrack = true);
+        unsigned int minmult = 1, unsigned int maxmult = 0, 
+        unsigned int ext = 0, bool intrack = true);
 
     /**
      * Finds 'unions' of overlaps.
      * For instance, the region [50,150] and the region [100, 200] will give rise
      * to the union region [50,200] with maximal multiplicity 2 (because in the middle
      * the original regions overlap).
-     * The parameters and the return value have the same meaning as with /find_overlaps/.
+     * The parameters and the return value have the same meaning as with `find_overlaps`.
      * However, /minmult/ must be >=2 as it makes no sense to detect solitaries here.
      * Also note that there is no /intrack/ parameter because I cannot understand
      * what inter-track region unions could be good for.
      */
     unsigned int find_unionoverlaps(unsigned int ovlen,
-        unsigned int minmult = 2, unsigned int maxmult = 0);
+        unsigned int minmult = 2, unsigned int maxmult = 0, unsigned int ext = 0);
     
     /// Returns the multiple overlaps found by the last 
     /// find_overlaps or find_unionoverlaps operation.
@@ -226,9 +182,22 @@ public:
     /// \param counter a Counter object with track histogram data which will be updated.
     void overlap_stats(Counter& counter) const;
     
+protected:
+
+    /// \return const access to the RegLimit multiset inside
+    const reglims_t& reglims() const { return _reglims; }
+
+    /// \return non-const access to the RegLimit multiset inside
+    reglims_t& nonconst_reglims() { return _reglims; }
+
 private:
-            
+    
+    void setup_reglims();
+    
     // -- data 
+    typedef std::vector<AncestorRegion> ancregions_t;
+    ancregions_t _ancregions;
+    reglims_t _reglims;
     multiregvec_t _multiregions;
     
     // serialization
@@ -236,8 +205,8 @@ private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int version)
     {
-        ar & boost::serialization::base_object<multovl::MultiRegLimit>(*this);
-        ar & _multiregions;
+        // _reglims is NOT serialized because it changes with each `find_overlaps`
+        ar & _ancregions & _multiregions;
     }
     
 };

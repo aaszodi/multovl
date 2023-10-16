@@ -31,7 +31,7 @@ set(testdir ${CMAKE_CURRENT_BINARY_DIR})
 # Test programs
 set(testprogs
     baseregiontest regiontest 
-    ancregiontest reglimittest multireglimittest
+    ancregiontest reglimittest
     multiregiontest errortest 
     politetest multovloptstest
     multioverlaptest timertest

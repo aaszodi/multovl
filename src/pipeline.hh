@@ -66,7 +66,7 @@ protected:
     /// The default implementation provided here uses 1 CPU core.
     /// \return the total number of overlaps found, including solitary regions.
     virtual
-    unsigned int detect_overlaps();
+    unsigned int detect_overlaps() override;
     
     /// \return const access to the chromosome=>multiple overlap map
     const chrom_multovl_map& cmovl() const { return _cmovl; }

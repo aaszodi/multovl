@@ -60,12 +60,13 @@ unsigned int Pipeline::detect_overlaps()
         if (opt_ptr()->uniregion())
         {
             totalcounts += movl.find_unionoverlaps(opt_ptr()->ovlen(), 
-                opt_ptr()->minmult(), opt_ptr()->maxmult());
+                opt_ptr()->minmult(), opt_ptr()->maxmult(), opt_ptr()->extension());
         }
         else
         {
             totalcounts += movl.find_overlaps(opt_ptr()->ovlen(), 
-                opt_ptr()->minmult(), opt_ptr()->maxmult(), !opt_ptr()->nointrack());
+                opt_ptr()->minmult(), opt_ptr()->maxmult(), 
+                opt_ptr()->extension(), !opt_ptr()->nointrack());
         }
     }
     return totalcounts;

@@ -13,7 +13,7 @@ endif()
 
 # Convenience library for 'multovl' and variants
 set(movlsrc
-    baseregion.cc region.cc ancregion.cc errors.cc reglimit.cc multireglimit.cc
+    baseregion.cc region.cc ancregion.cc errors.cc reglimit.cc
     polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc
     basepipeline.cc pipeline.cc
 )

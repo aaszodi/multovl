@@ -70,7 +70,7 @@ protected:
     /// In this case the input track file name arguments are ignored.
     /// \return the number of tracks successfully read, 0 on error.
     virtual
-    unsigned int read_input();
+    unsigned int read_input() override;
     
     // The default 1-CPU implementation is used.
     // virtual
@@ -80,7 +80,7 @@ protected:
     /// If the --save <archfile> option was specified, then the complete status of the program
     /// except the results will be serialized to a binary archive <archfile> as well.
     virtual
-    bool write_output();
+    bool write_output() override;
     
     /// \return access to the option-handling object
     virtual

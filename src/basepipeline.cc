@@ -77,10 +77,6 @@ bool BasePipeline::run()
     if (opt_ptr()->timing())
         timer.add_timepoint();  // [1]-st time point is the end of input
     
-    // optionally "extend" all regions at both ends with the same amount
-    // (default is 0 = don't extend)
-    Region::set_extension(opt_ptr()->extension());
-    
     // detect overlaps
     detect_overlaps();
     if (!errors().perfect())
@@ -104,10 +100,6 @@ bool BasePipeline::run()
             << " ms, total = " << timer.interval(2) << " ms" << std::endl;
         return true;    // OK
     }
-    
-    // Reset the region extension to 0
-    // so that the output contains the "true" region coordinates
-    Region::set_extension(0);
     
     // generate output: this can hardly go wrong, but who knows...
     write_output();

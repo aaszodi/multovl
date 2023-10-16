@@ -49,35 +49,174 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 
 // do not use this unless something goes seriously wrong
-#define MULTOVL_DEBUG
+#undef MULTOVL_DEBUG
 
 // == Implementation ==
 
 namespace multovl {
 
+namespace impl {
+    /**
+     * Encapsulates the parameters according to which the generated multiregions
+     * should be filtered: the minimal overlap length, the minimal and maximal
+     * multiplicity. Provides a method to filter nascent multiregions.
+     */
+    class Filter
+    {
+    public:
+        
+        /**
+         * Constructs a Filter.
+         * \param ovlen must be >=1, adjusted silently
+         * \param minmult minimal multiplicity, must be >=1 
+         * \param maxmult must be >=0, 0 means any multiplicity >= minmult is accepted; 
+         * if /minmult/ > /maxmult/ then they are swapped silently
+         * \param checksoli if /true/, then only solitary regions will be accepted
+         * if /minmult/ == 1
+         * (this sets /intrack/ to /true/, and /ovlen/ to 1)
+         * \param intrack if /true/, then overlaps within the same track are accepted as well,
+         * otherwise overlaps within the same track only are filtered out.
+         */
+        Filter(unsigned int ovlen, unsigned int minmult, 
+                unsigned int maxmult, bool checksoli, bool intrack=true):
+            _ovlen((ovlen<1)? 1: ovlen),
+            _minmult((minmult<1)? 1: minmult),
+            _maxmult(maxmult), _intrack(intrack)
+        {
+            // silent swapping: note _maxmult == 0 means _maxmult == infinity
+            if (_maxmult > 0 && _minmult > _maxmult) std::swap(_minmult, _maxmult);
+    
+            // do we detect solitary regions?
+            _solitary = checksoli && minmult == 1;
+            if (_solitary)
+            {
+                _ovlen = 1;   // longer ovlen wouldn't make sense
+                _intrack = true;   // do check intra-track overlaps
+            }
+        }
+
+        /**
+         * Checks whether a "nascent" multiregion (not yet constructed)
+         * should be accepted as new multiregion.
+         * \param mrstart the first position of the new multiregion
+         * \param mrend the last position of the new multiregion
+         * \param ancestors the set of ancestor regions
+         * \param mult the desired multiplicity of the new multiregion.
+         * This is usually ancestors.size(), but you need to specify a different value
+         * for union regions. Moreover, this method may override /mult/ if
+         * intra-track filtering is switched on.
+         * \return /true/ if the multiregion may be accepted.
+         */
+        bool accept_new_region(unsigned int mrstart, unsigned int mrend,
+            const ancregset_t& ancestors, unsigned int& mult) const
+        {
+            // solitary region required
+            // accept if there is only one ancestor with equal position
+            if (_solitary && ancestors.size() == 1)
+            {
+                const Region& anc = *ancestors.begin();
+                return (anc.first() == mrstart && anc.last() == mrend);
+            }
+    
+            // generic non-solitary case
+            if (!_intrack)
+            {
+                unsigned int distrcnt = distinct_track_count(ancestors);
+                if (distrcnt == 1)
+                {
+                    // do not accept overlaps within the same track only
+                    return false;
+                }
+                else
+                {
+                    // override the multiplicity: use the number of distinct tracks
+                    // contributing to the overlap
+                    // this is a lame workaround for track-filtered complex overlaps
+                    mult = distrcnt;
+                }
+            }
+    
+            unsigned int mlen = mrend - mrstart + 1;
+            return (_minmult <= mult && mlen >= _ovlen && 
+                (_maxmult == 0 || mult <= _maxmult));
+        }
+            
+    private:
+        
+        // Count the distinct tracks that make up an ancestry.
+        // \param ancestors the set of ancestors of a candidate multiregion.
+        // \return the number of distinct tracks in the ancestry. If there were no intra-track
+        // overlaps, then this is equal to ancestors.size(), otherwise it is less because
+        // some tracks occur in the ancestor set more than once.
+        static
+        unsigned int distinct_track_count(const ancregset_t& ancestors)
+        {
+            std::set<unsigned int> trackidset;
+            for (ancregset_t::const_iterator ancit = ancestors.begin();
+                ancit != ancestors.end(); ++ancit)
+            {
+                unsigned int trackid = ancit->track_id();
+                trackidset.insert(trackid);
+            }
+            return trackidset.size();
+        }
+
+        unsigned int _ovlen, _minmult, _maxmult;
+        bool _solitary, _intrack;
+        
+    };  // class Filter
+
+}   // namespace impl
+
+typedef std::pair<unsigned int, unsigned int> uintpair_t;
+typedef std::vector<uintpair_t> uintpairvec_t;
+
+// Sets up the private region limits object. Clears the old one.
+// Invoke this once the `Region::set_extension()` method has been called
+void MultiOverlap::setup_reglims() {
+    _reglims.clear();
+    // Stores ancregions twice in the region limit map `_reglims`
+    // through smart pointers
+    for (const auto& ancreg : _ancregions) {
+        // once as a "first position"
+        RegLimit limfirst(ancreg, true);
+        _reglims.insert(limfirst);
+        // ... and then as "last position"
+        RegLimit limlast(ancreg, false);
+        _reglims.insert(limlast);
+    }
+}
+
 unsigned int MultiOverlap::find_overlaps(
-        unsigned int ovlen, unsigned int minmult, unsigned int maxmult, bool intrack)
+        unsigned int ovlen, unsigned int minmult, unsigned int maxmult, 
+        unsigned int ext, bool intrack)
 {
     // set up filter params with solitary checking
-    Filter filter(ovlen, minmult, maxmult, true, intrack);
+    impl::Filter filter(ovlen, minmult, maxmult, true, intrack);
     
     unsigned int pos = 0, mrstart = 0, mrend = 0, mult = 0, regcount = 0;
     bool istempthere = false;
     ancregset_t ancestors;  // set of ancestors
     _multiregions.clear();
     
+    // Extend the region limits if required
+    Region::set_extension(ext);
+    
+    // Set up the region limits
+    setup_reglims();
+    
     // iterate over the region limits
-    reglim_t::const_iterator lowbound = reglim().begin(), upbound;
-    while (reglim().end() != lowbound)
+    reglims_t::const_iterator lowbound = _reglims.begin(), upbound;
+    while (_reglims.end() != lowbound)
     {
         pos = lowbound->this_pos(); // current region limit position
-        upbound = reglim().upper_bound(*lowbound);
+        upbound = _reglims.upper_bound(*lowbound);
 
         // the lowbound/upbound pair corresponds to the STL range
-        // of all RegLimit objects in reglim()
+        // of all RegLimit objects in _reglims
         // that were at position pos        
         // iterate over them all
-        for (reglim_t::const_iterator rmiter = lowbound;
+        for (reglims_t::const_iterator rmiter = lowbound;
                 rmiter != upbound; ++rmiter)
         {
 #ifdef MULTOVL_DEBUG
@@ -101,8 +240,7 @@ unsigned int MultiOverlap::find_overlaps(
                     mult = ancestors.size();    // can be overwritten when filtering intra-track ovls
                     if (filter.accept_new_region(mrstart, mrend, ancestors, mult))
                     {
-                        MultiRegion newregion(mrstart, mrend, ancestors, mult);
-                        _multiregions.push_back(newregion);
+                        _multiregions.emplace_back(mrstart, mrend, ancestors, mult);
                         ++regcount;
                     }
                 }
@@ -127,8 +265,7 @@ unsigned int MultiOverlap::find_overlaps(
                     mult = ancestors.size();
                     if (filter.accept_new_region(mrstart, mrend, ancestors, mult))
                     {
-                        MultiRegion newregion(mrstart, mrend, ancestors, mult);
-                        _multiregions.push_back(newregion);
+                        _multiregions.emplace_back(mrstart, mrend, ancestors, mult);
                         ++regcount;
                     }
                     mrstart = pos+1;
@@ -144,32 +281,42 @@ unsigned int MultiOverlap::find_overlaps(
         }
         lowbound = upbound;  // move on
     }
+    
+    // reset the extensions
+    Region::set_extension(0);
     return regcount;
 }
 
 unsigned int MultiOverlap::find_unionoverlaps(
-        unsigned int ovlen, unsigned int minmult, unsigned int maxmult)
+        unsigned int ovlen, unsigned int minmult, unsigned int maxmult,
+        unsigned int ext)
 {
     // set up filter params without solitary checking
     // intra-track overlaps are always allowed
-    Filter filter(ovlen, minmult, maxmult, false);
+    impl::Filter filter(ovlen, minmult, maxmult, false);
 
     unsigned int pos = 0, mrstart = 0, mrend = 0, mult = 0, multmax = 0, regcount = 0;
     ancregset_t ancestors;  // set of ancestors
     _multiregions.clear();
     
+    // Extend the region limits if required
+    Region::set_extension(ext);
+    
+    // Set up the region limits
+    setup_reglims();
+    
     // iterate over the region limit multimap
-    reglim_t::const_iterator lowbound = reglim().begin(), upbound;
-    while (reglim().end() != lowbound )
+    reglims_t::const_iterator lowbound = _reglims.begin(), upbound;
+    while (_reglims.end() != lowbound )
     {
         pos = lowbound->this_pos();    // this is the new position
-        upbound = reglim().upper_bound(*lowbound);
+        upbound = _reglims.upper_bound(*lowbound);
 
         // the lowbound/upbound pair corresponds to the STL range
-        // of all RegLimit objects in reglim()
+        // of all RegLimit objects in _reglims
         // that were at position pos
         // iterate over them all
-        for (reglim_t::const_iterator rmiter = lowbound;
+        for (reglims_t::const_iterator rmiter = lowbound;
                 rmiter!= upbound; ++rmiter)
         {
 #ifdef MULTOVL_DEBUG
@@ -222,7 +369,10 @@ unsigned int MultiOverlap::find_unionoverlaps(
             }
         }
         lowbound = upbound;  // move on
-    } 
+    }
+    
+    // reset the extensions
+    Region::set_extension(0);
     return regcount;
 }
 
@@ -234,82 +384,6 @@ void MultiOverlap::overlap_stats(Counter& counter) const
     {
         counter.count(*mrit);
     }
-}
-
-// == Private ==
-
-// -- Filter methods --
-
-MultiOverlap::Filter::Filter(unsigned int ovlen, unsigned int minmult, 
-        unsigned int maxmult, bool checksoli, bool intrack):
-    _ovlen((ovlen<1)? 1: ovlen),
-    _minmult((minmult<1)? 1: minmult),
-    _maxmult(maxmult), _intrack(intrack)
-{
-    // silent swapping: note _maxmult == 0 means _maxmult == infinity
-    if (_maxmult > 0 && _minmult > _maxmult) std::swap(_minmult, _maxmult);
-    
-    // do we detect solitary regions?
-    _solitary = checksoli && minmult == 1;
-    if (_solitary)
-    {
-        _ovlen = 1;   // longer ovlen wouldn't make sense
-        _intrack = true;   // do check intra-track overlaps
-    }
-}
-
-bool MultiOverlap::Filter::accept_new_region(unsigned int mrstart, unsigned int mrend,
-    const ancregset_t& ancestors, unsigned int& mult) const
-{
-    // solitary region required
-    // accept if there is only one ancestor with equal position
-    if (_solitary && ancestors.size() == 1)
-    {
-        const Region& anc = *ancestors.begin();
-        return (anc.first() == mrstart && anc.last() == mrend);
-    }
-    
-    // generic non-solitary case
-    if (!_intrack)
-    {
-        unsigned int distrcnt = distinct_track_count(ancestors);
-        if (distrcnt == 1)
-        {
-            // do not accept overlaps within the same track only
-            return false;
-        }
-        else
-        {
-            // override the multiplicity: use the number of distinct tracks
-            // contributing to the overlap
-            // this is a lame workaround for track-filtered complex overlaps
-            mult = distrcnt;
-        }
-    }
-    
-    unsigned int mlen = mrend - mrstart + 1;
-    return (_minmult <= mult && mlen >= _ovlen && 
-        (_maxmult == 0 || mult <= _maxmult));
-}
-
-/**
- * Count the distinct tracks that make up an ancestry.
- * \param ancestors the set of ancestors of a candidate multiregion.
- * \return the number of distinct tracks in the ancestry. If there were no intra-track
- * overlaps, then this is equal to ancestors.size(), otherwise it is less because
- * some tracks occur in the ancestor set more than once.
- * Private static
- */
-unsigned int MultiOverlap::Filter::distinct_track_count(const ancregset_t& ancestors)
-{
-    std::set<unsigned int> trackidset;
-    for (ancregset_t::const_iterator ancit = ancestors.begin();
-        ancit != ancestors.end(); ++ancit)
-    {
-        unsigned int trackid = ancit->track_id();
-        trackidset.insert(trackid);
-    }
-    return trackidset.size();
 }
 
 // -- Counter methods --

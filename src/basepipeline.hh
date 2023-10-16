@@ -86,8 +86,7 @@ public:
     const Errors& errors() const { return _errors; }
     
     virtual
-    ~BasePipeline()
-    {}
+    ~BasePipeline() = default;
     
     /// The Input structure stores the name of the input (a filename 
     /// or track name in a database), an ID assigned by Multovl,
