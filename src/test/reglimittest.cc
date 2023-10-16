@@ -85,6 +85,22 @@ BOOST_AUTO_TEST_CASE(reglimit_test)
     BOOST_CHECK(rf < rl);
 }
 
+BOOST_AUTO_TEST_CASE(reglimit_extension_test)
+{
+    Region::set_extension(2);
+    RegLimit rf(ancp, true), rl(ancp, false);
+    
+    BOOST_CHECK_EQUAL(rf.region().to_attrstring(), "9:a46:-:2-8");
+    BOOST_CHECK_EQUAL(rf.this_pos(), 2);
+    BOOST_CHECK_EQUAL(rf.other_pos(), 8);
+    
+    BOOST_CHECK_EQUAL(rl.region().to_attrstring(), "9:a46:-:2-8");
+    BOOST_CHECK_EQUAL(rl.this_pos(), 8);
+    BOOST_CHECK_EQUAL(rl.other_pos(), 2);
+    BOOST_CHECK(rf < rl);
+    Region::set_extension(0);
+}
+
 BOOST_AUTO_TEST_CASE(reglimitser_test)
 {
     Tempfile tempfile;

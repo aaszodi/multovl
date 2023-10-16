@@ -49,7 +49,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 
 // do not use this unless something goes seriously wrong
-#undef MULTOVL_DEBUG
+#define MULTOVL_DEBUG
 
 // == Implementation ==
 
@@ -66,7 +66,7 @@ unsigned int MultiOverlap::find_overlaps(
     ancregset_t ancestors;  // set of ancestors
     _multiregions.clear();
     
-    // iterate over the region limit multimap
+    // iterate over the region limits
     reglim_t::const_iterator lowbound = reglim().begin(), upbound;
     while (reglim().end() != lowbound)
     {

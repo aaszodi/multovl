@@ -72,6 +72,10 @@ struct ExpectedResult
     {
         result.push_back(to_str(first, last, mult, ancstr));
     }
+    void reset()
+    {
+        result.clear();
+    }
     vector<string> result;
 };
 
@@ -133,17 +137,17 @@ struct MultovlFixture
 // mrs: the multiregions generated
 static void check_results(
     unsigned int regcnt,
-    const ExpectedResult& exp,
+    const ExpectedResult& expres,
     const vector<MultiRegion>& mrs
 )
 {
-    unsigned int expsize = exp.result.size();
-    BOOST_CHECK_EQUAL(regcnt, expsize);
-    BOOST_CHECK_EQUAL(mrs.size(), expsize);
-    for (unsigned int i = 0; i < expsize; i++)
+    unsigned int expressize = expres.result.size();
+    BOOST_CHECK_EQUAL(regcnt, expressize);
+    BOOST_CHECK_EQUAL(mrs.size(), expressize);
+    for (unsigned int i = 0; i < expressize; i++)
     {
         BOOST_CHECK_EQUAL(
-            exp.result[i], 
+            expres.result[i], 
             ExpectedResult::to_str(
                 mrs[i].first(), mrs[i].last(),
                 mrs[i].multiplicity(), mrs[i].anc_str()
@@ -152,19 +156,32 @@ static void check_results(
     }
 }
 
+// another utility function to set up a MultiOverlap object
+// for region extension testing
+static
+MultiOverlap setup_mo_ext(unsigned int extlen=0) {
+    MultiOverlap mo;
+    // all regions on the same track
+    mo.add(Region(1000-extlen, 1100+extlen, '+', "r1"), 1);
+    mo.add(Region(1200-extlen, 1300+extlen, '+', "r2"), 1);
+    mo.add(Region(1400-extlen, 1500+extlen, '+', "r3"), 1);
+    mo.add(Region(1450-extlen, 1600+extlen, '+', "r4"), 1);
+    return mo;
+}
+
 BOOST_FIXTURE_TEST_SUITE(multioverlapsuite, MultovlFixture)
 
 BOOST_AUTO_TEST_CASE(solitary_test)
 {
-    ExpectedResult exp;
-    exp.add(210, 220, 1, "1:REGa:+:210-220"); // solitary
-    exp.add(222, 222, 1, "1:REGa:+:222-222");
-    exp.add(223, 223, 1, "2:REGb:-:223-223");
-    exp.add(224, 230, 1, "1:REGa:+:224-230");
-    exp.add(333, 333, 1, "1:REGa:+:333-333");
+    ExpectedResult expres;
+    expres.add(210, 220, 1, "1:REGa:+:210-220"); // solitary
+    expres.add(222, 222, 1, "1:REGa:+:222-222");
+    expres.add(223, 223, 1, "2:REGb:-:223-223");
+    expres.add(224, 230, 1, "1:REGa:+:224-230");
+    expres.add(333, 333, 1, "1:REGa:+:333-333");
     
     unsigned int regcnt = mo2.find_overlaps(32799, 1, 1);    // solitaries ONLY, checks ovlen set to 1
-    check_results(regcnt, exp, mo2.overlaps());
+    check_results(regcnt, expres, mo2.overlaps());
 }
 
 BOOST_AUTO_TEST_CASE(multioverlap2_test)
@@ -221,14 +238,14 @@ BOOST_AUTO_TEST_CASE(mo2_withresults_serialization_test)
 BOOST_AUTO_TEST_CASE(unionoverlap2_test)
 {
     // union overlap
-    ExpectedResult exp;
-    exp.add(50, 200, 2, "1:REGa:+:100-200|2:REGb:-:50-150");
-    exp.add(250, 300, 2, "1:REGa:+:250-300|2:REGb:-:250-300");
-    exp.add(340, 340, 2, "1:REGa:+:340-340|2:REGb:-:340-340");
-    exp.add(350, 500, 2, "1:REGb:+:350-450|2:REGb:-:400-410|2:REGb:-:415-415|2:REGb:-:420-430|2:REGb:-:440-500");
+    ExpectedResult expres;
+    expres.add(50, 200, 2, "1:REGa:+:100-200|2:REGb:-:50-150");
+    expres.add(250, 300, 2, "1:REGa:+:250-300|2:REGb:-:250-300");
+    expres.add(340, 340, 2, "1:REGa:+:340-340|2:REGb:-:340-340");
+    expres.add(350, 500, 2, "1:REGb:+:350-450|2:REGb:-:400-410|2:REGb:-:415-415|2:REGb:-:420-430|2:REGb:-:440-500");
 
     unsigned int regcnt = mo2.find_unionoverlaps(1, 2, 2);
-    check_results(regcnt, exp, mo2.overlaps());
+    check_results(regcnt, expres, mo2.overlaps());
     MultiOverlap::Counter counter;
     mo2.overlap_stats(counter);
     BOOST_CHECK_EQUAL(counter.to_string(), "1,2:4");
@@ -236,54 +253,75 @@ BOOST_AUTO_TEST_CASE(unionoverlap2_test)
 
 BOOST_AUTO_TEST_CASE(multioverlap3_test)
 {
-    ExpectedResult exp;
-    exp.add(200, 299, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
-    exp.add(300, 400, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:REGc:+:300-400");
-    exp.add(401, 500, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
-    exp.add(700, 800, 3, "1:REGa:+:700-800|2:REGb:+:700-800|3:REGc:+:700-800");
+    ExpectedResult expres;
+    expres.add(200, 299, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
+    expres.add(300, 400, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:REGc:+:300-400");
+    expres.add(401, 500, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
+    expres.add(700, 800, 3, "1:REGa:+:700-800|2:REGb:+:700-800|3:REGc:+:700-800");
 
     // overlaps without intra-track overlap
     unsigned int regcnt = mo3.find_overlaps(1, 2, 0, false); // up to any overlap
-    check_results(regcnt, exp, mo3.overlaps());
+    check_results(regcnt, expres, mo3.overlaps());
     
     // intra-track overlap allowed by default
-    exp.add(1100, 1200, 2, "2:REGbi1:-:1000-1200|2:REGbi2:-:1100-1300");
+    expres.add(1100, 1200, 2, "2:REGbi1:-:1000-1200|2:REGbi2:-:1100-1300");
     regcnt = mo3.find_overlaps(1, 2, 0);
-    check_results(regcnt, exp, mo3.overlaps());
+    check_results(regcnt, expres, mo3.overlaps());
 }
 
-BOOST_AUTO_TEST_CASE(extension_mo3_test)
+BOOST_AUTO_TEST_CASE(extension_test)
 {
-    // "short" extension of 50 that makes 100-600 and 700-800 "touch"
-    ExpectedResult expshort;
-    expshort.add(150, 249, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
-    expshort.add(250, 450, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:REGc:+:300-400");
-    expshort.add(451, 550, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
-    expshort.add(650, 850, 3, "1:REGa:+:700-800|2:REGb:+:700-800|3:REGc:+:700-800");
-
-    // overlaps without intra-track overlap
-    Region::set_extension(50);
-    unsigned int regcnt = mo3.find_overlaps(1, 2, 0, false); // up to any overlap
-    Region::set_extension(0);   // important to reset
-    check_results(regcnt, expshort, mo3.overlaps());
+    unsigned int regcnt;
+    ExpectedResult expres;
     
-    // now allow overlap
-    Region::set_extension(50);  // must set again
-    regcnt = mo3.find_overlaps(1, 2, 0);
-    Region::set_extension(0);   // ... and reset again
-    expshort.add(1050, 1250, 2, "2:REGbi1:-:1000-1200|2:REGbi2:-:1100-1300");
-    check_results(regcnt, expshort, mo3.overlaps());
+    // without extensions there's only one pairwise overlap
+    MultiOverlap mo0 = setup_mo_ext();
+    expres.add(1450, 1500, 2, "1:r3:+:1400-1500|1:r4:+:1450-1600");
+    regcnt = mo0.find_overlaps(1, 2, 0);
+    check_results(regcnt, expres, mo0.overlaps());
+    
+    // extend the regions "by hand"
+    //// MultiOverlap mo60 = setup_mo_ext(60);
+    
+    // ext=60 r1:r2, r2:r3 will partially overlap, too
+    expres.reset();
+    expres.add(1140, 1160, 2, "1:r1:+:940-1160|1:r2:+:1140-1360");
+    expres.add(1340, 1360, 2, "1:r2:+:1140-1360|1:r3:+:1340-1560");
+    expres.add(1390, 1560, 2, "1:r3:+:1340-1560|1:r4:+:1390-1660");
+    //// std::cout << "%%% starting MANUALLY extended overlaps" << std::endl;
+    //// regcnt = mo60.find_overlaps(1, 2, 0);
+    //// check_results(regcnt, expres, mo60.overlaps());
+
+    /***
+    ! this will not work as the MultiRegLimit order cannot be changed
+    ! and that's what setting the extensions would do...
+    // should get the same result on `mo0` but setting the region extension globally
+    std::cout << "%%% starting extended overlaps" << std::endl;
+    Region::set_extension(60);
+    regcnt = mo0.find_overlaps(1, 2, 0);
+    Region::set_extension(0);
+    check_results(regcnt, expres, mo0.overlaps());
+    ***/
+    
+    // change the extension length, THEN set up a MultiOverlap object
+    Region::set_extension(60);
+    MultiOverlap moex = setup_mo_ext(0);    // NOT extending here
+    std::cout << "%%% starting GLOBALLY extended overlaps" << std::endl;
+    regcnt = moex.find_overlaps(1, 2, 0);
+    check_results(regcnt, expres, moex.overlaps());
+    Region::set_extension(0);
+    
 }
 
 BOOST_AUTO_TEST_CASE(unionoverlap3_test)
 {
-    ExpectedResult exp;
-    exp.add(100, 600, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:REGc:+:300-400");
-    exp.add(700, 800, 3, "1:REGa:+:700-800|2:REGb:+:700-800|3:REGc:+:700-800");
+    ExpectedResult expres;
+    expres.add(100, 600, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:REGc:+:300-400");
+    expres.add(700, 800, 3, "1:REGa:+:700-800|2:REGb:+:700-800|3:REGc:+:700-800");
 
     vector<MultiRegion> urs;
     unsigned int regcnt = mo3.find_unionoverlaps(1, 3, 3); // 3-fold unions only
-    check_results(regcnt, exp, mo3.overlaps());
+    check_results(regcnt, expres, mo3.overlaps());
 }
 
 // Here comes a rather complex test.
@@ -317,17 +355,17 @@ BOOST_AUTO_TEST_CASE(complexintra_test)
     mo.add(Region(230, 260, '-', "Track2"), 2);
 
     // exclude internal overlaps, allow track-pairwise only
-    ExpectedResult exp;
-    exp.add(120, 130, 2, "1:Track1:+:100-140|1:Track1:+:110-150|2:Track2:-:120-130");
-    exp.add(210,219, 2, "1:Track1:+:200-250|2:Track2:-:210-240");
-    exp.add(220,229, 2, "1:Track1:+:200-250|1:Track1:+:220-270|2:Track2:-:210-240");
-    exp.add(230,240, 2, "1:Track1:+:200-250|1:Track1:+:220-270|2:Track2:-:210-240|2:Track2:-:230-260");
-    exp.add(241,250, 2, "1:Track1:+:200-250|1:Track1:+:220-270|2:Track2:-:230-260");
-    exp.add(251,260, 2, "1:Track1:+:220-270|2:Track2:-:230-260");
+    ExpectedResult expres;
+    expres.add(120, 130, 2, "1:Track1:+:100-140|1:Track1:+:110-150|2:Track2:-:120-130");
+    expres.add(210,219, 2, "1:Track1:+:200-250|2:Track2:-:210-240");
+    expres.add(220,229, 2, "1:Track1:+:200-250|1:Track1:+:220-270|2:Track2:-:210-240");
+    expres.add(230,240, 2, "1:Track1:+:200-250|1:Track1:+:220-270|2:Track2:-:210-240|2:Track2:-:230-260");
+    expres.add(241,250, 2, "1:Track1:+:200-250|1:Track1:+:220-270|2:Track2:-:230-260");
+    expres.add(251,260, 2, "1:Track1:+:220-270|2:Track2:-:230-260");
     
     // overlaps without intra-track overlap
     unsigned int regcnt = mo.find_overlaps(1, 2, 2, false); // pairwise overlap
-    check_results(regcnt, exp, mo.overlaps());
+    check_results(regcnt, expres, mo.overlaps());
 }
 
 // now relax... simple test for the MultiOverlap::Counter utility class
