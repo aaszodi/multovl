@@ -62,10 +62,10 @@ struct RandomPlacerFixture
         total(0)
     {
         // set up the free regions
-        frees.push_back(Region(100, 199, '+', "free100"));  // len=100
-        frees.push_back(Region(200, 249, '+', "free50"));  // len=50
-        frees.push_back(Region(300, 329, '+', "free30"));  // len=30
-        frees.push_back(Region(400, 419, '+', "free20"));  // len=20
+        frees.push_back(BaseRegion(100, 199, '+', "free100"));  // len=100
+        frees.push_back(BaseRegion(200, 249, '+', "free50"));  // len=50
+        frees.push_back(BaseRegion(300, 329, '+', "free30"));  // len=30
+        frees.push_back(BaseRegion(400, 419, '+', "free20"));  // len=20
         
         counts["free100"] = 0;
         counts["free50"] = 0;
@@ -124,7 +124,8 @@ struct RandomPlacerFixture
     
     // data
     UniformGen rng;
-    std::vector<Region> frees, regs;
+    freeregvec_t frees;
+    std::vector<Region> regs;
     std::map<std::string, unsigned int> counts;
     unsigned int total;
 };

@@ -84,8 +84,9 @@ public:
     ///     "" if all is OK, "EOF" if the internal stream was exhausted,
     ///     or some error message.
     virtual
-    std::string read_into(std::string& chrom, Region& reg);
+    std::string read_into(std::string& chrom, BaseRegion& reg);
 
+    virtual
     ~TextReader();
     
     /// Adds an error message to _errors, nicely decorated with linecount.

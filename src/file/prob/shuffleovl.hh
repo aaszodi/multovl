@@ -64,7 +64,7 @@ public:
         
     /// Init with free regions
     /// \param frees a vector of free regions into which all fixed and shufflable regions must fall
-    explicit ShuffleOvl(const std::vector<Region>& frees);
+    explicit ShuffleOvl(const freeregvec_t& frees);
     
     /// Checks whether a given region "fits" into one of the free regions
     /// (all regions must be contained in a free region).

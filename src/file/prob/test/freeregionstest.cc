@@ -57,10 +57,10 @@ struct FreeRegionsFixture
         rng(42u),    // uniform [0,1)
         total(0)
     {
-        frees.push_back(Region(100, 199, '+', "reg100"));  // len=100
-        frees.push_back(Region(200, 249, '+', "reg50"));  // len=50
-        frees.push_back(Region(300, 329, '+', "reg30"));  // len=30
-        frees.push_back(Region(400, 419, '+', "reg20"));  // len=20
+        frees.push_back(BaseRegion(100, 199, '+', "reg100"));  // len=100
+        frees.push_back(BaseRegion(200, 249, '+', "reg50"));  // len=50
+        frees.push_back(BaseRegion(300, 329, '+', "reg30"));  // len=30
+        frees.push_back(BaseRegion(400, 419, '+', "reg20"));  // len=20
         
         counts["reg100"] = 0;
         counts["reg50"] = 0;
@@ -81,7 +81,7 @@ struct FreeRegionsFixture
     }
     
     UniformGen rng;
-    std::vector<Region> frees;
+    std::vector<BaseRegion> frees;
     std::map<std::string, unsigned int> counts;
     unsigned int total;
 };
@@ -91,17 +91,17 @@ BOOST_FIXTURE_TEST_SUITE(freeregionssuite, FreeRegionsFixture)
 BOOST_AUTO_TEST_CASE(fit_test)
 {
     FreeRegions fr(frees);
-    BOOST_CHECK(fr.fit(Region(110, 120, '+', "fit1")));
-    BOOST_CHECK(fr.fit(Region(230, 240, '+', "fit2")));
-    BOOST_CHECK(fr.fit(Region(300, 329, '+', "xfit3")));  // "exact" fit, i.e. equality
-    BOOST_CHECK(fr.fit(Region(401, 410, '+', "fit4")));
+    BOOST_CHECK(fr.fit(BaseRegion(110, 120, '+', "fit1")));
+    BOOST_CHECK(fr.fit(BaseRegion(230, 240, '+', "fit2")));
+    BOOST_CHECK(fr.fit(BaseRegion(300, 329, '+', "xfit3")));  // "exact" fit, i.e. equality
+    BOOST_CHECK(fr.fit(BaseRegion(401, 410, '+', "fit4")));
 
-    BOOST_CHECK(!fr.fit(Region(10, 20, '+', "before")));
-    BOOST_CHECK(!fr.fit(Region(50, 120, '+', "beforeovl")));
-    BOOST_CHECK(!fr.fit(Region(130, 220, '+', "twoovl")));
-    BOOST_CHECK(!fr.fit(Region(270, 280, '+', "between")));
-    BOOST_CHECK(!fr.fit(Region(410, 430, '+', "afterovl")));
-    BOOST_CHECK(!fr.fit(Region(500, 600, '+', "after")));
+    BOOST_CHECK(!fr.fit(BaseRegion(10, 20, '+', "before")));
+    BOOST_CHECK(!fr.fit(BaseRegion(50, 120, '+', "beforeovl")));
+    BOOST_CHECK(!fr.fit(BaseRegion(130, 220, '+', "twoovl")));
+    BOOST_CHECK(!fr.fit(BaseRegion(270, 280, '+', "between")));
+    BOOST_CHECK(!fr.fit(BaseRegion(410, 430, '+', "afterovl")));
+    BOOST_CHECK(!fr.fit(BaseRegion(500, 600, '+', "after")));
 }
 
 BOOST_AUTO_TEST_CASE(nominlen_test)

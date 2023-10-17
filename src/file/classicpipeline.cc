@@ -39,7 +39,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "classicpipeline.hh"
 #include "fileio.hh"
 #include "multioverlap.hh"
-#include "region.hh"
+#include "baseregion.hh"
 #include "linewriter.hh"
 #include "version.h"
 #include "build.h"
@@ -141,7 +141,7 @@ unsigned int ClassicPipeline::read_tracks()
         }
         
         std::string chrom;
-        Region reg;
+        BaseRegion reg;
         unsigned int regcnt = 0, problemcnt = 0;
         while (true)
         {

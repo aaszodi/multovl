@@ -53,12 +53,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <stdexcept>
 
-// -- Boost headers --
+// -- Own headers --
+
+#include "baseregion.hh"
 
 namespace multovl {
-
-class Region;
-
 namespace io {
 
 /**
@@ -89,7 +88,8 @@ class Linereader
     /// \param commentchars the character(s) that signify the beginning of a comment
     explicit Linereader(const std::string& commentchars="#");
     
-    virtual ~Linereader() {}
+    virtual
+    ~Linereader() = default;
     
     /// Parses a line into the calling object from /line/.
     /// \return the status of the parsing operation.
@@ -97,7 +97,8 @@ class Linereader
     
     /// Updates the contents of a region with what has been parsed.
     /// Does nothing if the calling object is not in the DATA state.
-    virtual bool read_into(Region& region) const = 0;
+    virtual
+    bool read_into(BaseRegion& region) const = 0;
     
     // -- Accessors
     
@@ -137,7 +138,8 @@ class Linereader
     
     /// Prepares the calling object for parsing by resetting all fields.
     /// This method must be invoked by the parse(...) method.
-    virtual void reset();
+    virtual
+    void reset();
     
     /// Sets the given status flag by bitwise OR-ing it with the _status field.
     /// \param flag one or more of the Status enum-s, OR-ed together
@@ -151,11 +153,13 @@ class Linereader
     
     /// Parse a /line/ assuming it contains coordinate data.
     /// Implementations must set _status bits (ERROR and DATA) accordingly.
-    virtual void parse_data(const std::string& line) = 0;
+    virtual
+    void parse_data(const std::string& line) = 0;
     
     /// Converts /str/ to an unsigned int
     /// generates meaningful error messages via Linereader::Exception
-    static unsigned int str_to_uint(std::string& str);
+    static
+    unsigned int str_to_uint(std::string& str);
     
     // these data members can be set during parsing by the derived classes
     Status _status;	///< the status after parsing
@@ -163,7 +167,7 @@ class Linereader
     std::string _comment;    ///< store a comment line
     std::string _err;    ///< stores parsing error messages
     
-    // basically the contents of a Region object
+    // same as the contents of a BaseRegion object
     std::string _chrom, _name;
     unsigned int _first, _last;
     char _strand;
@@ -189,14 +193,17 @@ class BedLinereader: public Linereader
     
     /// Updates the contents of a region with what has been parsed from a BED-formatted line.
     /// Does nothing if the calling object is not in the DATA state.
-    virtual bool read_into(Region& region) const;
+    virtual
+    bool read_into(BaseRegion& region) const override;
     
     protected:
     
-    virtual void reset();
+    virtual
+    void reset() override;
     
     /// Parse a /line/ assuming it contains BED-formatted data.
-    virtual void parse_data(const std::string& line);
+    virtual
+    void parse_data(const std::string& line) override;
     
 };
 
@@ -219,7 +226,8 @@ class GffLinereader: public BedLinereader
     // NOTE: reset() is not overridden
     
     /// Parse a /line/ assuming it contains GFF-formatted data.
-    virtual void parse_data(const std::string& line);
+    virtual
+    void parse_data(const std::string& line) override;
     
 };
 

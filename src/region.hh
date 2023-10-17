@@ -94,6 +94,11 @@ class Region: public BaseRegion {
         BaseRegion(f, l, s, nm)
     {}
     
+    /// Inits with base class object
+    Region(const BaseRegion& r):
+        BaseRegion(r)
+    {}
+    
     // -- Getters --
     
     /// Returns the extension

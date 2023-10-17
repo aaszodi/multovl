@@ -94,7 +94,7 @@ TextReader::TextReader(
     _valid = true;
 }
 
-std::string TextReader::read_into(std::string& chrom, Region& reg)
+std::string TextReader::read_into(std::string& chrom, BaseRegion& reg)
 {
     if (!is_valid())
         return "Cannot read";
@@ -131,10 +131,10 @@ std::string TextReader::read_into(std::string& chrom, Region& reg)
 TextReader::~TextReader()
 {
     _inf.close();
-    if (_lrp != NULL)
+    if (_lrp != nullptr)
     {
         delete _lrp;
-        _lrp = NULL;
+        _lrp = nullptr;
     }
 }
 

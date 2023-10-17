@@ -55,7 +55,7 @@ struct LinewriterFixture
         mreg.add_ancestor(AncestorRegion(4, 6, '-', "a46", 9)); // track id = 9
     }
     
-    Region reg;
+    BaseRegion reg;
     MultiRegion mreg;
     std::string chrom;
 };

@@ -72,14 +72,14 @@ FileReader::FileReader(
 
 FileReader::~FileReader()
 {
-    if (_reader != NULL)
+    if (_reader != nullptr)
     {
         delete _reader;
-        _reader = NULL;
+        _reader = nullptr;
     }
 }
 
-bool FileReader::read_into(std::string& chrom, Region& reg)
+bool FileReader::read_into(std::string& chrom, BaseRegion& reg)
 {
     if (finished()) return true;
     

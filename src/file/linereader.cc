@@ -52,7 +52,6 @@ using namespace std;
 // -- Own header --
 
 #include "linereader.hh"
-#include "region.hh"
 
 // -- Implementation --
 
@@ -195,7 +194,7 @@ unsigned int Linereader::str_to_uint(std::string& str)
 
 // -- BedLinereader methods --
 
-bool BedLinereader::read_into(Region& region) const
+bool BedLinereader::read_into(BaseRegion& region) const
 {
 	if (status() != DATA) return false;
 	

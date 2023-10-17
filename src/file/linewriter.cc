@@ -55,7 +55,7 @@ Linewriter::Linewriter(const std::string& chrom):
 
 // -- BedLinewriter methods --
 
-std::string BedLinewriter::write(const Region& reg)
+std::string BedLinewriter::write(const BaseRegion& reg)
 {
 	reset();
 	_ostr << _chr << '\t' << reg.first() << '\t' << reg.last()
@@ -86,7 +86,7 @@ GffLinewriter::GffLinewriter(const std::string& source, unsigned int version,
     }
 }
 
-std::string GffLinewriter::write(const Region& reg)
+std::string GffLinewriter::write(const BaseRegion& reg)
 {
 	reset();
 	

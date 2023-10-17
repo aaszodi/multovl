@@ -42,7 +42,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- own headers --
 
 #include "fileio.hh"
-#include "region.hh"
+#include "baseregion.hh"
 #include "thirdparty.h"
 using namespace multovl;
 
@@ -81,12 +81,12 @@ struct FileioFixture
         (1350,1450,'-',"REGa");
     }
     
-    std::vector<Region> exps;   // expected regions
+    std::vector<BaseRegion> exps;   // expected regions
     
     // all sorts of helper functions
     
     // converts /reg/ to a string. Convenient to test region equality.
-    std::string reg_tostr(const Region& reg)
+    std::string reg_tostr(const BaseRegion& reg)
     {
         std::string s = boost::lexical_cast<std::string>(reg.first()) + ":"
             + boost::lexical_cast<std::string>(reg.last()) + ":"
@@ -97,7 +97,7 @@ struct FileioFixture
     // The BAM input ignores region names, so change them in exps
     void change_region_names(const std::string& newname)
     {
-        for (std::vector<Region>::iterator eit = exps.begin();
+        for (std::vector<BaseRegion>::iterator eit = exps.begin();
             eit != exps.end();
             ++eit
         )
@@ -149,7 +149,7 @@ struct FileioFixture
         // read the first 5 records, they are all chr1
         unsigned int i;
         std::string chrom;
-        Region reg;
+        BaseRegion reg;
         for (i = 0; i < 5; ++i)
         {
             ok = fr.read_into(chrom, reg);
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(badbed_test)
     }
     
     std::string chrom;
-    Region reg;
+    BaseRegion reg;
     // the errors tested here must correspond to bad.bed's content
     std::vector<std::string> experrs;
     boost::assign::push_back( experrs )

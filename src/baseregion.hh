@@ -91,8 +91,11 @@ class BaseRegion:
     BaseRegion(unsigned int f, unsigned int l,
         char s, const std::string& nm);
     
-    /// empty virtual dtor
-    virtual ~BaseRegion() {}
+    /// Copy ctor
+    BaseRegion(const BaseRegion&) = default;
+    
+    virtual
+    ~BaseRegion() = default;
     
     // -- Getters --
     

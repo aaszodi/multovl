@@ -135,8 +135,8 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
     }
     
     std::string chrom;
-    Region reg; // temp input
-    typedef std::vector<Region> rv_t;
+    BaseRegion reg; // temp input
+    typedef std::vector<BaseRegion> rv_t;
     typedef std::map<std::string, rv_t> crv_t;
     crv_t crv; // collect free regions per chromosome here
     unsigned int regcnt = 0, problemcnt = 0;

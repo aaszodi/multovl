@@ -54,7 +54,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace multovl {
 namespace prob {
 
-FreeRegions::FreeRegions(const std::vector<Region>& frees)
+FreeRegions::FreeRegions(const freeregvec_t& frees)
     : _frees(frees), _roulette_sectors()
 {
     // store the "roulette wheel sections"
@@ -83,7 +83,7 @@ FreeRegions::FreeRegions(const std::vector<Region>& frees)
     // looks like 0, 0.15, 0.27, ... , 1.0 sorted
 }
 
-bool FreeRegions::fit(const Region& reg) const
+bool FreeRegions::fit(const BaseRegion& reg) const
 {
     // very simple linear algorithm
     for (unsigned int i = 0; i < _frees.size(); ++i)
@@ -94,7 +94,7 @@ bool FreeRegions::fit(const Region& reg) const
     return false;
 }
 
-const Region& FreeRegions::select_free_region(UniformGen& rng, unsigned int minlen) const
+const freereg_t& FreeRegions::select_free_region(UniformGen& rng, unsigned int minlen) const
 {
     unsigned int idx;
     do {

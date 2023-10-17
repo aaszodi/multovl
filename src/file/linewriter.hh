@@ -49,10 +49,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <sstream>
 
-namespace multovl {
+// -- Own headers --
 
-class Region;
-class MultiRegion;
+#include "multiregion.hh"
+
+namespace multovl {
 
 namespace io {
 
@@ -68,17 +69,20 @@ class Linewriter
     /// regions to be stringified
     explicit Linewriter(const std::string& chrom);
     
-    virtual ~Linewriter() {}
+    virtual
+    ~Linewriter() = default;
     
-    /// Writes a Region to a string (no newline) and returns it.
-    /// \param reg the Region to be stringified
+    /// Writes a BaseRegion to a string (no newline) and returns it.
+    /// \param reg the BaseRegion to be stringified
     /// \return the stringified region or the empty string if something went wrong
-    virtual std::string write(const Region& reg) = 0;
+    virtual
+    std::string write(const BaseRegion& reg) = 0;
     
     /// Writes a MultiRegion to a string (no newline) and returns it.
     /// \param reg the MultiRegion to be stringified
     /// \return the stringified region or the empty string if something went wrong
-    virtual std::string write(const MultiRegion& reg) = 0;
+    virtual
+    std::string write(const MultiRegion& reg) = 0;
     
     protected:
     
@@ -105,19 +109,21 @@ class BedLinewriter: public Linewriter
     explicit BedLinewriter(const std::string& chrom): 
     	Linewriter(chrom) {}
     
-    /// Writes a Region to a string (no newline) in BED format and returns it.
+    /// Writes a BaseRegion to a string (no newline) in BED format and returns it.
     /// The name of the region is written into the 4th column ("name"),
     /// the 5th column ("score") will be 0.
     /// \param region the region to be stringified
     /// \return the stringified region or the empty string if something went wrong
-    virtual std::string write(const Region& reg);
+    virtual
+    std::string write(const BaseRegion& reg);
     
     /// Writes a MultiRegion to a string (no newline) in BED format and returns it.
     /// The ancestor string is written into the 4th column ("name"),
     /// the multiplicity into the 5th column ("score").
     /// \param region the region to be stringified
     /// \return the stringified region or the empty string if something went wrong
-    virtual std::string write(const MultiRegion& reg);
+    virtual
+    std::string write(const MultiRegion& reg);
 };
 
 /**
@@ -138,19 +144,21 @@ class GffLinewriter: public Linewriter
     GffLinewriter(const std::string& source, unsigned int version, 
     	const std::string& chrom);
     
-    /// Writes a Region to a string (no newline) in GFF format and returns it.
+    /// Writes a BaseRegion to a string (no newline) in GFF format and returns it.
     /// The score column will be '.', columns 8 and 9 (frame, attributes)
     /// are not printed at all.
     /// \param region the region to be stringified
     /// \return the stringified region or the empty string if something went wrong
-    virtual std::string write(const Region& region);
+    virtual
+    std::string write(const BaseRegion& region);
     
     /// Writes a MultiRegion to a string (no newline) in GFF format and returns it.
     /// The score column will contain the multiplicity, frame will be '.',
     /// the ancestor strings are presented as the ANCESTORS attribute in column 9.
     /// \param region the region to be stringified
     /// \return the stringified region or the empty string if something went wrong
-    virtual std::string write(const MultiRegion& region);
+    virtual
+    std::string write(const MultiRegion& region);
     
     // Accessors
     

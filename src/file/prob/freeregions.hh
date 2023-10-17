@@ -45,7 +45,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "region.hh"
+#include "baseregion.hh"
 #include "randomgen.hh"
 
 // -- System headers --
@@ -54,6 +54,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace multovl {
 namespace prob {
+
+// -- Typedefs --
+
+// The free regions must be represented by BaseRegion objects
+// because their coordinates must not be extended
+typedef BaseRegion freereg_t;
+typedef std::vector<freereg_t> freeregvec_t;
 
 // == Classes ==
 
@@ -72,12 +79,12 @@ class FreeRegions
     /// All must be on the same chromosome of course.
     /// They should not overlap (not tested).
     /// \param frees vector of free regions
-    explicit FreeRegions(const std::vector<Region>& frees);
+    explicit FreeRegions(const freeregvec_t& frees);
     
     /// Checks if a given region fits into one of the free regions.
     /// \param reg the region to be tested
     /// \return true if /reg/ fits, false if not.
-    bool fit(const Region& reg) const;
+    bool fit(const BaseRegion& reg) const;
     
     /// Picks one of the free regions randomly with a probability
     /// corresponding to the regions' lengths
@@ -85,12 +92,12 @@ class FreeRegions
     /// \param minlen The selected region must be at least this long
     /// (this is how we make sure a region would fit into the selected free region)
     /// \return const ref to a randomly selected free region
-    const Region& select_free_region(UniformGen& rng, unsigned int minlen) const;
+    const freereg_t& select_free_region(UniformGen& rng, unsigned int minlen) const;
     
     private:
     
     // data
-    std::vector<Region> _frees;
+    freeregvec_t _frees;
     std::vector<float> _roulette_sectors;
 };
 

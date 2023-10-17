@@ -56,11 +56,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "fileformat.hh"
 #include "errors.hh"
+#include "baseregion.hh"
 
 namespace multovl {
-
-class Region;
-
 namespace io {
 
 class TrackReader;
@@ -70,7 +68,7 @@ class TrackReader;
 /// FileReader objects implement reading regions from a track file.
 /// Clients should instantiate a FileReader with a file name,
 /// then invoke its read_into() method repeatedly,
-/// and use the resulting Region immediately for building up a MultiOverlap object.
+/// and use the resulting BaseRegion immediately for building up a MultiOverlap object.
 /// The class is non-copyable.
 class FileReader
 {
@@ -95,7 +93,7 @@ class FileReader
     /// \param reg the region this method tries to read into.
     /// \return /true/ if all went well, /false/ on errors.
     ///     For details, invoke errors() and finished().
-    bool read_into(std::string& chrom, Region& reg);
+    bool read_into(std::string& chrom, BaseRegion& reg);
 
     /// \return true if all input has been squeezed out of the input file.
     bool finished() const { return _finished; }

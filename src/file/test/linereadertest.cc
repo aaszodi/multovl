@@ -45,7 +45,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <limits>
 
 #include "linereader.hh"
-#include "region.hh"
 using namespace multovl;
 
 struct LinereaderFixture
@@ -54,7 +53,7 @@ struct LinereaderFixture
         region(10, 20, '+', "region")
     {}
     
-    Region region;
+    BaseRegion region;
 };
 
 BOOST_FIXTURE_TEST_SUITE(linereadersuite, LinereaderFixture)
@@ -63,7 +62,7 @@ BOOST_AUTO_TEST_CASE(bedreader_test)
 {
     io::BedLinereader blr;
     
-    Region reg;
+    BaseRegion reg;
     io::Linereader::Status status;
     bool ok;
 
@@ -89,7 +88,7 @@ BOOST_AUTO_TEST_CASE(gffreader_test)
 {
     io::GffLinereader glr;
     
-    Region reg;
+    BaseRegion reg;
     io::Linereader::Status status;
     bool ok;
 

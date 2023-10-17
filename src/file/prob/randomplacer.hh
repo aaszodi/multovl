@@ -45,6 +45,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Library headers --
 
 #include "freeregions.hh"
+#include "region.hh"
 
 // -- System headers --
 

@@ -52,12 +52,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
+#include "baseregion.hh"
 #include "errors.hh"
 
 namespace multovl {
-
-class Region;
-
 namespace io {
 
 // -- Input --
@@ -76,14 +74,14 @@ public:
     TrackReader(const TrackReader&) = delete;
     TrackReader& operator=(const TrackReader&) = delete;
     
-    /// Attempts to read from the wrapped input file into a region.
+    /// Attempts to read from the wrapped input file into a base region.
     /// \param chrom string to store the chromosome name for /reg/
     /// \param reg the region this method tries to read into.
     /// \return message containing information about how the parsing went.
     ///     "" if all is OK, "EOF" if the internal stream was exhausted,
     ///     or some error message.
     virtual
-    std::string read_into(std::string& chrom, Region& reg) = 0;
+    std::string read_into(std::string& chrom, BaseRegion& reg) = 0;
 
     /// \return const access to the internal error collecting object.
     const Errors& errors() const { return _errors; }
@@ -96,7 +94,7 @@ public:
     }
 
     virtual
-    ~TrackReader() {}
+    ~TrackReader() = default;
     
 private:
     

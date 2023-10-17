@@ -37,7 +37,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Own headers --
 
 #include "bamio.hh"
-#include "region.hh"
 
 // == Implementation ==
 
@@ -67,7 +66,7 @@ BamReader::BamReader(const std::string& infname):
     }
 }
 
-std::string BamReader::read_into(std::string& chrom, Region& reg)
+std::string BamReader::read_into(std::string& chrom, BaseRegion& reg)
 {
     if (!_bamreader.IsOpen())
         return "Input file not open";

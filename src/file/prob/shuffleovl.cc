@@ -51,7 +51,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace multovl {
 namespace prob {
 
-ShuffleOvl::ShuffleOvl(const std::vector<Region>& frees):
+ShuffleOvl::ShuffleOvl(const freeregvec_t& frees):
     _freeregions(frees),
     _rpm(),
     _shufflecount(0)

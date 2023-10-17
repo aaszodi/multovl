@@ -82,7 +82,7 @@ struct ShuffleOvlFixture
     	frees.push_back(Region(900,1400,'.',"free3"));
     }
     
-    std::vector<Region> frees;	// free regions
+    freeregvec_t frees;	// free regions
 };
 
 // little utility function for result checking using the GFF output string format
