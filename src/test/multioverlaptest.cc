@@ -288,7 +288,6 @@ BOOST_AUTO_TEST_CASE(extension_test)
     expres.add(1140, 1160, 2, "1:r1:+:940-1160|1:r2:+:1140-1360");
     expres.add(1340, 1360, 2, "1:r2:+:1140-1360|1:r3:+:1340-1560");
     expres.add(1390, 1560, 2, "1:r3:+:1340-1560|1:r4:+:1390-1660");
-    std::cout << "%%% starting MANUALLY extended overlaps" << std::endl;
     regcnt = mo60.find_overlaps(1, 2, 0);
     check_results(regcnt, expres, mo60.overlaps());
 
@@ -299,7 +298,6 @@ BOOST_AUTO_TEST_CASE(extension_test)
     expres.add(1140, 1160, 2, "1:r1:+:1000-1100|1:r2:+:1200-1300");
     expres.add(1340, 1360, 2, "1:r2:+:1200-1300|1:r3:+:1400-1500");
     expres.add(1390, 1560, 2, "1:r3:+:1400-1500|1:r4:+:1450-1600");
-    std::cout << "%%% starting GLOBALLY extended overlaps" << std::endl;
     regcnt = moex.find_overlaps(1, 2, 0, 60);
     check_results(regcnt, expres, moex.overlaps());
 }

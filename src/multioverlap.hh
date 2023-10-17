@@ -112,7 +112,7 @@ public:
         
     };  // class Counter
     
-    typedef std::multiset<RegLimit> reglims_t;
+    typedef std::multiset<RegLimit> reglimset_t;
 	typedef std::vector<MultiRegion> multiregvec_t;
 	
 	// -- methods --
@@ -184,20 +184,32 @@ public:
     
 protected:
 
+    typedef std::vector<AncestorRegion> ancregionvec_t;
+    
+    /// Sets up the private region limits object. Clears the old one.
+    /// \param ancregions A vector of AncestorRegion objects whose start and end
+    ///     coordinates will be used to build up the limits.
+    void setup_reglims(const ancregionvec_t& ancregions);
+    
+    /// Generates the overlaps based on what has been set up in `_reglims`
+    unsigned int generate_overlaps(
+            unsigned int ovlen, unsigned int minmult, unsigned int maxmult, bool intrack);
+    
+    unsigned int generate_unionoverlaps(
+            unsigned int ovlen, unsigned int minmult, unsigned int maxmult);
+
     /// \return const access to the RegLimit multiset inside
-    const reglims_t& reglims() const { return _reglims; }
+    const reglimset_t& reglims() const { return _reglims; }
 
     /// \return non-const access to the RegLimit multiset inside
-    reglims_t& nonconst_reglims() { return _reglims; }
+    reglimset_t& nonconst_reglims() { return _reglims; }
 
 private:
     
-    void setup_reglims();
     
     // -- data 
-    typedef std::vector<AncestorRegion> ancregions_t;
-    ancregions_t _ancregions;
-    reglims_t _reglims;
+    ancregionvec_t _ancregions;
+    reglimset_t _reglims;
     multiregvec_t _multiregions;
     
     // serialization
