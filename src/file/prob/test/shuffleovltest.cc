@@ -61,6 +61,15 @@ class TestShuffleOvl: public ShuffleOvl {
     
     /// \return const access to the RegLimit multiset inside
     const reglimset_t& reglims() const { return ShuffleOvl::reglims(); }
+
+    /// print the reglims object
+    void print_reglims() const {
+        for (const auto& rl : reglims()) {
+            std::cout << rl.this_pos()
+            << ":" << rl.other_pos() 
+            <<", track=" << rl.track_id() << std::endl;
+        }
+    }
 };
 
 // ad-hoc storage for expected results
@@ -186,6 +195,8 @@ BOOST_AUTO_TEST_CASE(shuffle_test)
     // overlaps without reshuffling
     unsigned int regcnt = so3.find_overlaps(1, 2, 0, 0, false); // up to any overlap
     check_results(regcnt, exp, so3.overlaps());
+    std::cout << "Reglims after overlapping:" << std::endl;
+    so3.print_reglims();
 
     // now we reshuffle and overlap once
     regcnt = so3.shuffle_overlaps(rng, 1, 2, 0, 0, false);
@@ -200,6 +211,9 @@ BOOST_AUTO_TEST_CASE(shuffle_test)
     // chances are _very_ slim that the reshuffled track 3 regions stayed in place
     BOOST_CHECK(!is_present(reglims, 300, 400, 3));
     BOOST_CHECK(!is_present(reglims, 700, 800, 3));
+    
+    std::cout << "Reglims after reshuffling:" << std::endl;
+    so3.print_reglims();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

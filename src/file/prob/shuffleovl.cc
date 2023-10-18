@@ -142,19 +142,16 @@ unsigned int ShuffleOvl::shuffle(UniformGen& rng)
     }
     
     // shuffle the reshufflable tracks
-    for (rpm_t::iterator rit = _rpm.begin(); rit != _rpm.end(); ++rit)
-    {
-        rit->second.random_placement(_freeregions, rng);
+    for (auto& r : _rpm) {
+        r.second.random_placement(_freeregions, rng);
     }
     
     // add their limits again
-    for (rpm_t::const_iterator rcit = _rpm.begin(); rcit != _rpm.end(); ++rcit)
-    {
-        unsigned int rtid = rcit->first;
-        const std::vector<Region>& vr = rcit->second.get_regions();
-        for (std::vector<Region>::const_iterator vrcit = vr.begin(); vrcit != vr.end(); ++vrcit)
-        {
-            add(*vrcit, rtid);
+    for (const auto& r : _rpm) {
+        unsigned int rtid = r.first;
+        const auto& shuffledregs = r.second.get_regions();
+        for (const auto& sr : shuffledregs) {
+            add(sr, rtid);
         }
     }
     return ++_shufflecount;

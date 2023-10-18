@@ -110,7 +110,7 @@ void ParProbPipeline::shuffle(
 )
 {
     UniformGen rng(rndseed);
-    chrom_shufovl_map csovl(this->csovl());   // local copy of csovl() map, hopefully with deeply copied ShuffleOvl
+    chrom_shufovl_map csovl(this->csovl());   // local copy of csovl() map
     while(check_update_shufflecounter(progressptr))
     {
         OvlenCounter rndcounter;
@@ -118,20 +118,23 @@ void ParProbPipeline::shuffle(
              csit != csovl.end(); ++csit)
         {
             ShuffleOvl& sovl = csit->second;
-            sovl.shuffle(rng);
             
             // generate and store overlaps
             if (opt_ptr()->uniregion())
             {
-                sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                sovl.shuffle_unionoverlaps(rng,
+                    opt_ptr()->ovlen(), 
                     opt_ptr()->minmult(), 
-                    opt_ptr()->maxmult());
+                    opt_ptr()->maxmult(),
+                    opt_ptr()->extension());
             }
             else
             {
-                sovl.find_overlaps(opt_ptr()->ovlen(), 
+                sovl.shuffle_overlaps(rng,
+                    opt_ptr()->ovlen(), 
                     opt_ptr()->minmult(), 
-                    opt_ptr()->maxmult(), 
+                    opt_ptr()->maxmult(),
+                    opt_ptr()->extension(),
                     !opt_ptr()->nointrack());
             }
             rndcounter.update(sovl.overlaps()); // update actual counts
