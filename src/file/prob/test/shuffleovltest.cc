@@ -51,6 +51,18 @@ using namespace multovl::prob;
 
 // -- Fixture --
 
+// Test class that makes the `reglims()` member function public
+class TestShuffleOvl: public ShuffleOvl {
+    public:
+    
+    explicit TestShuffleOvl(const freeregvec_t& frees):
+        ShuffleOvl(frees)
+    {}
+    
+    /// \return const access to the RegLimit multiset inside
+    const reglimset_t& reglims() const { return ShuffleOvl::reglims(); }
+};
+
 // ad-hoc storage for expected results
 // basically a string vector and a method to fill it up
 struct ExpectedResult
@@ -133,26 +145,24 @@ private:
 	unsigned int _trackid;
 };
 
-#if 0
 // helper function to detect the presence of a reglimit in a reglims_t multiset
 static
-bool is_present(const MultiOverlap::reglims_t& reglims,
+bool is_present(const MultiOverlap::reglimset_t& reglims,
 		unsigned int first, unsigned int last, unsigned int trackid)
 {
-	MultiOverlap::reglims_t::const_iterator rlcit;
+	MultiOverlap::reglimset_t::const_iterator rlcit;
 	rlcit = std::find_if(reglims.begin(), reglims.end(), RegLimitPred(first, true, trackid));
 	if (rlcit == reglims.end()) return false;
 	rlcit = std::find_if(reglims.begin(), reglims.end(), RegLimitPred(last, false, trackid));
 	return (rlcit != reglims.end());
 }
-#endif
 
 BOOST_FIXTURE_TEST_SUITE(multioverlapsuite, ShuffleOvlFixture)
 
 // check the overlaps before shuffling and then does one shuffling
 BOOST_AUTO_TEST_CASE(shuffle_test)
 {
-	ShuffleOvl so3(frees);
+	TestShuffleOvl so3(frees);
 	UniformGen rng(42);		// fixed seed to be reproducible
 
     // regions for triple overlaps
@@ -177,12 +187,11 @@ BOOST_AUTO_TEST_CASE(shuffle_test)
     unsigned int regcnt = so3.find_overlaps(1, 2, 0, 0, false); // up to any overlap
     check_results(regcnt, exp, so3.overlaps());
 
-    // now we reshuffle once
-    so3.shuffle(rng);
+    // now we reshuffle and overlap once
+    regcnt = so3.shuffle_overlaps(rng, 1, 2, 0, 0, false);
 
-#if 0
     // check if the fixed tracks remained fixed (ID=1,2)
-    const MultiOverlap::reglims_t& reglims = so3.reglims();
+    const MultiOverlap::reglimset_t& reglims = so3.reglims();
     BOOST_CHECK(is_present(reglims, 100, 600, 1));
     BOOST_CHECK(is_present(reglims, 200, 500, 2));
     BOOST_CHECK(is_present(reglims, 700, 800, 1));
@@ -191,7 +200,6 @@ BOOST_AUTO_TEST_CASE(shuffle_test)
     // chances are _very_ slim that the reshuffled track 3 regions stayed in place
     BOOST_CHECK(!is_present(reglims, 300, 400, 3));
     BOOST_CHECK(!is_present(reglims, 700, 800, 3));
-#endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()

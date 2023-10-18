@@ -302,20 +302,23 @@ unsigned int ProbPipeline::detect_overlaps()
              csit != csovl().end(); ++csit)
         {
             ShuffleOvl& sovl = csit->second;
-            sovl.shuffle(rng);
             
             // generate and store overlaps
             if (opt_ptr()->uniregion())
             {
-                sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                sovl.shuffle_unionoverlaps(rng,
+                    opt_ptr()->ovlen(), 
                     opt_ptr()->minmult(), 
-                    opt_ptr()->maxmult());
+                    opt_ptr()->maxmult(),
+                    opt_ptr()->extension());
             }
             else
             {
-                sovl.find_overlaps(opt_ptr()->ovlen(), 
+                sovl.shuffle_overlaps(rng,
+                    opt_ptr()->ovlen(), 
                     opt_ptr()->minmult(), 
-                    opt_ptr()->maxmult(), 
+                    opt_ptr()->maxmult(),
+                    opt_ptr()->extension(),
                     !opt_ptr()->nointrack());
             }
             rndcounter.update(sovl.overlaps()); // update actual counts
@@ -361,13 +364,15 @@ unsigned int ProbPipeline::calc_actual_overlaps()
         {
             acts += sovl.find_unionoverlaps(opt_ptr()->ovlen(), 
                 opt_ptr()->minmult(), 
-                opt_ptr()->maxmult());
+                opt_ptr()->maxmult(),
+                opt_ptr()->extension());
         }
         else
         {
             acts += sovl.find_overlaps(opt_ptr()->ovlen(), 
                 opt_ptr()->minmult(), 
-                opt_ptr()->maxmult(), 
+                opt_ptr()->maxmult(),
+                opt_ptr()->extension(),
                 !opt_ptr()->nointrack());
         }
         actcounter.update(sovl.overlaps()); // update actual counts

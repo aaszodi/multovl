@@ -80,18 +80,60 @@ bool ShuffleOvl::add_randomplacer(unsigned int reglen, unsigned int trackid)
     return ok;
 }
 
+unsigned int ShuffleOvl::shuffle_overlaps(UniformGen& rng,
+        unsigned int ovlen, unsigned int minmult, unsigned int maxmult, 
+        unsigned int ext, bool intrack)
+{
+    // Extend the region limits if required
+    Region::set_extension(ext);
+    
+    // shuffle the movable regions
+    // this just updates the region limits
+    shuffle(rng);
+    
+    // generate the overlaps
+    unsigned int regcount = generate_overlaps(ovlen, minmult, maxmult, intrack);
+    
+    // reset the extensions
+    Region::set_extension(0);
+    return regcount;
+}
+
+unsigned int ShuffleOvl::shuffle_unionoverlaps(UniformGen& rng,
+        unsigned int ovlen, unsigned int minmult, unsigned int maxmult,
+        unsigned int ext)
+{
+    // Extend the region limits if required
+    Region::set_extension(ext);
+    
+    // shuffle the movable regions
+    // this just updates the region limits
+    shuffle(rng);
+    
+    // generate the union overlaps
+    unsigned int regcount = generate_unionoverlaps(ovlen, minmult, maxmult);
+        
+    // reset the extensions
+    Region::set_extension(0);
+    return regcount;
+}
+
+// Shuffle the "shufflable" tracks
+// \param rng a uniform[0,1) random number generator
+// \return the new shuffle count
+// Private
 unsigned int ShuffleOvl::shuffle(UniformGen& rng)
 {
     // remove all RegLimits referring to the reshufflable tracks
     for (rpm_t::const_iterator rcit = _rpm.begin(); rcit != _rpm.end(); ++rcit)
     {
         unsigned int rtid = rcit->first;    // reshufflable track ID
-        reglims_t::const_iterator rlit = reglims().begin();
+        MultiOverlap::reglimset_t::const_iterator rlit = reglims().begin();
         while(rlit != reglims().end())
         {
             if (rtid == rlit->track_id())
             {
-                reglims_t::iterator me = rlit;   // rlit still valid
+                MultiOverlap::reglimset_t::iterator me = rlit;   // rlit still valid
                 ++rlit;                         // so increment it...
                 nonconst_reglims().erase(me);    // me is now invalid
             }

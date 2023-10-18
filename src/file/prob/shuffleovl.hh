@@ -80,12 +80,36 @@ public:
     /// \return true on success, false if reglen == 0
     bool add_randomplacer(unsigned int reglen, unsigned int trackid);
     
-    /// Shuffle the "shufflable" tracks
-    /// \param rng a uniform[0,1) random number generator
-    /// \return the new shuffle count
-    unsigned int shuffle(UniformGen& rng);
-    
+    /// Shuffles the "shufflable"regions once by updating the internal `_reglims` object
+    /// and then calculates the overlaps.
+    /// \param rng A uniform RNG
+    /// \param ovlen the minimum overlap length (>=1) required
+    /// \param minmult the minimum multiplicity required, >=1,  if 0 --> solitaries also required
+    /// \param maxmult the maximum multiplicity required, >=2, or if 0 --> any multiplicity accepted
+    /// if /minmult/ > /maxmult/ then they are swapped silently, except when /maxmult/ == 0
+    /// \param ext "fake" extension of the input region boundaries, 0 by default
+    /// \param intrack if /true/ (default), then overlaps within the same track are accepted
+    /// \return the total count of the overlaps found
+    unsigned int shuffle_overlaps(UniformGen& rng,
+            unsigned int ovlen, unsigned int minmult, unsigned int maxmult, 
+            unsigned int ext, bool intrack);
+
+    /// Shuffles the "shufflable"regions once by updating the internal `_reglims` object
+    /// and then calculates the union overlaps.
+    /// \param rng A uniform RNG
+    /// \param ovlen the minimum overlap length (>=1) required
+    /// \param minmult the minimum multiplicity required, >=1,  if 0 --> solitaries also required
+    /// \param maxmult the maximum multiplicity required, >=2, or if 0 --> any multiplicity accepted
+    /// if /minmult/ > /maxmult/ then they are swapped silently, except when /maxmult/ == 0
+    /// \param ext "fake" extension of the input region boundaries, 0 by default
+    /// \return the total count of the union overlaps found
+    unsigned int shuffle_unionoverlaps(UniformGen& rng,
+            unsigned int ovlen, unsigned int minmult, unsigned int maxmult,
+            unsigned int ext);
+
 private:
+    
+    unsigned int shuffle(UniformGen& rng);
     
     // data
     FreeRegions _freeregions;
