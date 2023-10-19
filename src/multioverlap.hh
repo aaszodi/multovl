@@ -186,15 +186,20 @@ protected:
 
     typedef std::vector<AncestorRegion> ancregionvec_t;
     
-    /// Sets up the private region limits object. Clears the old one.
-    /// \param ancregions A vector of AncestorRegion objects whose start and end
-    ///     coordinates will be used to build up the limits.
-    void setup_reglims(const ancregionvec_t& ancregions);
+    /// \return const access to the ancestor region vector
+    const ancregionvec_t& ancregions() const { return _ancregions; }
+    
+    /// Sets up the private region limits object. Clears the old one
+    void setup_reglims();
+    
+    /// Adds the limits of an ancestor region to the internal `_reglims` object
+    void add_reglimit(const AncestorRegion& ancreg);
     
     /// Generates the overlaps based on what has been set up in `_reglims`
     unsigned int generate_overlaps(
             unsigned int ovlen, unsigned int minmult, unsigned int maxmult, bool intrack);
     
+    /// Generates union overlaps based on what has been set up in `_reglims`
     unsigned int generate_unionoverlaps(
             unsigned int ovlen, unsigned int minmult, unsigned int maxmult);
 

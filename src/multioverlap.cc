@@ -171,19 +171,22 @@ namespace impl {
 typedef std::pair<unsigned int, unsigned int> uintpair_t;
 typedef std::vector<uintpair_t> uintpairvec_t;
 
-// Sets up the private region limits object. Clears the old one.
-// Invoke this once the `Region::set_extension()` method has been called
-void MultiOverlap::setup_reglims(const ancregionvec_t& ancregions) {
+void MultiOverlap::setup_reglims() {
     _reglims.clear();
+    
     // Stores ancregions twice in the region limit map `_reglims`
-    for (const auto& ancreg : ancregions) {
-        // once as a "first position"
-        RegLimit limfirst(ancreg, true);
-        _reglims.insert(limfirst);
-        // ... and then as "last position"
-        RegLimit limlast(ancreg, false);
-        _reglims.insert(limlast);
+    for (const auto& ancreg : _ancregions) {
+        add_reglimit(ancreg);
     }
+}
+
+void MultiOverlap::add_reglimit(const AncestorRegion& ancreg) {
+    // add once as a "first position"
+    RegLimit limfirst(ancreg, true);
+    _reglims.insert(limfirst);
+    // ... and then as "last position"
+    RegLimit limlast(ancreg, false);
+    _reglims.insert(limlast);
 }
 
 unsigned int MultiOverlap::find_overlaps(
@@ -194,7 +197,7 @@ unsigned int MultiOverlap::find_overlaps(
     Region::set_extension(ext);
     
     // Set up the region limits based on the current contents of `_ancregions`
-    setup_reglims(_ancregions);
+    setup_reglims();
     
     // generate the overlaps
     unsigned int regcount = generate_overlaps(ovlen, minmult, maxmult, intrack);
@@ -216,14 +219,14 @@ unsigned int MultiOverlap::generate_overlaps(
     _multiregions.clear();
     
     // iterate over the region limits which have already been set up
-    reglimset_t::const_iterator lowbound = _reglims.begin(), upbound;
-    while (_reglims.end() != lowbound)
+    reglimset_t::const_iterator lowbound = reglims().begin(), upbound;
+    while (reglims().end() != lowbound)
     {
         pos = lowbound->this_pos(); // current region limit position
-        upbound = _reglims.upper_bound(*lowbound);
+        upbound = reglims().upper_bound(*lowbound);
 
         // the lowbound/upbound pair corresponds to the STL range
-        // of all RegLimit objects in _reglims
+        // of all RegLimit objects in reglims()
         // that were at position pos        
         // iterate over them all
         for (reglimset_t::const_iterator rmiter = lowbound;
@@ -302,7 +305,7 @@ unsigned int MultiOverlap::find_unionoverlaps(
     Region::set_extension(ext);
     
     // Set up the region limits
-    setup_reglims(_ancregions);
+    setup_reglims();
     
     // generate the union overlaps
     unsigned int regcount = generate_unionoverlaps(ovlen, minmult, maxmult);
@@ -324,14 +327,14 @@ unsigned int MultiOverlap::generate_unionoverlaps(
     _multiregions.clear();
     
     // iterate over the region limit multimap which was set up already
-    reglimset_t::const_iterator lowbound = _reglims.begin(), upbound;
-    while (_reglims.end() != lowbound )
+    reglimset_t::const_iterator lowbound = reglims().begin(), upbound;
+    while (reglims().end() != lowbound )
     {
         pos = lowbound->this_pos();    // this is the new position
-        upbound = _reglims.upper_bound(*lowbound);
+        upbound = reglims().upper_bound(*lowbound);
 
         // the lowbound/upbound pair corresponds to the STL range
-        // of all RegLimit objects in _reglims
+        // of all RegLimit objects in reglims()
         // that were at position pos
         // iterate over them all
         for (reglimset_t::const_iterator rmiter = lowbound;
@@ -393,11 +396,8 @@ unsigned int MultiOverlap::generate_unionoverlaps(
 
 void MultiOverlap::overlap_stats(Counter& counter) const
 {
-    for (multiregvec_t::const_iterator mrit = _multiregions.begin();
-        mrit != _multiregions.end(); ++mrit
-    )
-    {
-        counter.count(*mrit);
+    for (const auto& mr : _multiregions) {
+        counter.count(mr);
     }
 }
 
