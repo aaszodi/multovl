@@ -74,11 +74,12 @@ public:
     /// \return true if /reg/ fits, false otherwise.
     bool fit_into_frees(const Region& reg) const { return _freeregions.fit(reg); }
     
-    /// Adds the length of a "shufflable" region in a track to the internal trackid => RandomPlacer map.
-    /// \param reglen the length of the region, should be > 0
-    /// \param trackid the track ID 
+    /// Adds a potentially "shufflable" region to the calling object.
+    /// \param reg A Region object
+    /// \param trackid the track ID
+    /// \param shuffle if /true/ then this region can be "shuffled"
     /// \return true on success, false if reglen == 0
-    bool add_randomplacer(unsigned int reglen, unsigned int trackid);
+    bool add_randomplacer(const Region& reg, unsigned int trackid, bool shuffle);
     
     /// Shuffles the "shufflable"regions once by updating the internal `_reglims` object
     /// and then calculates the overlaps.
@@ -113,8 +114,7 @@ private:
     
     // data
     FreeRegions _freeregions;
-    typedef std::map<unsigned int, RandomPlacer> rpm_t; // track ID => RandomPlacer for the "shufflable tracks"
-    rpm_t _rpm;
+    RandomPlacer _randomplacer;
     unsigned int _shufflecount;
 
 #if 0

@@ -46,38 +46,35 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Standard headers --
 
+// do not use this unless something goes seriously wrong
+#define MULTOVL_DEBUG
+
 // == Implementation ==
 
 namespace multovl {
 namespace prob {
 
 ShuffleOvl::ShuffleOvl(const freeregvec_t& frees):
+    MultiOverlap(),
     _freeregions(frees),
-    _rpm(),
     _shufflecount(0)
 {}
 
-bool ShuffleOvl::add_randomplacer(unsigned int reglen, unsigned int trackid)
+bool ShuffleOvl::add_randomplacer(const Region& reg, unsigned int trackid, bool shuffle)
 {
-    if (reglen == 0)
+    if (reg.length() == 0)
         return false;
     bool ok = false;
     
-    // have we seen this track ID before?
-    rpm_t::iterator rit = _rpm.find(trackid);
-    if (rit != _rpm.end())
-    {
-        // track ID already there
-        ok = rit->second.add(reglen);
+    // first add to the ancestors (pushes back)
+    add(reg, trackid);
+    
+    if (shuffle) {
+        // if the region is "shufflable" (ProbPipeline decides this)
+        // then also add it to the RandomPlacer
+        // the newly added region is the last ancestor seen so far
+        _randomplacer.add(ancregions().back());
     }
-    else
-    {
-        // set up for this track ID
-        RandomPlacer rp;
-        ok = rp.add(reglen);
-        _rpm[trackid] = rp;
-    }
-    return ok;
 }
 
 unsigned int ShuffleOvl::shuffle_overlaps(UniformGen& rng,
@@ -118,13 +115,39 @@ unsigned int ShuffleOvl::shuffle_unionoverlaps(UniformGen& rng,
     return regcount;
 }
 
+#ifdef MULTOVL_DEBUG
+namespace debug {
+    // ad-hoc debug functions
+    std::ostream& operator<<(std::ostream& ostr, const Region& reg) {
+        ostr << "*** " << reg.first() << "-" << reg.last() << ":" << reg.name();
+        return ostr;
+    }
+    std::ostream& operator<<(std::ostream& ostr, const RegLimit& rl) {
+        ostr << "*** this_pos()=" << rl.this_pos()
+            << " --> " << rl.region();
+        return ostr;
+    }
+    // end of ad-hoc debug functions
+}
+#endif
+
 // Shuffle the "shufflable" tracks
 // \param rng a uniform[0,1) random number generator
 // \return the new shuffle count
 // Private
 unsigned int ShuffleOvl::shuffle(UniformGen& rng)
 {
+    using namespace debug;
+    
+#ifdef MULTOVL_DEBUG
+    std::cout << "** The contents of _ancregions upon entering shuffle:" << std::endl;
+    for (const auto& reg : ancregions()) {
+        std::cout << reg << std::endl;
+    }
+#endif
+
     // remove all RegLimits referring to the reshufflable tracks
+    
     for (rpm_t::const_iterator rcit = _rpm.begin(); rcit != _rpm.end(); ++rcit)
     {
         unsigned int rtid = rcit->first;    // reshufflable track ID
@@ -141,6 +164,13 @@ unsigned int ShuffleOvl::shuffle(UniformGen& rng)
         }
     }
     
+#ifdef MULTOVL_DEBUG
+    std::cout << "** The contents of _ancregions after reglimit deletion:" << std::endl;
+    for (const auto& reg : ancregions()) {
+        std::cout << reg << std::endl;
+    }
+#endif
+
     // shuffle the reshufflable tracks
     for (auto& r : _rpm) {
         r.second.random_placement(_freeregions, rng);
@@ -148,12 +178,23 @@ unsigned int ShuffleOvl::shuffle(UniformGen& rng)
     
     // add their limits again
     for (const auto& r : _rpm) {
-        unsigned int rtid = r.first;
         const auto& shuffledregs = r.second.get_regions();
         for (const auto& sr : shuffledregs) {
-            add(sr, rtid);
+            add_reglimit(sr);
+            std::cout << "** Added limit " << sr << ", track " << rtid << std::endl;
         }
     }
+#ifdef MULTOVL_DEBUG
+    std::cout << "** Reglims contents after adding reshuffled limits:" << std::endl;
+    for (const auto& rl : reglims()) {
+        std::cout << rl << std::endl;
+    }
+    std::cout << "** The contents of _ancregions:" << std::endl;
+    for (const auto& reg : ancregions()) {
+        std::cout << reg << std::endl;
+    }
+#endif
+
     return ++_shufflecount;
 }
 
