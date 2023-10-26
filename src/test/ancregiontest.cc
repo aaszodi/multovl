@@ -54,7 +54,7 @@ struct AncRegionFixture
 {
     AncRegionFixture():
         a1(Region(1, 5, '+', "a15")),   // track id = 0
-        a2(4, 6, '-', "a46", 9)
+        a2(4, 6, '-', "a46", 9, false)  // non-default track ID and shuffleability
     {}
     
     AncestorRegion a1, a2;
@@ -69,6 +69,12 @@ BOOST_AUTO_TEST_CASE(trackid_test)
     BOOST_CHECK_EQUAL(oldid, 0);
     BOOST_CHECK_EQUAL(a1.track_id(), 17);
     BOOST_CHECK_EQUAL(a2.track_id(), 9);
+}
+
+BOOST_AUTO_TEST_CASE(shuffattr_test)
+{
+    BOOST_CHECK(a1.is_shuffleable());
+    BOOST_CHECK(!a2.is_shuffleable());
 }
 
 BOOST_AUTO_TEST_CASE(io_test)

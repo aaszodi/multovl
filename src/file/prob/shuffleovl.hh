@@ -44,12 +44,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Library headers --
 
 #include "multioverlap.hh"
-#include "randomplacer.hh"
+#include "freeregions.hh"
 
 // -- Boost headers --
 
 // -- Standard headers --
 
+#include <set>
 #include <map>
 
 namespace multovl {
@@ -73,13 +74,6 @@ public:
     /// \param reg The region to be tested
     /// \return true if /reg/ fits, false otherwise.
     bool fit_into_frees(const Region& reg) const { return _freeregions.fit(reg); }
-    
-    /// Adds a potentially "shufflable" region to the calling object.
-    /// \param reg A Region object
-    /// \param trackid the track ID
-    /// \param shuffle if /true/ then this region can be "shuffled"
-    /// \return true on success, false if reglen == 0
-    bool add_randomplacer(const Region& reg, unsigned int trackid, bool shuffle);
     
     /// Shuffles the "shufflable"regions once by updating the internal `_reglims` object
     /// and then calculates the overlaps.
@@ -111,10 +105,12 @@ public:
 private:
     
     unsigned int shuffle(UniformGen& rng);
+    bool place_randomly(UniformGen& rng, AncestorRegion& sreg) const;
     
     // data
     FreeRegions _freeregions;
-    RandomPlacer _randomplacer;
+    typedef std::vector<AncestorRegion> ancregvec_t;
+    ancregvec_t _shuffleables;
     unsigned int _shufflecount;
 
 #if 0

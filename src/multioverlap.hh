@@ -132,10 +132,12 @@ public:
     /**
      * Adds a region from a track.
      * \param region A Region object
-     * \param trackid The track ID of the object
+     * \param trackid The track ID of the region
+     * \param shuffleable /true/ if the region may be reshuffled,
+     *  \sa ShuffleOvl class
      */
-    void add(const Region& region, unsigned int trackid) {
-        _ancregions.emplace_back(region, trackid);
+    void add(const Region& region, unsigned int trackid, bool shuffleable=true) {
+        _ancregions.emplace_back(region, trackid, shuffleable);
     }
 
     /**

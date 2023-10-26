@@ -22,7 +22,7 @@ set(testdir ${CMAKE_CURRENT_BINARY_DIR})
 # -- Prob tests --
 
 set(probtestprogs
-    empirdistrtest freeregionstest randomplacertest stattest shuffleovltest
+    empirdistrtest freeregionstest stattest shuffleovltest
 )
 
 foreach(probtestprog ${probtestprogs})

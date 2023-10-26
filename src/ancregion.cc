@@ -63,7 +63,8 @@ unsigned int AncestorRegion::track_id(unsigned int trackid)
 bool AncestorRegion::operator==(const AncestorRegion& rhs) const
 {
     return (static_cast<Region>(*this) == static_cast<Region>(rhs) &&
-        track_id() == rhs.track_id());
+        this->track_id() == rhs.track_id() &&
+        this->is_shuffleable() == rhs.is_shuffleable());
 }
 
 bool AncestorRegion::operator<(const AncestorRegion& rhs) const 

@@ -179,12 +179,10 @@ BOOST_AUTO_TEST_CASE(shuffle_test)
     so3.add(Region(100, 600, '+', "REGa"), 1);
     so3.add(Region(200, 500, '+', "REGb"), 2);
     so3.add(Region(300, 400, '+', "REGc"), 3);
-    so3.add_randomplacer(101, 3);	// 300..400 is 101 bp long, trackID=3
 
     so3.add(Region(700, 800, '+', "REGa"), 1);
     so3.add(Region(700, 800, '+', "REGb"), 2);
     so3.add(Region(700, 800, '+', "REGc"), 3);
-    so3.add_randomplacer(101, 3);	// 700..800 is also 101 bp long, trackID=3
 
     ExpectedResult exp;
     exp.add(200, 299, 2, "1:REGa:+:100-600|2:REGb:+:200-500");

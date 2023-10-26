@@ -81,6 +81,9 @@ class FreeRegions
     /// \param frees vector of free regions
     explicit FreeRegions(const freeregvec_t& frees);
     
+    /// \return The length of the longest free region
+    unsigned int max_freelen() const { return _maxfreelen; }
+    
     /// Checks if a given region fits into one of the free regions.
     /// \param reg the region to be tested
     /// \return true if /reg/ fits, false if not.
@@ -91,6 +94,7 @@ class FreeRegions
     /// \param rng A uniform random number generator
     /// \param minlen The selected region must be at least this long
     /// (this is how we make sure a region would fit into the selected free region)
+    /// \raises `std::length_error` if `minlen` is larger than `max_freelen()`
     /// \return const ref to a randomly selected free region
     const freereg_t& select_free_region(UniformGen& rng, unsigned int minlen) const;
     
@@ -98,6 +102,7 @@ class FreeRegions
     
     // data
     freeregvec_t _frees;
+    unsigned int _maxfreelen;
     std::vector<float> _roulette_sectors;
 };
 

@@ -6,7 +6,7 @@ include_directories(${SRCDIR} ${SRCDIR}/file ${SRCDIR}/file/prob)
 
 # overlap probability convenience library
 set(movl_probsrc
-    empirdistr.cc freeregions.cc randomplacer.cc shuffleovl.cc stat.cc
+    empirdistr.cc freeregions.cc shuffleovl.cc stat.cc
      probpipeline.cc probopts.cc
 )
 add_library(movl_prob STATIC ${movl_probsrc})

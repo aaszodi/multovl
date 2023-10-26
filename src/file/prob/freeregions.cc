@@ -38,6 +38,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cmath>
 #include <cassert>
+#include <stdexcept>
 #include <algorithm>
 
 #ifdef DEBUGG
@@ -55,7 +56,7 @@ namespace multovl {
 namespace prob {
 
 FreeRegions::FreeRegions(const freeregvec_t& frees)
-    : _frees(frees), _roulette_sectors()
+    : _frees(frees), _maxfreelen(0), _roulette_sectors()
 {
     // store the "roulette wheel sections"
     const unsigned int FREESIZE = frees.size();
@@ -69,6 +70,9 @@ FreeRegions::FreeRegions(const freeregvec_t& frees)
         #ifdef DEBUGG
         std::cerr << "_freelengths[" << i << "] = " << flen << std::endl;
         #endif
+        // build up maximal free region length...
+        _maxfreelen = std::max(_maxfreelen, flen);
+        // ...and total length
         flensum += flen;
         _roulette_sectors.push_back(flensum);
     }
@@ -85,6 +89,11 @@ FreeRegions::FreeRegions(const freeregvec_t& frees)
 
 bool FreeRegions::fit(const BaseRegion& reg) const
 {
+    if (reg.length() > max_freelen()) {
+        // cannot fit
+        return false;
+    }
+    
     // very simple linear algorithm
     for (unsigned int i = 0; i < _frees.size(); ++i)
     {
@@ -96,6 +105,11 @@ bool FreeRegions::fit(const BaseRegion& reg) const
 
 const freereg_t& FreeRegions::select_free_region(UniformGen& rng, unsigned int minlen) const
 {
+    if (minlen > max_freelen()) {
+        // no free region is long enough
+        throw std::length_error("Region will not fit");
+    }
+    
     unsigned int idx;
     do {
         float rnd = static_cast<float>(rng()); // 0.0 .. 1.0

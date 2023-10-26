@@ -64,6 +64,8 @@ namespace multovl {
  * They are essentially Region-s, with the additional track ID attribute (an uint)
  * that indicates which track they belong to. Track IDs are assigned by
  * client programs and may indirectly refer to files or database objects.
+ * AncestorRegion-s also have a `shuffleable` attribute which is used
+ * by the randomisation calculations.
  */
 class AncestorRegion: public Region,
     boost::less_than_comparable< AncestorRegion,
@@ -72,25 +74,28 @@ class AncestorRegion: public Region,
     public:
     
     /// Init to empty
-    AncestorRegion(): Region(), _trackid(0) {}
+    AncestorRegion(): Region(), _trackid(0), _shuffleable(true) {}
 
-    /// Init with base class /region/ and /trackid/ (default 0)
-    explicit AncestorRegion(const Region& region, unsigned int trackid = 0): 
-        Region(region), _trackid(trackid) {}
+    /// Init with base class /region/ and /trackid/ (default 0) and /shuffleable/ default true
+    explicit AncestorRegion(const Region& region, unsigned int trackid = 0, bool shuffleable=true): 
+        Region(region), _trackid(trackid), _shuffleable(shuffleable) {}
     
     /**
      * Inits to contain the genomic region with positions [f..l],
      * strand /s/, name /nm/, track ID /trackid/.
      */
     AncestorRegion(unsigned int f, unsigned int l,
-        char s, const std::string& nm, unsigned int trackid = 0): 
-        Region(f, l, s, nm), _trackid(trackid) {}
+        char s, const std::string& nm, unsigned int trackid = 0, bool shuffleable=true): 
+        Region(f, l, s, nm), _trackid(trackid), _shuffleable(shuffleable) {}
     
     /// Returns the current track ID.
     const unsigned int& track_id() const { return _trackid; }
     
     /// Sets the track ID to /trackid/. Returns old track ID.
     unsigned int track_id(unsigned int trackid);
+    
+    /// Returns the "shuffleability"
+    bool is_shuffleable() const { return _shuffleable; }
     
     /// Equality. All fields must be equal.
     bool operator==(const AncestorRegion& rhs) const;
@@ -108,6 +113,7 @@ class AncestorRegion: public Region,
     private:
     
     unsigned int _trackid;
+    bool _shuffleable;
     
     // "split" serialization
     friend class boost::serialization::access;
@@ -115,14 +121,14 @@ class AncestorRegion: public Region,
     void save(Archive& ar, const unsigned int version) const
     {
         ar << boost::serialization::base_object<Region>(*this); 
-        ar << _trackid;
+        ar << _trackid << _shuffleable;
     }
     
     template <class Archive>
     void load(Archive& ar, const unsigned int version)
     {
         ar >> boost::serialization::base_object<Region>(*this);
-        ar >> _trackid;
+        ar >> _trackid >> _shuffleable;
     }
     BOOST_SERIALIZATION_SPLIT_MEMBER()
     

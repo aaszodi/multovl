@@ -85,10 +85,10 @@ ProbPipeline::ProbPipeline(int argc, char* argv[]):
 ProbPipeline::~ProbPipeline()
 {
     ProbOpts *op = opt_ptr();
-    if (op != NULL)
+    if (op != nullptr)
     {
         delete op;
-        set_optpimpl(NULL);
+        set_optpimpl(nullptr);
     }
 }
 
@@ -198,11 +198,11 @@ unsigned int ProbPipeline::read_tracks(
     bool shuffle
 )
 {
-    unsigned int i, filecnt = inputfiles.size(), totalregcnt = 0;
+    unsigned int totalregcnt = 0;
     
-    for (i = 0; i < filecnt; ++i)
+    for (const auto& inputfilenm : inputfiles)
     {
-        Input currinp(inputfiles[i]);
+        Input currinp(inputfilenm);
         io::FileReader reader(currinp.name);    // automatic format detection
         if (!reader.errors().ok())
         {
@@ -246,12 +246,9 @@ unsigned int ProbPipeline::read_tracks(
                 continue;
             }
             
-            // OK, add the region
-            csit->second.add(reg, trackid+1);
-            if (shuffle)
-            {
-                csit->second.add_randomplacer(reg.length(), trackid+1);
-            }
+            // OK, add the region to its chromosome's ShuffleOvl instance
+            // note the shuffleability
+            csit->second.add(reg, trackid + 1, shuffle);
             ++regcnt;
         }
         if (problemcnt > 0)
@@ -298,10 +295,9 @@ unsigned int ProbPipeline::detect_overlaps()
     {
     	// TODO this loop may be parallelised
         OvlenCounter rndcounter;
-        for (chrom_shufovl_map::iterator csit = csovl().begin();
-             csit != csovl().end(); ++csit)
+        for (auto& csit : csovl())
         {
-            ShuffleOvl& sovl = csit->second;
+            ShuffleOvl& sovl = csit.second;
             
             // generate and store overlaps
             if (opt_ptr()->uniregion())
@@ -325,10 +321,9 @@ unsigned int ProbPipeline::detect_overlaps()
         }
         
         // update the empirical distributions
-        for (OvlenCounter::mtolen_t::const_iterator mtcit = rndcounter.mtolen().begin();
-            mtcit != rndcounter.mtolen().end(); ++mtcit)
+        for (const auto& mtc : rndcounter.mtolen())
         {
-            stat().add(mtcit->first, mtcit->second, false);
+            stat().add(mtc.first, mtc.second, false);
         }
         
         if (opt_ptr()->progress())
@@ -354,10 +349,9 @@ unsigned int ProbPipeline::calc_actual_overlaps()
 {
     OvlenCounter actcounter;
     unsigned int acts = 0;
-    for (chrom_shufovl_map::iterator csit = csovl().begin();
-         csit != csovl().end(); ++csit)
+    for (auto& csit : csovl())
     {
-        ShuffleOvl& sovl = csit->second;      // "current overlap"
+        ShuffleOvl& sovl = csit.second;      // "current overlap"
         
         // generate and store overlaps
         if (opt_ptr()->uniregion())
@@ -379,10 +373,9 @@ unsigned int ProbPipeline::calc_actual_overlaps()
     }
     
     // add actual counts to statistics
-    for (OvlenCounter::mtolen_t::const_iterator mtcit = actcounter.mtolen().begin();
-        mtcit != actcounter.mtolen().end(); ++mtcit)
+    for (const auto& mtc : actcounter.mtolen())
     {
-        stat().add(mtcit->first, mtcit->second, true);
+        stat().add(mtc.first, mtc.second, true);
     }
     return acts;
 }
@@ -394,19 +387,18 @@ bool ProbPipeline::write_output()
     
     // input file names (the fixed are listed in the parameters above)
     std::cout << "# Input files = " << inputs().size() << std::endl;
-    for (input_seq_t::const_iterator it = inputs().begin();
-        it != inputs().end(); ++it)
+    for (const auto& inp : inputs())
     {
-        std::cout << "# " << it->name;
-        if (it->trackid > 0)
+        std::cout << "# " << inp.name;
+        if (inp.trackid > 0)
         {
             std::cout << " = track " 
-                << it->trackid << ", region count = " 
-                << it->regcnt;
+                << inp.trackid << ", region count = " 
+                << inp.regcnt;
         } else {
             std::cout << " : skipped";
         }
-        if (opt_ptr()->file_is_fixed(it->name))
+        if (opt_ptr()->file_is_fixed(inp.name))
         	std::cout << " [fixed]";
         else
         	std::cout << " [shuffled]";
