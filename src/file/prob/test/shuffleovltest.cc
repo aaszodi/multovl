@@ -176,19 +176,19 @@ BOOST_AUTO_TEST_CASE(shuffle_test)
 
     // regions for triple overlaps
 	// Track 3 will be "shufflable"
-    so3.add(Region(100, 600, '+', "REGa"), 1);
-    so3.add(Region(200, 500, '+', "REGb"), 2);
-    so3.add(Region(300, 400, '+', "REGc"), 3);
+    so3.add(Region(100, 600, '+', "REGa"), 1, false);
+    so3.add(Region(200, 500, '+', "REGb"), 2, false);
+    so3.add(Region(300, 400, '+', "sREGc"), 3, true);
 
-    so3.add(Region(700, 800, '+', "REGa"), 1);
-    so3.add(Region(700, 800, '+', "REGb"), 2);
-    so3.add(Region(700, 800, '+', "REGc"), 3);
+    so3.add(Region(700, 800, '+', "REGd"), 1, false);
+    so3.add(Region(700, 800, '+', "REGe"), 2, false);
+    so3.add(Region(700, 800, '+', "sREGf"), 3, true);
 
     ExpectedResult exp;
     exp.add(200, 299, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
-    exp.add(300, 400, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:REGc:+:300-400");
+    exp.add(300, 400, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:sREGc:+:300-400");
     exp.add(401, 500, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
-    exp.add(700, 800, 3, "1:REGa:+:700-800|2:REGb:+:700-800|3:REGc:+:700-800");
+    exp.add(700, 800, 3, "1:REGd:+:700-800|2:REGe:+:700-800|3:sREGf:+:700-800");
 
     // overlaps without reshuffling
     unsigned int regcnt = so3.find_overlaps(1, 2, 0, 0, false); // up to any overlap
