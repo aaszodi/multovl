@@ -48,9 +48,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <iterator>
 
-// do not use this unless something goes seriously wrong
-#undef MULTOVL_DEBUG
-
 // == Implementation ==
 
 namespace multovl {
@@ -232,7 +229,7 @@ unsigned int MultiOverlap::generate_overlaps(
         for (reglimset_t::const_iterator rmiter = lowbound;
                 rmiter != upbound; ++rmiter)
         {
-#ifdef MULTOVL_DEBUG
+#ifndef NDEBUG
             std::cerr << "** pos = " << pos << ", other = " << rmiter->other_pos()
                 <<": track = " << rmiter->track_id() << " isfirst = " << rmiter->is_first() << ": ";
             for (std::set<AncestorRegion>::const_iterator ait = ancestors.begin();
@@ -259,7 +256,7 @@ unsigned int MultiOverlap::generate_overlaps(
                 }
                 mrstart = pos;
                 ancestors.insert(rmiter->region());   // save ancestor
-#ifdef MULTOVL_DEBUG
+#ifndef NDEBUG
 				std::cerr << "** mrstart = " << pos << std::endl;
 				std::cerr << "** save ancestor: " << 
 				    rmiter->region().to_attrstring() << std::endl;
@@ -340,7 +337,7 @@ unsigned int MultiOverlap::generate_unionoverlaps(
         for (reglimset_t::const_iterator rmiter = lowbound;
                 rmiter!= upbound; ++rmiter)
         {
-#ifdef MULTOVL_DEBUG
+#ifndef NDEBUG
             std::cerr << "** pos = " << pos << ", other = " << rmiter->other_pos()
                 <<": track = " << rmiter->track_id() << " isfirst = " << rmiter->is_first() << ": ";
             for (std::set<AncestorRegion>::const_iterator ait = ancestors.begin();
@@ -356,7 +353,7 @@ unsigned int MultiOverlap::generate_unionoverlaps(
                 if (mult == 0)   // remember if a new union region is started here
                     mrstart = pos;
                 ancestors.insert(rmiter->region());   // save ancestor
-#ifdef MULTOVL_DEBUG
+#ifndef NDEBUG
 				std::cerr << "** mrstart = " << pos << std::endl;
 				std::cerr << "** save ancestor: " << 
 				    rmiter->region().to_attrstring() << std::endl;

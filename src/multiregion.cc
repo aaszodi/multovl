@@ -36,7 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Standard headers --
 
-#ifdef MULTOVL_DEBUG
+#ifndef NDEBUG
 #include <iostream>
 #endif
 
@@ -66,8 +66,8 @@ MultiRegion::MultiRegion(unsigned int first, unsigned int last,
     _mult(mult>0? mult: ancestors.size())
 {
     update_solitary();
-#ifdef MULTOVL_DEBUG
-    std::cerr << "anclen = " << ancestors().size() << ", ancstr = \"" << ancstr() << "\"" << std::endl;
+#ifndef NDEBUG
+    std::cerr << "anclen = " << _ancestors.size() << ", ancstr = \"" << anc_str() << "\"" << std::endl;
 #endif
 }
 
@@ -82,9 +82,8 @@ std::vector<int> MultiRegion::ancestor_trackids() const
 {
     std::vector<int> ancids;
     ancids.reserve(ancestors().size());
-    for (ancregset_t::const_iterator ait = ancestors().begin(); ait != ancestors().end(); ++ait)
-    {
-        ancids.push_back(ait->track_id());
+    for (const auto& anc : ancestors()) {
+        ancids.push_back(anc.track_id());
     }
     return ancids;
 }

@@ -48,9 +48,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
-// do not use this unless something goes seriously wrong
-#define MULTOVL_DEBUG
-
 // == Implementation ==
 
 namespace multovl {
@@ -99,7 +96,7 @@ unsigned int ShuffleOvl::shuffle_unionoverlaps(UniformGen& rng,
     return regcount;
 }
 
-#ifdef MULTOVL_DEBUG
+#ifndef NDEBUG
 namespace debug {
     // ad-hoc debug functions
     std::ostream& operator<<(std::ostream& ostr, const Region& reg) {
@@ -121,11 +118,11 @@ namespace debug {
 // Private
 unsigned int ShuffleOvl::shuffle(UniformGen& rng)
 {
-#ifdef MULTOVL_DEBUG
+#ifndef NDEBUG
     using namespace debug;
-    std::cout << "** The contents of _ancregions upon entering shuffle:" << std::endl;
+    std::cerr << "** The contents of _ancregions upon entering shuffle:" << std::endl;
     for (const auto& reg : ancregions()) {
-        std::cout << reg << std::endl;
+        std::cerr << reg << std::endl;
     }
 #endif
 
@@ -137,10 +134,10 @@ unsigned int ShuffleOvl::shuffle(UniformGen& rng)
             }
         }
     }
-#ifdef MULTOVL_DEBUG
-    std::cout << "** The contents of _shuffleables upon entering shuffle:" << std::endl;
+#ifndef NDEBUG
+    std::cerr << "** The contents of _shuffleables upon entering shuffle:" << std::endl;
     for (const auto& reg : _shuffleables) {
-        std::cout << reg << std::endl;
+        std::cerr << reg << std::endl;
     }
 #endif
 
@@ -162,10 +159,10 @@ unsigned int ShuffleOvl::shuffle(UniformGen& rng)
         add_reglimit(sreg);
     }
     
-#ifdef MULTOVL_DEBUG
-    std::cout << "** Reglims contents after adding reshuffled limits:" << std::endl;
+#ifndef NDEBUG
+    std::cerr << "** Reglims contents after adding reshuffled limits:" << std::endl;
     for (const auto& rl : reglims()) {
-        std::cout << rl << std::endl;
+        std::cerr << rl << std::endl;
     }
 #endif
 
@@ -186,8 +183,8 @@ bool ShuffleOvl::place_randomly(UniformGen& rng, AncestorRegion& sreg) const {
         double rnd = rng();
         int newbeg = static_cast<unsigned int>(std::floor((freeN-free1)*rnd)) + free1,
             newend = newbeg + reglen - 1;
-#ifdef MULTOVL_DEBUG
-        std::cout << "** free1=" << free1 << ", freeN=" << freeN
+#ifndef NDEBUG
+        std::cerr << "** free1=" << free1 << ", freeN=" << freeN
             << ", rnd=" << rnd << ", beg=" << newbeg << ", end=" << newend << std::endl;
 #endif
         sreg.set_coords(newbeg, newend);

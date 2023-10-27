@@ -41,9 +41,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 #include <algorithm>
 
-#ifdef DEBUGG
+#ifndef NDEBUG
 #include <iostream>
-#define NDEBUG
 #endif
 
 // -- Own header --
@@ -67,9 +66,9 @@ FreeRegions::FreeRegions(const freeregvec_t& frees)
     for (i=0; i<FREESIZE; ++i)
     {
         unsigned int flen = _frees[i].length();
-        #ifdef DEBUGG
+#ifndef NDEBUG
         std::cerr << "_freelengths[" << i << "] = " << flen << std::endl;
-        #endif
+#endif
         // build up maximal free region length...
         _maxfreelen = std::max(_maxfreelen, flen);
         // ...and total length
@@ -80,9 +79,9 @@ FreeRegions::FreeRegions(const freeregvec_t& frees)
     for (i=1; i<=FREESIZE; ++i)
     {
         _roulette_sectors[i] /= flensum;
-        #ifdef DEBUGG
+#ifndef NDEBUG
         std::cerr << "_roulette_sectors[" << i << "] = " << _roulette_sectors[i] << std::endl;
-        #endif
+#endif
     }
     // looks like 0, 0.15, 0.27, ... , 1.0 sorted
 }
@@ -117,9 +116,9 @@ const freereg_t& FreeRegions::select_free_region(UniformGen& rng, unsigned int m
             std::lower_bound(_roulette_sectors.begin(), _roulette_sectors.end(), rnd);
         idx = (roulit - _roulette_sectors.begin());
         if (idx > 0) --idx; // N free regions, N+1 sector elems
-        #ifdef DEBUGG
+#ifndef NDEBUG
         std::cerr << "Roulette selector: rnd = " << rnd << ", idx = " << idx << std::endl;
-        #endif
+#endif
     } while(_frees[idx].length() < minlen);
     return _frees[idx];
 }
