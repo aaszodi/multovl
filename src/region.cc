@@ -56,5 +56,10 @@ unsigned int Region::last() const {
     return BaseRegion::last() + extension();
 }
 
+void Region::set_coords(unsigned int f, unsigned int l) {
+    unsigned int truefirst = f + extension();
+    unsigned int truelast = l - extension();
+    BaseRegion::set_coords(truefirst, truelast);
+}
 
 }   // namespace multovl

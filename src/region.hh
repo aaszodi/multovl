@@ -119,6 +119,16 @@ class Region: public BaseRegion {
     static
     void set_extension(unsigned int ext) { _extension = ext; }
     
+    /// Sets the coordinates. Enforces f<=l.
+    /// The `f` and `l` parameters are extended coordinates.
+    /// For instance, if the current extension is 10, and you invoke
+    /// `set_coords(50, 80)`, then the "true" coordinates stored inside
+    /// will be `_first=60`, `_last=70`.
+    /// \param f The first, possibly extended coordinate
+    /// \param l the last, possibly extended coordinate
+    virtual
+    void set_coords(unsigned int f, unsigned int l) override;
+
     private:
     
     // data

@@ -102,11 +102,20 @@ BOOST_AUTO_TEST_CASE(extension_test)
     // change it
     Region::set_extension(3);
     BOOST_CHECK_EQUAL(r15.first(), 0); // because extension > first
-    BOOST_CHECK_EQUAL(r46.first(), 1); // here extension could be subtracted
     BOOST_CHECK_EQUAL(r15.last(), 8);
     BOOST_CHECK_EQUAL(r15.length(), 9);
-    // set back to 0
+    BOOST_CHECK_EQUAL(r46.first(), 1); // here `extension` could be subtracted
+    BOOST_CHECK_EQUAL(r46.last(), 9);
+    BOOST_CHECK_EQUAL(r46.length(), 9);
+    // change the extended coordinates
+    // 5 -- 8 ======= 16 -- 19
+    r46.set_coords(5, 19);
+    BOOST_CHECK_EQUAL(r46.first(), 5);
+    BOOST_CHECK_EQUAL(r46.last(), 19);
+    // set extension back to 0
     Region::set_extension(0);
+    BOOST_CHECK_EQUAL(r46.first(), 8);  // `set_coords` stored the non-extended "true" coordinates
+    BOOST_CHECK_EQUAL(r46.last(), 16);
 }
 
 BOOST_AUTO_TEST_CASE(regionser_test)

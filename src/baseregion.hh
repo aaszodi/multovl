@@ -142,8 +142,12 @@ class BaseRegion:
     
     // -- Setters --
     
-    /// Sets the coordinates.
-    /// Enforces f<=l.
+    /// Sets the coordinates. Enforces f<=l.
+    /// This method is virtual, will be overridden in `Region`
+    /// to handle optional region limit extensions.
+    /// \param f The first coordinate
+    /// \param l the last coordinate
+    virtual
     void set_coords(unsigned int f, unsigned int l);
     
     /// Sets the strand
