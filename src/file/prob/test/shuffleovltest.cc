@@ -95,15 +95,29 @@ struct ExpectedResult
 struct ShuffleOvlFixture
 {
     ShuffleOvlFixture():
-    	frees()
+    	frees{
+            Region(50,650,'.',"free1"),
+            Region(690,850,'.',"free2"),
+            Region(900,1400,'.',"free3")
+    	}, 
+    	so3(frees), rng(42),		// use fixed seed for reproducibility
+    	expres()
     {
-    	// free regions
-    	frees.push_back(Region(50,650,'.',"free1"));
-    	frees.push_back(Region(690,850,'.',"free2"));
-    	frees.push_back(Region(900,1400,'.',"free3"));
+        // add regions for triple overlaps
+        // Track 3 will be "shufflable"
+        so3.add(Region(100, 600, '+', "REGa"), 1, false);
+        so3.add(Region(200, 500, '+', "REGb"), 2, false);
+        so3.add(Region(300, 400, '+', "sREGc"), 3, true);
+
+        so3.add(Region(700, 800, '+', "REGd"), 1, false);
+        so3.add(Region(700, 800, '+', "REGe"), 2, false);
+        so3.add(Region(700, 800, '+', "sREGf"), 3, true);
     }
     
     freeregvec_t frees;	// free regions
+    TestShuffleOvl so3;
+	UniformGen rng;
+	ExpectedResult expres;
 };
 
 // little utility function for result checking using the GFF output string format
@@ -168,36 +182,55 @@ bool is_present(const MultiOverlap::reglimset_t& reglims,
 
 BOOST_FIXTURE_TEST_SUITE(multioverlapsuite, ShuffleOvlFixture)
 
-// check the overlaps before shuffling and then does one shuffling
-BOOST_AUTO_TEST_CASE(shuffle_test)
+// shuffle test without extending the ancestor regions
+BOOST_AUTO_TEST_CASE(noext_shuffle_test)
 {
-	TestShuffleOvl so3(frees);
-	UniformGen rng(42);		// fixed seed to be reproducible
-
-    // regions for triple overlaps
-	// Track 3 will be "shufflable"
-    so3.add(Region(100, 600, '+', "REGa"), 1, false);
-    so3.add(Region(200, 500, '+', "REGb"), 2, false);
-    so3.add(Region(300, 400, '+', "sREGc"), 3, true);
-
-    so3.add(Region(700, 800, '+', "REGd"), 1, false);
-    so3.add(Region(700, 800, '+', "REGe"), 2, false);
-    so3.add(Region(700, 800, '+', "sREGf"), 3, true);
-
-    ExpectedResult exp;
-    exp.add(200, 299, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
-    exp.add(300, 400, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:sREGc:+:300-400");
-    exp.add(401, 500, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
-    exp.add(700, 800, 3, "1:REGd:+:700-800|2:REGe:+:700-800|3:sREGf:+:700-800");
+    expres.add(200, 299, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
+    expres.add(300, 400, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:sREGc:+:300-400");
+    expres.add(401, 500, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
+    expres.add(700, 800, 3, "1:REGd:+:700-800|2:REGe:+:700-800|3:sREGf:+:700-800");
 
     // overlaps without reshuffling
     unsigned int regcnt = so3.find_overlaps(1, 2, 0, 0, false); // up to any overlap
-    check_results(regcnt, exp, so3.overlaps());
+    check_results(regcnt, expres, so3.overlaps());
     std::cout << "Reglims after overlapping:" << std::endl;
     so3.print_reglims();
 
     // now we reshuffle and overlap once
     regcnt = so3.shuffle_overlaps(rng, 1, 2, 0, 0, false);
+
+    // check if the fixed tracks remained fixed (ID=1,2)
+    const MultiOverlap::reglimset_t& reglims = so3.reglims();
+    BOOST_CHECK(is_present(reglims, 100, 600, 1));
+    BOOST_CHECK(is_present(reglims, 200, 500, 2));
+    BOOST_CHECK(is_present(reglims, 700, 800, 1));
+    BOOST_CHECK(is_present(reglims, 700, 800, 2));
+
+    // chances are _very_ slim that the reshuffled track 3 regions stayed in place
+    BOOST_CHECK(!is_present(reglims, 300, 400, 3));
+    BOOST_CHECK(!is_present(reglims, 700, 800, 3));
+    
+    std::cout << "Reglims after reshuffling:" << std::endl;
+    so3.print_reglims();
+}
+
+// shuffle test with extended AncestorRegion coordinates
+BOOST_AUTO_TEST_CASE(ext_shuffle_test)
+{
+    static const unsigned int EXT = 20;
+    expres.add(180, 279, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
+    expres.add(280, 420, 3, "1:REGa:+:100-600|2:REGb:+:200-500|3:sREGc:+:300-400");
+    expres.add(421, 520, 2, "1:REGa:+:100-600|2:REGb:+:200-500");
+    expres.add(680, 820, 3, "1:REGd:+:700-800|2:REGe:+:700-800|3:sREGf:+:700-800");
+
+    // overlaps without reshuffling
+    unsigned int regcnt = so3.find_overlaps(1, 2, 0, EXT, false); // up to any overlap
+    check_results(regcnt, expres, so3.overlaps());
+    std::cout << "Reglims after overlapping:" << std::endl;
+    so3.print_reglims();
+
+    // now we reshuffle and overlap once
+    regcnt = so3.shuffle_overlaps(rng, 1, 2, 0, EXT, false);
 
     // check if the fixed tracks remained fixed (ID=1,2)
     const MultiOverlap::reglimset_t& reglims = so3.reglims();
