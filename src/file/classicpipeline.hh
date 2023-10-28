@@ -39,8 +39,14 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "pipeline.hh"
+#include "basepipeline.hh"
+#include "multioverlap.hh"
 #include "classicopts.hh"
+
+// -- Standard headers --
+
+#include <map>
+#include <string>
 
 namespace multovl {
 
@@ -50,7 +56,7 @@ namespace multovl {
 /// The inputs are files (text or binary),
 /// the overlap calculations are serial/single core,
 /// the output goes to a GFF2-formatted text file to standard output.
-class ClassicPipeline: public Pipeline
+class ClassicPipeline: public BasePipeline
 {
 public:
     
@@ -72,9 +78,20 @@ protected:
     virtual
     unsigned int read_input() override;
     
-    // The default 1-CPU implementation is used.
-    // virtual
-    // unsigned int detect_overlaps();
+    /// There is one MultiOverlap object for each chromosome
+    typedef std::map<std::string, MultiOverlap> chrom_multovl_map;
+
+    /// \return const access to the chromosome=>multiple overlap map
+    const chrom_multovl_map& cmovl() const { return _cmovl; }
+
+    /// \return non-const access to the chromosome=>multiple overlap map
+    chrom_multovl_map& cmovl() { return _cmovl; }
+
+    /// Detects the overlaps.
+    /// The default implementation provided here uses 1 CPU core.
+    /// \return the total number of overlaps found, including solitary regions.
+    virtual
+    unsigned int detect_overlaps() override;
     
     /// Writes the results to standard output. Format will be decided based on the options.
     /// If the --save <archfile> option was specified, then the complete status of the program
@@ -89,10 +106,11 @@ protected:
 private:
     
     unsigned int read_tracks();
-    
     bool write_gff_output();
     bool write_bed_output();
     void write_comments();
+    
+    chrom_multovl_map _cmovl;   ///< chromosome ==> MultiOverlap map
 };
 
 }   // namespace multovl

@@ -15,7 +15,7 @@ endif()
 set(movlsrc
     baseregion.cc region.cc ancregion.cc errors.cc reglimit.cc
     polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc
-    basepipeline.cc pipeline.cc
+    basepipeline.cc
 )
 if (MULTOVL_USE_STATIC_LIBS)
 	add_library(movl STATIC ${movlsrc})

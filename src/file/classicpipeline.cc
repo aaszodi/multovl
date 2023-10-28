@@ -67,7 +67,7 @@ namespace serialization {
 
 // Non-intrusive serialization for the Input struct
 template<class Archive>
-void serialize(Archive& ar, multovl::Pipeline::Input& inp, const unsigned int version)
+void serialize(Archive& ar, multovl::ClassicPipeline::Input& inp, const unsigned int version)
 {
     ar & inp.name & inp.trackid & inp.regcnt;
 }
@@ -194,7 +194,31 @@ unsigned int ClassicPipeline::read_tracks()
     return trackid; // number of tracks from which at least 1 region could be read
 }
 
-// NOTE: detect_overlaps() is the default, not overridden
+// Serial implementation of Multovl
+unsigned int ClassicPipeline::detect_overlaps()
+{
+    // the overlaps are detected chromosome by chromosome
+    unsigned int totalcounts = 0;
+    for (chrom_multovl_map::iterator cmit = cmovl().begin();
+        cmit != cmovl().end(); ++cmit)
+    {
+        MultiOverlap& movl = cmit->second;      // "current overlap"
+        
+        // generate and store overlaps
+        if (opt_ptr()->uniregion())
+        {
+            totalcounts += movl.find_unionoverlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), opt_ptr()->maxmult(), opt_ptr()->extension());
+        }
+        else
+        {
+            totalcounts += movl.find_overlaps(opt_ptr()->ovlen(), 
+                opt_ptr()->minmult(), opt_ptr()->maxmult(), 
+                opt_ptr()->extension(), !opt_ptr()->nointrack());
+        }
+    }
+    return totalcounts;
+}
 
 bool ClassicPipeline::write_output()
 {
