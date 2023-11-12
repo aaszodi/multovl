@@ -63,8 +63,6 @@ public:
     /// if parsing goes wrong.
     ProbPipeline(int argc, char* argv[]);
     
-    ~ProbPipeline();
-    
 protected:
     
     /// Default ctor that does not set the option processing object
@@ -129,7 +127,7 @@ protected:
     
     /// \return access to the option-handling object
     virtual
-    ProbOpts* opt_ptr() { return dynamic_cast<ProbOpts*>(opt_pimpl()); }
+    ProbOpts* opt_ptr() { return dynamic_cast<ProbOpts*>(opt_pimpl().get()); }
     
     /// \return const access to the chrom => ShuffleOvl map
     const chrom_shufovl_map& csovl() const { return _csovl; }

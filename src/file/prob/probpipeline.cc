@@ -75,21 +75,10 @@ ProbPipeline::ProbPipeline():
 {}
 
 ProbPipeline::ProbPipeline(int argc, char* argv[]):
-    _csovl(),
-    _stat()
+    ProbPipeline()
 {
     set_optpimpl(new ProbOpts());
     opt_ptr()->process_commandline(argc, argv); // exits on error or help request
-}
-
-ProbPipeline::~ProbPipeline()
-{
-    ProbOpts *op = opt_ptr();
-    if (op != nullptr)
-    {
-        delete op;
-        set_optpimpl(nullptr);
-    }
 }
 
 // -- Virtual method implementations
@@ -179,11 +168,11 @@ unsigned int ProbPipeline::read_free_regions(const std::string& freefile)
     }
     
     // set up csovl() map
-    for (crv_t::const_iterator crvcit = crv.begin(); crvcit != crv.end(); ++crvcit)
+    for (const auto& cr : crv)
     {
-        const std::string& chrom = crvcit->first;
-        const rv_t& regs = crvcit->second;
-        csovl().insert(std::make_pair(chrom,ShuffleOvl(regs)));
+        const std::string& chrom = cr.first;
+        const rv_t& regs = cr.second;
+        csovl().insert(std::make_pair(chrom, ShuffleOvl(regs)));
     }
     return regcnt;
 }

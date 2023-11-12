@@ -50,9 +50,9 @@ namespace multovl {
 
 bool BasePipeline::set_optpimpl(MultovlOptbase* optp)
 {
-    if (_optpimpl == NULL)
+    if (_optpimpl.get() == nullptr)
     {
-        _optpimpl = optp;
+        _optpimpl.reset(optp);
         return true;
     }
     else

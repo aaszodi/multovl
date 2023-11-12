@@ -85,16 +85,6 @@ ClassicPipeline::ClassicPipeline(int argc, char* argv[])
     opt_ptr()->process_commandline(argc, argv); // exits on error or help request
 }
 
-ClassicPipeline::~ClassicPipeline()
-{
-    ClassicOpts *op = opt_ptr();
-    if (op != NULL)
-    {
-        delete op;
-        set_optpimpl(NULL);
-    }
-}
-
 // -- Pipeline virtual method implementations
 
 unsigned int ClassicPipeline::read_input()

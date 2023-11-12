@@ -51,6 +51,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Standard headers --
 
 #include <string>
+#include <memory>
 
 namespace multovl {
 
@@ -69,7 +70,7 @@ public:
     
     /// Default init of a BasePipeline object.
     BasePipeline():
-        _optpimpl(NULL),    // derived classes allocate this
+        _optpimpl(),    // derived classes allocate this
         _inputs(),
         _errors()
     {}
@@ -103,6 +104,7 @@ public:
     
 protected:
     
+    typedef std::unique_ptr<MultovlOptbase> optptr_t;
     typedef std::vector<Input> input_seq_t;
 
     /// Reads the input tracks. Pure virtual.
@@ -123,15 +125,16 @@ protected:
     virtual
     bool write_output() = 0;
     
-    /// Sets the option handling object (invoke in ctor) but only if the pimpl was NULL.
+    /// Sets the option handling object (invoke in ctor) 
+    /// if it was not initialised.
     /// \param optp pointer to an appropriate option handling object instance.
     /// \return /true/ on success, /false/ if opt_ptr() != NULL.
     bool set_optpimpl(MultovlOptbase* optp);
     
-    /// \return access to the option-handling pointer itself
-    MultovlOptbase* opt_pimpl() { return _optpimpl; }
+    /// \return non-const access to the option-handling pointer itself
+    optptr_t& opt_pimpl() { return _optpimpl; }
     
-    /// \return access to the option-handling object.
+    /// \return correctly typed non-const pointer to the option-handling object.
     virtual
     MultovlOptbase* opt_ptr() = 0;
     
@@ -161,7 +164,7 @@ private:
     // Each derived class will have its option-handling object
     // which is derived from MultovlOptbase (parallel inheritance hierarchy). 
     // The ptr to it remains NULL in this base class.
-    MultovlOptbase* _optpimpl;
+    optptr_t _optpimpl;
     input_seq_t _inputs;      ///< vector of input track descriptors
     Errors _errors; ///< collect error messages here
 };

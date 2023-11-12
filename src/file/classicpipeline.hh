@@ -65,8 +65,6 @@ public:
     /// if parsing goes wrong.
     ClassicPipeline(int argc, char* argv[]);
     
-    ~ClassicPipeline();
-    
 protected:
     
     /// Reads the input tracks from files if no --load option was specified.
@@ -101,7 +99,7 @@ protected:
     
     /// \return access to the option-handling object
     virtual
-    ClassicOpts* opt_ptr() { return dynamic_cast<ClassicOpts*>(opt_pimpl()); }
+    ClassicOpts* opt_ptr() { return dynamic_cast<ClassicOpts*>(opt_pimpl().get()); }
     
 private:
     

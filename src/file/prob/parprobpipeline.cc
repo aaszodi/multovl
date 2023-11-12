@@ -61,16 +61,6 @@ ParProbPipeline::ParProbPipeline(int argc, char* argv[]):
     _shufflecounter = opt_ptr()->reshufflings();
 }
 
-ParProbPipeline::~ParProbPipeline()
-{
-    ParProbOpts *op = opt_ptr();
-    if (op != NULL)
-    {
-        delete op;
-        set_optpimpl(NULL);
-    }
-}
-
 // -- Virtual method implementations
 
 unsigned int ParProbPipeline::detect_overlaps()
@@ -114,10 +104,9 @@ void ParProbPipeline::shuffle(
     while(check_update_shufflecounter(progressptr))
     {
         OvlenCounter rndcounter;
-        for (chrom_shufovl_map::iterator csit = csovl.begin();
-             csit != csovl.end(); ++csit)
+        for (auto& cs: csovl)
         {
-            ShuffleOvl& sovl = csit->second;
+            ShuffleOvl& sovl = cs.second;
             
             // generate and store overlaps
             if (opt_ptr()->uniregion())
@@ -141,10 +130,9 @@ void ParProbPipeline::shuffle(
         }
         
         // update the empirical distributions
-        for (OvlenCounter::mtolen_t::const_iterator mtcit = rndcounter.mtolen().begin();
-            mtcit != rndcounter.mtolen().end(); ++mtcit)
+        for (const auto& mtc: rndcounter.mtolen())
         {
-            stat().add(mtcit->first, mtcit->second, false);
+            stat().add(mtc.first, mtc.second, false);
         }
     }
 }

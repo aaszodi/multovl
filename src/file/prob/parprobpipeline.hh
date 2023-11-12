@@ -70,8 +70,6 @@ public:
     /// if parsing goes wrong.
     ParProbPipeline(int argc, char* argv[]);
     
-    ~ParProbPipeline();
-    
 protected:
     
     /// Detects overlaps.
@@ -85,7 +83,7 @@ protected:
     
     /// \return access to the option-handling object
     virtual
-    ParProbOpts* opt_ptr() { return dynamic_cast<ParProbOpts*>(opt_pimpl()); }
+    ParProbOpts* opt_ptr() { return dynamic_cast<ParProbOpts*>(opt_pimpl().get()); }
     
     /// \return thread-safe non-const access to the statistics collector object
     virtual
