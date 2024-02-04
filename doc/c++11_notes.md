@@ -87,3 +87,18 @@ Current state on 2023-03-11
 /usr/include/boost/test/floating_point_comparison.hpp:14:1: note: ‘#pragma message: This header is deprecated. Use <boost/test/tools/floating_point_comparison.hpp> instead.’
    14 | BOOST_HEADER_DEPRECATED( "<boost/test/tools/floating_point_comparison.hpp>" )
 ```
+
+## Boost V 1.83 deprecation issues
+
+The `boost/timer.hpp` header is not allowed any longer. The error can still be
+converted to a warning with the following setting:
+
+```
+#include "boost/version.hpp"
+#if BOOST_VERSION >= 108300
+#define BOOST_TIMER_ENABLE_DEPRECATED
+#endif
+```
+This I added to `probpipeline.cc` and `parprobpipeline.hh` as a stopgap measure
+on 2024-02-04. **TODO** use the "Timer 2" which lives in `boost/timer/timer.hpp`
+and the `boost::timer` namespace instead.

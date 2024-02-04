@@ -41,6 +41,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
+// NOTE: Since V1.83 the "old" timer module is deprecated with an error
+// TODO: change to Timer 2
+#include "boost/version.hpp"
+#if BOOST_VERSION >= 108300
+#define BOOST_TIMER_ENABLE_DEPRECATED
+#endif
 #include "boost/progress.hpp"   // deprecated but pretty ASCII progress display
 
 // -- Standard headers --
