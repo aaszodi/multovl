@@ -149,10 +149,8 @@ namespace impl {
         unsigned int distinct_track_count(const ancregset_t& ancestors)
         {
             std::set<unsigned int> trackidset;
-            for (ancregset_t::const_iterator ancit = ancestors.begin();
-                ancit != ancestors.end(); ++ancit)
-            {
-                unsigned int trackid = ancit->track_id();
+            for (const auto& anc : ancestors) {
+                unsigned int trackid = anc.track_id();
                 trackidset.insert(trackid);
             }
             return trackidset.size();
@@ -232,10 +230,8 @@ unsigned int MultiOverlap::generate_overlaps(
 #ifndef NDEBUG
             std::cerr << "** pos = " << pos << ", other = " << rmiter->other_pos()
                 <<": track = " << rmiter->track_id() << " isfirst = " << rmiter->is_first() << ": ";
-            for (std::set<AncestorRegion>::const_iterator ait = ancestors.begin();
-                    ait != ancestors.end(); ++ait)
-            {
-                std::cerr << ait->to_attrstring() << '|';
+            for (const auto& anc : ancestors) {
+                std::cerr << anc.to_attrstring() << '|';
             }
             std::cerr << std::endl;
 #endif
@@ -340,10 +336,8 @@ unsigned int MultiOverlap::generate_unionoverlaps(
 #ifndef NDEBUG
             std::cerr << "** pos = " << pos << ", other = " << rmiter->other_pos()
                 <<": track = " << rmiter->track_id() << " isfirst = " << rmiter->is_first() << ": ";
-            for (std::set<AncestorRegion>::const_iterator ait = ancestors.begin();
-                    ait != ancestors.end(); ++ait)
-            {
-                std::cerr << ait->to_attrstring() << '|';
+            for (const auto& anc : ancestors) {
+                std::cerr << anc.to_attrstring() << '|';
             }
             std::cerr << std::endl;
 #endif
@@ -426,20 +420,18 @@ MultiOverlap::Counter& MultiOverlap::Counter::operator+=(const Counter& other)
     
     // for each entry in /other/, check if the key is already available in this.
     // if yes, then add the count, if not, then insert
-    for (histo_t::const_iterator otherit = other._histo.begin();
-        otherit != other._histo.end(); ++otherit)
-    {
-        std::string otherkey = otherit->first;
+    for (const auto& oth : other._histo) {
+        std::string otherkey = oth.first;
         histo_t::iterator thisit = _histo.find(otherkey);
         if (thisit == _histo.end())
         {
             // otherkey is not in this, so insert
-            _histo[otherkey] = otherit->second;
+            _histo[otherkey] = oth.second;
         }
         else
         {
             // otherkey already present, increase count
-            thisit->second += otherit->second;
+            thisit->second += oth.second;
         }
     }
     

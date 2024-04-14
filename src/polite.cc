@@ -143,10 +143,8 @@ bool Polite::perform_parsing(int argc, char* argv[])
 			parsed.options, bpo::exclude_positional);
 		if (unknown.size() > 0)
 		{
-			for (vector<string>::const_iterator uit = unknown.begin();
-				uit != unknown.end(); uit++)
-            {
-                add_error("Unknown parameter: " + *uit);
+			for (const auto& unk : unknown) {
+                add_error("Unknown parameter: " + unk);
 			}
 			return false;
 		}

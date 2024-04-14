@@ -97,12 +97,8 @@ struct FileioFixture
     // The BAM input ignores region names, so change them in exps
     void change_region_names(const std::string& newname)
     {
-        for (std::vector<BaseRegion>::iterator eit = exps.begin();
-            eit != exps.end();
-            ++eit
-        )
-        {
-            eit->name(newname);
+        for (auto& ex : exps) {
+            ex.name(newname);
         }
     }
     

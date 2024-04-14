@@ -81,18 +81,20 @@ Errors& Errors::operator+=(const Errors& another)
 
 std::ostream& Errors::print(std::ostream& outf, bool warnings) const
 {
-    std::vector<std::string>::const_iterator it;
-    for (it = _errors.begin(); it != _errors.end(); ++it)
-        outf << (*it) << std::endl;
-    if (error_count() > 0)
+    for (const auto& err: _errors) {
+        outf << err << std::endl;
+    }
+    if (error_count() > 0) {
         outf << _errprefix << "total = " << error_count() << std::endl;
+    }
     
-    if (warnings)
-    {
-        for (it = _warnings.begin(); it != _warnings.end(); ++it)
-            outf << (*it) << std::endl;
-        if (warning_count() > 0)
+    if (warnings) {
+        for (const auto& warn: _warnings) {
+            outf << warn << std::endl;
+        }
+        if (warning_count() > 0) {
             outf << _warnprefix << "total = " << warning_count() << std::endl;
+        }
     }
     return outf;
 }

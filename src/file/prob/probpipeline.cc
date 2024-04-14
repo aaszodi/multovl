@@ -63,11 +63,9 @@ namespace prob {
 
 void ProbPipeline::OvlenCounter::update(const MultiOverlap::multiregvec_t& overlaps)
 {
-    for (MultiOverlap::multiregvec_t::const_iterator mrcit = overlaps.begin();
-        mrcit != overlaps.end(); ++mrcit)
-    {
-        unsigned int m = mrcit->multiplicity(),
-            len = mrcit->length();
+    for (const auto& ovl : overlaps) {
+        unsigned int m = ovl.multiplicity(),
+            len = ovl.length();
         _mtolen[m] += len;
     }
 }

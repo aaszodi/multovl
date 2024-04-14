@@ -211,11 +211,8 @@ int main(int argc, char *argv[])
 		for (unsigned int ch = 0; ch < chromcnt; ++ch)
 		{
 		    multovl::io::BedLinewriter blw(chroms[ch]);
-		    for (regvec_t::const_iterator rit = regvecs[i].begin();
-		        rit != regvecs[i].end(); ++rit
-		    )
-		    {
-		        out << blw.write(*rit) << std::endl;
+		    for (const auto& reg : regvecs[i]) {
+		        out << blw.write(reg) << std::endl;
             }
 		}
 		out.close();

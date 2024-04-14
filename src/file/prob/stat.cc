@@ -78,9 +78,8 @@ void Stat::add(unsigned int multiplicity,
 
 void Stat::evaluate()
 {
-    for (diter_t dit = _distrs.begin(); dit != _distrs.end(); ++dit)
-    {
-        dit->second.evaluate();
+    for (auto& distr : _distrs) {
+        distr.second.evaluate();
     }
 }
 

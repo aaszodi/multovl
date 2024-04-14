@@ -117,10 +117,8 @@ unsigned int ClassicPipeline::read_tracks()
     const str_vec& inputfiles = opt_ptr()->input_files();
     unsigned int trackid = 0;   // current ID, will be equal to the number of OK tracks on return
     
-    for (str_vec::const_iterator ifit = inputfiles.begin();
-        ifit != inputfiles.end(); ++ifit)
-    {
-        Input currinp(*ifit);
+    for (const auto& inf : inputfiles) {
+        Input currinp(inf);
         io::FileReader reader(currinp.name);    // automatic format detection
         if (!reader.errors().ok())
         {
@@ -189,10 +187,8 @@ unsigned int ClassicPipeline::detect_overlaps()
 {
     // the overlaps are detected chromosome by chromosome
     unsigned int totalcounts = 0;
-    for (chrom_multovl_map::iterator cmit = cmovl().begin();
-        cmit != cmovl().end(); ++cmit)
-    {
-        MultiOverlap& movl = cmit->second;      // "current overlap"
+    for (auto& cm : cmovl()) {
+        MultiOverlap& movl = cm.second;      // "current overlap"
         
         // generate and store overlaps
         if (opt_ptr()->uniregion())
@@ -267,20 +263,16 @@ bool ClassicPipeline::write_gff_output()
     write_comments();
     
     // process each chromosome in turn
-    for (chrom_multovl_map::const_iterator cmit = cmovl().begin();
-        cmit != cmovl().end(); ++cmit)
-    {
+    for (const auto& cm : cmovl()) {
         io::GffLinewriter lw(
             opt_ptr()->source(), 
-            2, cmit->first
+            2, cm.first
         );    // init with chromosome
-        const MultiOverlap::multiregvec_t& mregs = cmit->second.overlaps();
+        const MultiOverlap::multiregvec_t& mregs = cm.second.overlaps();
         
         // simply write the regions
-        for (MultiOverlap::multiregvec_t::const_iterator mregit = mregs.begin();
-            mregit != mregs.end(); ++mregit)
-        {
-            std::cout << lw.write(*mregit) << std::endl;
+        for (const auto& mreg : mregs) {
+            std::cout << lw.write(mreg) << std::endl;
         }
     }
     return true;    // cannot really go wrong
@@ -292,17 +284,13 @@ bool ClassicPipeline::write_bed_output()
     write_comments();
     
     // process each chromosome in turn
-    for (chrom_multovl_map::const_iterator cmit = cmovl().begin();
-        cmit != cmovl().end(); ++cmit)
-    {
-        io::BedLinewriter lw(cmit->first); // init with chromosome
-        const MultiOverlap::multiregvec_t& mregs = cmit->second.overlaps();
+    for (const auto& cm : cmovl()) {
+        io::BedLinewriter lw(cm.first); // init with chromosome
+        const MultiOverlap::multiregvec_t& mregs = cm.second.overlaps();
         
         // simply write the regions
-        for (MultiOverlap::multiregvec_t::const_iterator mregit = mregs.begin();
-            mregit != mregs.end(); ++mregit)
-        {
-            std::cout << lw.write(*mregit) << std::endl;
+        for (const auto& mreg : mregs) {
+            std::cout << lw.write(mreg) << std::endl;
         }
     }
     return true;    // cannot really go wrong
@@ -316,10 +304,8 @@ void ClassicPipeline::write_comments()
 {
     // count "histograms": overlap combinations
     MultiOverlap::Counter counter;
-    for (chrom_multovl_map::iterator cmit = cmovl().begin();
-        cmit != cmovl().end(); ++cmit)
-    {
-        cmit->second.overlap_stats(counter);      // "current overlap"
+    for (auto& cm : cmovl()) {
+        cm.second.overlap_stats(counter);      // "current overlap"
     }
     
     // the command-line parameters
@@ -332,15 +318,13 @@ void ClassicPipeline::write_comments()
             << opt_ptr()->load_from() << std::endl;
     }
     std::cout << "# Input files = " << inputs().size() << std::endl;
-    for (input_seq_t::const_iterator it = inputs().begin();
-        it != inputs().end(); ++it)
-    {
-        std::cout << "# " << it->name;
-        if (it->trackid > 0)
+    for (const auto& inp : inputs()) {
+        std::cout << "# " << inp.name;
+        if (inp.trackid > 0)
         {
             std::cout << " = track " 
-                << it->trackid << ", region count = " 
-                << it->regcnt;
+                << inp.trackid << ", region count = " 
+                << inp.regcnt;
         } else {
             std::cout << " : skipped";
         }

@@ -102,3 +102,42 @@ converted to a warning with the following setting:
 This I added to `probpipeline.cc` and `parprobpipeline.hh` as a stopgap measure
 on 2024-02-04. **TODO** use the "Timer 2" which lives in `boost/timer/timer.hpp`
 and the `boost::timer` namespace instead.
+
+## Traditional `for` loops
+
+2024-04-14
+
+Decided to replace the `for (i=0; i<n; ++i)` - style `for` loops 
+with `for( const auto&x : ctr)` loops as much as possible.
+
+Detected with the following command:
+
+`find src -name '*.cc' -exec egrep -l 'for.?\(.+;' {} \;`
+
+Finds the following source files:
+
+```
+src/multioverlap.cc <-FIXED
+src/multiregion.cc <-NOFIX_NEEDED
+src/exercise/inputfiles.cc <-FIXED
+src/errors.cc <-FIXED
+src/test/multioverlaptest.cc <-NOFIX_NEEDED
+src/test/baseregiontest.cc <-NOFIX_NEEDED
+src/polite.cc <-FIXED
+src/file/test/fileiotest.cc <-FIXED
+src/file/classicpipeline.cc <-FIXED
+src/file/prob/test/shuffleovltest.cc <-NOFIX_NEEDED
+src/file/prob/test/empirdistrtest.cc <-NOFIX_NEEDED
+src/file/prob/test/stattest.cc <-NOFIX_NEEDED
+src/file/prob/test/freeregionstest.cc <-NOFIX_NEEDED
+src/file/prob/probopts.cc <-NOFIX_NEEDED
+src/file/prob/probpipeline.cc <-FIXED
+src/file/prob/stat.cc <-FIXED
+src/file/prob/shuffleovl.cc <-NOFIX_NEEDED
+src/file/prob/parprobpipeline.cc <-NOFIX_NEEDED
+src/file/prob/freeregions.cc <-NOFIX_NEEDED
+```
+
+Those files in which the `for` loops were updated are marked with "FIXED".
+In some cases the "old-style" `for` loop is semantically correct (e.g.
+because it was an integer-iteration-variable loop), the annotation above is "NOFIX_NEEDED".
