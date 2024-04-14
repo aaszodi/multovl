@@ -69,7 +69,7 @@ unsigned int ParProbPipeline::detect_overlaps()
     unsigned int acts = calc_actual_overlaps();
     
     // optional ASCII progress bar to stderr
-    boost::timer::progress_display *progress = NULL;
+    boost::timer::progress_display *progress = nullptr;
     if (opt_ptr()->progress())
     {
         // prints display at creation time
@@ -143,7 +143,7 @@ unsigned int ParProbPipeline::check_update_shufflecounter(boost::timer::progress
     unsigned int oldcounter = _shufflecounter;
     if (_shufflecounter > 0)
     {
-        if (progressptr != NULL)
+        if (progressptr != nullptr)
             ++(*progressptr);
         --_shufflecounter;
     }

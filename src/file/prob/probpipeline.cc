@@ -271,7 +271,7 @@ unsigned int ProbPipeline::detect_overlaps()
     // now estimate the null distribution by reshuffling the shufflable tracks, 
     // and re-doing the overlaps with the same settings
     unsigned int maxreshufflings = opt_ptr()->reshufflings();
-    boost::timer::progress_display *progress = NULL;
+    boost::timer::progress_display *progress = nullptr;
     if (opt_ptr()->progress())
     {
         // prints display at creation time
@@ -323,7 +323,7 @@ unsigned int ProbPipeline::detect_overlaps()
     if (opt_ptr()->progress())
     {
         delete progress;
-        progress = NULL;
+        progress = nullptr;
     }
     
     // evaluate the stats

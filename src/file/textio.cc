@@ -62,7 +62,7 @@ TextReader::TextReader(
     Fileformat::Kind format
 ):
     TrackReader(),
-    _lrp(NULL),
+    _lrp(nullptr),
     _inf(),
     _linecount(0),
     _valid(false)

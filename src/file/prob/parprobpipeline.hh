@@ -104,9 +104,9 @@ private:
     /// If it is >0, then this means there are still jobs to do. The counter will be 
     /// decremented and the worker performs one reshuffling. If it is 0, then the
     /// worker knows that it can stop, there are no more shuffling jobs.
-    /// \param progressptr if not NULL then the global progress object is updated
+    /// \param progressptr if not nullptr then the global progress object is updated
     /// \return the number of remaining shuffles, 0 indicates the thread may stop
-    unsigned int check_update_shufflecounter(boost::timer::progress_display* progressptr=NULL);
+    unsigned int check_update_shufflecounter(boost::timer::progress_display* progressptr=nullptr);
 
     unsigned int _shufflecounter;
     std::mutex _shufflecounter_mutex, _stat_mutex;

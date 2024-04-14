@@ -128,7 +128,7 @@ protected:
     /// Sets the option handling object (invoke in ctor) 
     /// if it was not initialised.
     /// \param optp pointer to an appropriate option handling object instance.
-    /// \return /true/ on success, /false/ if opt_ptr() != NULL.
+    /// \return /true/ on success, /false/ if opt_ptr() != nullptr.
     bool set_optpimpl(MultovlOptbase* optp);
     
     /// \return non-const access to the option-handling pointer itself
@@ -163,7 +163,7 @@ private:
 
     // Each derived class will have its option-handling object
     // which is derived from MultovlOptbase (parallel inheritance hierarchy). 
-    // The ptr to it remains NULL in this base class.
+    // The ptr to it remains nullptr in this base class.
     optptr_t _optpimpl;
     input_seq_t _inputs;      ///< vector of input track descriptors
     Errors _errors; ///< collect error messages here

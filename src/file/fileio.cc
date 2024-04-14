@@ -51,7 +51,7 @@ FileReader::FileReader(
     const std::string& infname,
     Fileformat::Kind format
 ):
-    _reader(NULL),
+    _reader(nullptr),
     _finished(false)
 {
     // figure out the file format
