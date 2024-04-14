@@ -81,6 +81,7 @@ Current state on 2023-03-11
 /usr/include/boost/progress.hpp:23:1: note: ‘#pragma message: This header is deprecated. Use the facilities in <boost/timer/timer.hpp> or <boost/timer/progress_display.hpp> instead.’
    23 | BOOST_HEADER_DEPRECATED( "the facilities in <boost/timer/timer.hpp> or <boost/timer/progress_display.hpp>" )
 ```
+2024-04-14: fixed, see below.
 
 ```
                  from /home/andras/DEV/WORK/multovl/src/file/prob/test/empirdistrtest.cc:36:
@@ -100,8 +101,9 @@ converted to a warning with the following setting:
 #endif
 ```
 This I added to `probpipeline.cc` and `parprobpipeline.hh` as a stopgap measure
-on 2024-02-04. **TODO** use the "Timer 2" which lives in `boost/timer/timer.hpp`
-and the `boost::timer` namespace instead.
+on 2024-02-04. 
+**UPDATE** 2024-04-14: Replaced `#include "boost/progress.hpp"` with
+`#include "boost/timer/progress_display.hpp"`, compiles fine with Boost V1.74
 
 ## Traditional `for` loops
 

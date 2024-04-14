@@ -69,11 +69,11 @@ unsigned int ParProbPipeline::detect_overlaps()
     unsigned int acts = calc_actual_overlaps();
     
     // optional ASCII progress bar to stderr
-    boost::progress_display *progress = NULL;
+    boost::timer::progress_display *progress = NULL;
     if (opt_ptr()->progress())
     {
         // prints display at creation time
-        progress = new boost::progress_display(opt_ptr()->reshufflings(), std::cerr);
+        progress = new boost::timer::progress_display(opt_ptr()->reshufflings(), std::cerr);
     }
     
     // now estimate the null distribution in parallel by reshuffling the shufflable tracks, 
@@ -96,7 +96,7 @@ unsigned int ParProbPipeline::detect_overlaps()
 // Worker thread
 void ParProbPipeline::shuffle(
     unsigned int rndseed,
-    boost::progress_display* progressptr
+    boost::timer::progress_display* progressptr
 )
 {
     UniformGen rng(rndseed);
@@ -137,7 +137,7 @@ void ParProbPipeline::shuffle(
     }
 }
 
-unsigned int ParProbPipeline::check_update_shufflecounter(boost::progress_display* progressptr)
+unsigned int ParProbPipeline::check_update_shufflecounter(boost::timer::progress_display* progressptr)
 {
     std::lock_guard<std::mutex> lock(_shufflecounter_mutex);  // 1 thread only
     unsigned int oldcounter = _shufflecounter;

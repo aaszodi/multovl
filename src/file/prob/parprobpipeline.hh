@@ -44,13 +44,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-// NOTE: Since V1.83 the "old" timer module is deprecated with an error
-// TODO: change to Timer 2
-#include "boost/version.hpp"
-#if BOOST_VERSION >= 108300
-#define BOOST_TIMER_ENABLE_DEPRECATED
-#endif
-#include "boost/progress.hpp"
+#include "boost/timer/progress_display.hpp"
 
 // -- Standard headers --
 
@@ -103,7 +97,7 @@ private:
 
     void shuffle(
         unsigned int rndseed,
-        boost::progress_display* progressptr
+        boost::timer::progress_display* progressptr
     );
     
     /// Before a worker thread starts a shuffle, the shuffle counter will be checked.
@@ -112,7 +106,7 @@ private:
     /// worker knows that it can stop, there are no more shuffling jobs.
     /// \param progressptr if not NULL then the global progress object is updated
     /// \return the number of remaining shuffles, 0 indicates the thread may stop
-    unsigned int check_update_shufflecounter(boost::progress_display* progressptr=NULL);
+    unsigned int check_update_shufflecounter(boost::timer::progress_display* progressptr=NULL);
 
     unsigned int _shufflecounter;
     std::mutex _shufflecounter_mutex, _stat_mutex;

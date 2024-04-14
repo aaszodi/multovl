@@ -41,13 +41,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-// NOTE: Since V1.83 the "old" timer module is deprecated with an error
-// TODO: change to Timer 2
-#include "boost/version.hpp"
-#if BOOST_VERSION >= 108300
-#define BOOST_TIMER_ENABLE_DEPRECATED
-#endif
-#include "boost/progress.hpp"   // deprecated but pretty ASCII progress display
+#include "boost/timer/progress_display.hpp"
 
 // -- Standard headers --
 
@@ -277,11 +271,11 @@ unsigned int ProbPipeline::detect_overlaps()
     // now estimate the null distribution by reshuffling the shufflable tracks, 
     // and re-doing the overlaps with the same settings
     unsigned int maxreshufflings = opt_ptr()->reshufflings();
-    boost::progress_display *progress = NULL;
+    boost::timer::progress_display *progress = NULL;
     if (opt_ptr()->progress())
     {
         // prints display at creation time
-        progress = new boost::progress_display(maxreshufflings, std::cerr);
+        progress = new boost::timer::progress_display(maxreshufflings, std::cerr);
     }
     UniformGen rng(opt_ptr()->random_seed());
     for (unsigned int r = 0; r < maxreshufflings; ++r)
