@@ -99,7 +99,9 @@ protected:
     
     /// \return access to the option-handling object
     virtual
-    ClassicOpts* opt_ptr() { return dynamic_cast<ClassicOpts*>(opt_pimpl().get()); }
+    ClassicOpts* opt_ptr() override { 
+        return dynamic_cast<ClassicOpts*>(opt_pimpl().get());
+    }
     
 private:
     
