@@ -81,7 +81,7 @@ public:
     // END of member class Exception
     
     // -- methods
-	    
+        
     /**
      * Constructs an object so that it is ready to do a CDF approximation
      * with a number of cells

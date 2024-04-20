@@ -107,7 +107,7 @@ class BedLinewriter: public Linewriter
     /// regions to be stringified
     /// \param prefix the chromosome prefix, "chr" by default
     explicit BedLinewriter(const std::string& chrom): 
-    	Linewriter(chrom) {}
+        Linewriter(chrom) {}
     
     /// Writes a BaseRegion to a string (no newline) in BED format and returns it.
     /// The name of the region is written into the 4th column ("name"),
@@ -142,7 +142,7 @@ class GffLinewriter: public Linewriter
     /// regions to be stringified
     /// \param prefix the chromosome prefix, "chr" by default
     GffLinewriter(const std::string& source, unsigned int version, 
-    	const std::string& chrom);
+        const std::string& chrom);
     
     /// Writes a BaseRegion to a string (no newline) in GFF format and returns it.
     /// The score column will be '.', columns 8 and 9 (frame, attributes)
