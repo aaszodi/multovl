@@ -98,7 +98,8 @@ fi
 TOOLCHAIN=${2:-"gnu"}
 
 # Build in this subdirectory
-BUILDDIR="quickbuild/${TOOLCHAIN}/release"
+# the `build` is always there
+BUILDDIR="build/${TOOLCHAIN}/release"
 
 # Configure
 mkdir -p $BUILDDIR

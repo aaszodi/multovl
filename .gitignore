@@ -8,10 +8,6 @@ thirdparty/zlib-1.2.8/zconf.h
 thirdparty/zlib-1.2.8/zconf.h.included
 
 # Build and project directories
-# By convention 'build' contains 'debug' and 'release'
-build
-debug
-release
 xcode
 
 # Do not track Eclipse project setup files
