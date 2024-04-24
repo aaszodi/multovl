@@ -5,7 +5,8 @@
 # "gnu" = The Gnu Compiler Collection
 #       with the special cases "gcc6" and "gcc7"
 #       on (Linux) installations with several versions
-# "intel" = The Intel compilers ("classic" ICC/ICPC)
+# "intel" = The "classic" Intel compilers (ICC/ICPC)
+# "oneapi" = The OneAPI Intel compilers (ICX/ICPX)
 # "sunpro" = Solaris Studio compilers
 # "xlc" = IBM XL/C compilers
 # "nvc" = Nvidia HPC SDK
@@ -19,6 +20,9 @@ elseif (TOOLCHAIN STREQUAL "gnu")
 elseif (TOOLCHAIN STREQUAL "intel")
     set(CMAKE_C_COMPILER "icc")
     set(CMAKE_CXX_COMPILER "icpc")
+elseif (TOOLCHAIN STREQUAL "oneapi")
+    set(CMAKE_C_COMPILER "icx")
+    set(CMAKE_CXX_COMPILER "icpx")
 elseif (TOOLCHAIN STREQUAL "sunpro")
     set(CMAKE_C_COMPILER "cc")
     set(CMAKE_CXX_COMPILER "CC")
