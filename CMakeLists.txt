@@ -32,7 +32,7 @@
 #
 # By convention I put all the various build directories under multovl/build.
 #
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.20.5)
 
 # Directory layout:-
 # multovl					<== ${CMAKE_SOURCE_DIR}: top-level
@@ -67,6 +67,9 @@ if (TOOLCHAIN)
     include("${MYCMAKE_PATH}/toolchain.cmake")
 endif()
 project(multovl C CXX)
+if(TOOLCHAIN MATCHES "oneapi")
+    find_package(IntelSYCL REQUIRED) # for heterogeneous apps, etc.
+endif()
 
 # Brief system/compiler description
 message(STATUS "System = ${CMAKE_SYSTEM_NAME}")
