@@ -165,11 +165,11 @@ int main(int argc, char *argv[])
     }
     
     // create data directory if necessary
+    // like `mkdir -p`
     if (outdir != ".")
     {
         try
         {
-            boost::filesystem::remove_all(outdir);
             boost::filesystem::create_directories(outdir);
         } catch (const boost::filesystem::filesystem_error& err) {
             std::cerr << "! Failed to create output dir \"" << outdir << "\": " <<

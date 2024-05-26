@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
-# Runs a given MULTOVL variant "forever" with big input files
-# Can be used to detect 'random' crashes in multithreaded versions
+# Runs a given MULTOVL variant with big input files
+# Can be used for timing or to detect 'random' crashes in multithreaded versions
 # 2012-04-16 AA
 
 # -- Directories --
@@ -12,6 +12,7 @@ DATA=${TEST}/running
 
 # -- Default values for script parameters --
 
+REPEAT=1
 CHROM=20
 DELTA=10
 GROUPCNT=1000
@@ -22,9 +23,10 @@ TRACKNO=8
 print_usage()
 {
     cat <<HERE 
-Script to run a MULTOVL variant with big input files 'forever'
+Script to run a MULTOVL variant with big input files
 Usage: `basename $0` [script-options] program [program-options]
 Script options:
+    -r <repeat>: Number of repeated runs, default ${REPEAT}
     -c <chrom>: number of chromosomes in input files, default ${CHROM}
     -d <delta>: relative shift of regions, default ${DELTA}
     -g <groupcnt>: number of overlap groups, default ${GROUPCNT}
@@ -35,14 +37,15 @@ HERE
 
 # == MAIN ==
 
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
 	print_usage
 	exit 99
 fi
 
-while getopts c:d:g:t:h OPTION
+while getopts r:c:d:g:t:h OPTION
 do
     case $OPTION in
+        r) REPEAT=$OPTARG ;;
         c) CHROM=$OPTARG ;;
         d) DELTA=$OPTARG ;;
         g) GROUPCNT=$OPTARG ;;
@@ -51,34 +54,33 @@ do
     esac
 done
 shift `expr $OPTIND - 1`
-if [ $# -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
 	echo "You must specify the path to the program to be run."
 	exit 1
 fi
-if [ ! -x $1 ]; then
+if [[ ! -x $1 ]]; then
 	echo "Program $1 not found or is not executable."
 	exit 2
 fi
 
-# this is the setup part
-OUTPUT_FILE=${DATA}/runner_output.txt
-if [ -d ${DATA} ]; then
-    echo "Making a clean slate in exercise directory ${DATA}"
-    rm -rf ${DATA}/track_*.bed
-    rm -f ${OUTPUT_FILE}
-else
-    echo "Creating exercise directory ${DATA}"
-    mkdir -p ${DATA}
-fi
-
-echo "Making input files..."
+# setup
+TIMER_FILE=${DATA}/timer_output.txt
+OUTPUT_FILE=${DATA}/program_output.txt
+echo "Creating exercise directory ${DATA}"
+mkdir -p ${DATA}
+rm -f ${TIMER_FILE}
 INPUTCMD="${TEST}/inputfiles -c ${CHROM} -d ${DELTA} -D ${DATA} -t ${TRACKNO} -g ${GROUPCNT}"
-echo $INPUTCMD
-$INPUTCMD
-echo "Run program $1 'forever' (Ctrl-C to stop)..."
 
-while true; do
-	$@ ${DATA}/*.bed > ${OUTPUT_FILE} 2>&1
+for iter in $(seq $REPEAT); do
+    echo "Run ${iter}"
+    # clean slate
+    rm -f ${DATA}/track_*.bed
+    rm -f ${OUTPUT_FILE}
+    # make new input
+    ${INPUTCMD}
+    # command to execute and redirect its outputs
+    # do the timing
+	/usr/bin/time -f "user %U system %S elapsed %E CPU %P" -a -o ${TIMER_FILE} $@ ${DATA}/track_*.bed >& ${OUTPUT_FILE}
     if [ $? != 0 ]; then
         echo "Program failure, check ${OUTPUT_FILE}"
         break
