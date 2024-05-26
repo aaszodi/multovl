@@ -71,6 +71,13 @@ mkdir -p ${DATA}
 rm -f ${TIMER_FILE}
 INPUTCMD="${TEST}/inputfiles -c ${CHROM} -d ${DELTA} -D ${DATA} -t ${TRACKNO} -g ${GROUPCNT}"
 
+# time output format for Linux only (GNU extension)
+if [[ $(uname -s) = "Linux" ]]; then
+    # this mimics the format under MacOS
+    TIMER_FMT="-f \"\t%E real\t%U user\t%S sys\t%P CPU\""
+else
+    TIMER_FMT=""
+fi
 for iter in $(seq $REPEAT); do
     echo "Run ${iter}"
     # clean slate
@@ -80,7 +87,7 @@ for iter in $(seq $REPEAT); do
     ${INPUTCMD}
     # command to execute and redirect its outputs
     # do the timing
-	/usr/bin/time -f "user %U system %S elapsed %E CPU %P" -a -o ${TIMER_FILE} $@ ${DATA}/track_*.bed >& ${OUTPUT_FILE}
+	/usr/bin/time  ${TIMER_FMT} -a -o ${TIMER_FILE} $@ ${DATA}/track_*.bed >& ${OUTPUT_FILE}
     if [ $? != 0 ]; then
         echo "Program failure, check ${OUTPUT_FILE}"
         break

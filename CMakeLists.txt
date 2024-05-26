@@ -179,7 +179,8 @@ include("${THIRDPARTY_DIR}/CMakeLists.txt")
 include_directories(
     ${SRCDIR}
     ${SRCDIR}/config
-    ${Boost_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIR} # On MacOS, both seem to be needed
+    ${Boost_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
     ${BAMTOOLS_INCLUDE_DIRS}
 )
