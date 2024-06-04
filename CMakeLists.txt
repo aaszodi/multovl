@@ -189,49 +189,9 @@ include_directories(
 
 # -- SOURCE TREE --
 
-# we collect the app targets in this "truly global" variable
-# which can be updated from subdirectories
-# thanks to Robert J Maynard,
-# http://stackoverflow.com/questions/4372512/global-variables-in-cmake-for-dependency-tracking
-set(app_targets CACHE INTERNAL "app targets" FORCE)
-
-if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
-    include(CTest)
-    enable_testing()
-    
-    # "truly global" variables
-    set(utestlibs 
-        ${BAMTOOLS_LIBRARIES}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SERIALIZATION_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-    CACHE INTERNAL "unit test libs" FORCE
-    )
-    set(unit_test_targets CACHE INTERNAL "unit test targets" FORCE)
-    
-    # Code coverage
-    # Currently only GNU compiler + gcov 
-    include("${CMAKE_SOURCE_DIR}/cmake/coverage.cmake")
-    if(GCOV_CAPABLE_COMPILER)
-        set(CMAKE_CXX_FLAGS "-g -O0 -Wall ${GCOV_COMPILER_FLAGS}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCOV_COMPILER_FLAGS}")
-        message(STATUS "Coverage tests were set up.")
-    endif()
-endif()
-
 # Add the source directory and recursively everything under it
 # (see respective CMakeLists.txt files therein)
 add_subdirectory(${SRCDIR} bin)
-
-# custom target to make all apps at once
-add_custom_target(apps DEPENDS ${app_targets})
-
-# ... and the unit tests
-if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_custom_target(unit_tests DEPENDS ${unit_test_targets})
-endif()
 
 # Doxygen documentation
 find_package(Doxygen)

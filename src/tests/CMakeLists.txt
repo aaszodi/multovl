@@ -1,6 +1,6 @@
-# == src/test/CMakeLists.txt for generic Multovl component testing ==
+# == src/tests/CMakeLists.txt for generic Multovl component testing ==
 
-include_directories(${SRCDIR} ${SRCDIR}/config ${SRCDIR}/test)
+include_directories(${SRCDIR} ${SRCDIR}/config ${SRCDIR}/tests)
 
 # -- Unit tests --
 
@@ -9,15 +9,15 @@ include_directories(${SRCDIR} ${SRCDIR}/config ${SRCDIR}/test)
 add_library(testhelper STATIC tempfile.cc)
 flag_fix(testhelper)
 
-# libraries that may be needed by the unit tests
-set (genericlibs
+set(utestlibs
     testhelper
     movl cfg
-)
-set(utestlibs
-    ${genericlibs}
-    ${utestlibs}
-    CACHE INTERNAL "unit test libs"
+    ${BAMTOOLS_LIBRARIES}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SERIALIZATION_LIBRARY}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 )
 
 # the test framework needs a #define when linked dynamically
@@ -35,6 +35,10 @@ set(testprogs
     multiregiontest errortest 
     politetest multovloptstest
     multioverlaptest timertest
+    fileformattest fileiotest
+    linereadertest linewritertest
+    empirdistrtest freeregionstest
+    stattest shuffleovltest
 )
 
 foreach(testprog ${testprogs})
@@ -44,9 +48,4 @@ foreach(testprog ${testprogs})
 	add_test(${testprog} ${testdir}/${testprog})
 endforeach(testprog)
 
-# add to global unit test target list
-set(unit_test_targets 
-    ${unit_test_targets}
-    ${testprogs}
-    CACHE INTERNAL "unit test targets"
-)
+add_custom_target(unit_tests DEPENDS ${testprogs})

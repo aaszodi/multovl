@@ -56,13 +56,6 @@ add_executable(multovl_config multovl_config.c)
 target_link_libraries(multovl_config cfg)
 flag_fix(multovl_config)
 
-# add to global app target list
-set(app_targets 
-    ${app_targets}
-    multovl_config
-    CACHE INTERNAL "app targets"
-)
-
 # install won't find non-toplevel targets
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
