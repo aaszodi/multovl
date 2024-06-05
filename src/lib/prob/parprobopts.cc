@@ -37,7 +37,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Own header --
 
 #include "multovl/prob/parprobopts.hh"
-#include "thirdparty.h"
 
 // -- Boost headers --
 
@@ -96,11 +95,7 @@ std::ostream& ParProbOpts::print_help(std::ostream& out) const
         << "file1, file2, ... will be reshuffled, there must be at least one" << std::endl
         << "Reshuffling can be done in parallel on multicore machines" << std::endl
         << "Default number of threads on this machine is " << DEFAULT_THREADS << std::endl
-		<< "Accepted input file formats: BED, GFF/GTF" ;
-    if (config_have_bamtools()) {
-        out << ", BAM";
-    }
-    out << " (detected from extension)" << std::endl
+		<< "Accepted input file formats: BED, GFF/GTF, BAM (detected from extension)" << std::endl
 		<< "Output goes to stdout" << std::endl;
 	Polite::print_help(out);
 	return out;

@@ -43,7 +43,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "multovl/io/fileio.hh"
 #include "multovl/baseregion.hh"
-#include "thirdparty.h"
 using namespace multovl;
 
 // -- Boost headers --
@@ -194,14 +193,9 @@ BOOST_AUTO_TEST_CASE(fromtextfile_test)
 
 BOOST_AUTO_TEST_CASE(frombamfile_test)
 {
-    if (config_have_bamtools()) {
-        BOOST_TEST_MESSAGE("Running BAM file input test");  // these are expected to be OK
-        change_region_names("bam");
-        test_goodfile("rega12.bam"); // hard-coded input file name!
-    } else {
-        BOOST_TEST_MESSAGE("BAM file input test skipped");
-        BOOST_CHECK(true);
-    }
+    BOOST_TEST_MESSAGE("Running BAM file input test");  // these are expected to be OK
+    change_region_names("bam");
+    test_goodfile("rega12.bam"); // hard-coded input file name!
 }
 
 // NOTE: Johanna was right (again)

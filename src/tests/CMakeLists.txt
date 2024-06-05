@@ -11,7 +11,7 @@ flag_fix(testhelper)
 
 set(utestlibs
     testhelper
-    movl_prob movl cfg
+    movl_prob movl
     ${BAMTOOLS_LIBRARIES}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}

@@ -42,7 +42,7 @@ using namespace std;
 // -- Own headers --
 
 #include "multovl/polite.hh"
-#include "thirdparty.h"
+#include "multovl/config.hh"
 
 namespace multovl {
 
@@ -157,8 +157,8 @@ bool Polite::perform_parsing(int argc, char* argv[])
 
 ostream& Polite::version_info(ostream& out) const
 {
-    out << config_boost_version() << endl
-        << config_bamtools() << endl;
+    out << config::library_version("Boost") << endl
+        << config::library_version("BamTools") << endl;
 	return out;
 }
 

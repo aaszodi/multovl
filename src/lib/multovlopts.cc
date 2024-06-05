@@ -41,8 +41,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Own header --
 
 #include "multovl/multovlopts.hh"
-#include "version.h"
-#include "build.h"
+#include "multovl/config.hh"
 
 // == Implementation ==
 
@@ -126,18 +125,12 @@ bool MultovlOptbase::check_variables()
 std::ostream& MultovlOptbase::print_version(std::ostream& out) const
 {
     version_info(out);
-    Polite::version_info(out);
     return out;
 }
 
 std::ostream& MultovlOptbase::version_info(std::ostream& out) const
 {
-	out << "Version " << config_version() << std::endl
-	    << "Git revision: " << config_gitrevdate() << " ["
-	    << config_gitrev() << "]" << std::endl
-	    << "Build: " << config_build_type() << std::endl
-	    << "Compiler: " << config_build_compiler() << std::endl
-	    << "System: " << config_build_system() << std::endl;
+	out << config::detailed_versioninfo(); // \n-terminated string
 	return out;
 }
 

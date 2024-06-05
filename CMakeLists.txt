@@ -47,7 +47,6 @@ cmake_minimum_required(VERSION 3.20.5)
 # │   ├── docker     
 # │   └── singularity
 # └── src                   <== ${SRCDIR}: application main source files
-#     ├── config            <== C source for the config/build information library
 #     ├── exercise          <== timing tests
 #     ├── incl              <== top-level header file directory: -I this
 #     │   └── multovl       <== Multovl headers (*.hh) in `multovl` namespace
@@ -89,6 +88,9 @@ set(MULTOVL_VERSION_MAJOR ${CMAKE_MATCH_1})
 string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${ver})
 set(MULTOVL_VERSION_MINOR ${CMAKE_MATCH_1})
 set(MULTOVL_VERSION ${MULTOVL_VERSION_MAJOR}.${MULTOVL_VERSION_MINOR})
+
+# Git revision
+include(${MYCMAKE_PATH}/gitrev.cmake)
 
 # Multi-config environments (CMAKE_BUILD_TYPE not used)
 set(MULTICONFIG OFF)
@@ -181,7 +183,6 @@ include("${THIRDPARTY_DIR}/CMakeLists.txt")
 # All the include directories
 include_directories(
     ${SRCDIR}
-    ${SRCDIR}/config
     ${SRCDIR}/incl
     ${Boost_INCLUDE_DIR} # On MacOS, both seem to be needed
     ${Boost_INCLUDE_DIRS}
@@ -225,12 +226,12 @@ endif(DOXYGEN_FOUND)
 
 if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
-    set(_applications multovl_config multovl multovlprob parmultovlprob)
+    set(_applications multovl multovlprob parmultovlprob)
     install(TARGETS ${_applications}
         RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
     
     # libraries
-    set(_libraries cfg movl movl_prob ${BAMTOOLS_CORE_LIBRARY}) # without Zlib
+    set(_libraries movl movl_prob ${BAMTOOLS_CORE_LIBRARY}) # without Zlib
     if(NOT ZLIB_FOUND)
         # not provided by system, install "our own"
         set(_libraries ${_libraries} ${ZLIB_LIBRARIES})

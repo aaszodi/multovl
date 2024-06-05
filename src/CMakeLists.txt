@@ -4,14 +4,11 @@
 
 include_directories(${SRCDIR}/incl)
 
-# Configuration library
-add_subdirectory(config)
-
 # Multovl library (libmovl.{a,so})
 add_subdirectory(lib)
 
 # basic set of libraries
-set(MULTOVLIBS movl cfg ${BAMTOOLS_LIBRARIES} ${MULTOVL_BOOST_LIBS})   # library order does matter in Linux/g++
+set(MULTOVLIBS movl ${BAMTOOLS_LIBRARIES} ${MULTOVL_BOOST_LIBS})
 
 # Unit tests
 if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -45,7 +42,7 @@ flag_fix(parmultovlprob)
 
 # target to build all apps
 add_custom_target(apps DEPENDS 
-    multovl_config multovl 
+    multovl 
     multovlprob parmultovlprob)
 
 
