@@ -51,7 +51,7 @@ using namespace std;
 
 // -- Own header --
 
-#include "linereader.hh"
+#include "multovl/io/linereader.hh"
 
 // -- Implementation --
 

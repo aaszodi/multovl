@@ -50,8 +50,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Library headers --
 
-#include "trackio.hh"
-#include "fileformat.hh"
+#include "multovl/io/trackio.hh"
+#include "multovl/io/fileformat.hh"
 
 namespace multovl {
 namespace io {

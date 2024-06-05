@@ -43,7 +43,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Library headers --
 
-#include "empirdistr.hh"
+#include "multovl/prob/empirdistr.hh"
 
 // -- Boost headers --
 

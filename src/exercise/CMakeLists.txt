@@ -1,8 +1,6 @@
 # CMakeLists.txt for exercising the MULTOVL programs
 # unlike the unit tests, these will be built also for Release
 
-include_directories(${SRCDIR} ${SRCDIR}/file)
-
 # Programs needed for exercising
 # currently, it is only "inputfiles"
 # that makes bogus input files
@@ -13,11 +11,11 @@ else()
 endif()
 flag_fix(inputfiles)
 if (MULTOVL_USE_STATIC_LIBS)
-	target_link_libraries(inputfiles movl_fileio ${MULTOVLIBS})
+	target_link_libraries(inputfiles ${MULTOVLIBS})
 else()
 	# Even though `inputfiles` doesn't need BamTools,
-	# `movl_fileio` wants that when linking dynamically
-	target_link_libraries(inputfiles movl_fileio ${MULTOVLIBS} ${BAMTOOLS_LIBRARIES})
+	# `movl` wants that when linking dynamically
+	target_link_libraries(inputfiles ${MULTOVLIBS} ${BAMTOOLS_LIBRARIES})
 endif()
 
 # Test scripts

@@ -55,9 +55,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "probpipeline.hh"
-using namespace multovl;
-using namespace prob;
+#include "multovl/prob/probpipeline.hh"
 
 // == MAIN ==
 
@@ -66,7 +64,7 @@ int main(int argc, char *argv[])
     try
     {
         // set up and run pipeline
-        ProbPipeline pipeline(argc, argv);
+        multovl::prob::ProbPipeline pipeline(argc, argv);
         bool ok = pipeline.run();
         if (!ok)
         {

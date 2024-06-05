@@ -45,7 +45,7 @@ using namespace std;
 
 // -- Own headers --
 
-#include "shuffleovl.hh"
+#include "multovl/prob/shuffleovl.hh"
 using namespace multovl;
 using namespace multovl::prob;
 

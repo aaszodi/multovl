@@ -43,8 +43,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Library headers --
 
-#include "multioverlap.hh"
-#include "freeregions.hh"
+#include "multovl/multioverlap.hh"
+#include "multovl/prob/freeregions.hh"
 
 // -- Boost headers --
 

@@ -36,11 +36,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "fileio.hh"
-#include "textio.hh"
-#include "bamio.hh"
+#include "multovl/io/fileio.hh"
+#include "multovl/io/textio.hh"
+#include "multovl/io/bamio.hh"
 
-#include "multioverlap.hh"
+#include "multovl/multioverlap.hh"
 
 // == Implementation ==
 

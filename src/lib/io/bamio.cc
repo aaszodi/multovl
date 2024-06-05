@@ -36,7 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "bamio.hh"
+#include "multovl/io/bamio.hh"
 
 // == Implementation ==
 

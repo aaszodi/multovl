@@ -52,8 +52,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "baseregion.hh"
-#include "errors.hh"
+#include "multovl/baseregion.hh"
+#include "multovl/errors.hh"
 
 namespace multovl {
 namespace io {

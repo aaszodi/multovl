@@ -38,8 +38,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- own headers --
 
-#include "empirdistr.hh"
-#include "randomgen.hh" // note: this is implicitly tested here
+#include "multovl/prob/empirdistr.hh"
+#include "multovl/prob/randomgen.hh" // note: this is implicitly tested here
 using namespace multovl;
 using namespace prob;
 

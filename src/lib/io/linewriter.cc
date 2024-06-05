@@ -36,9 +36,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Library headers --
 
-#include "linewriter.hh"
-#include "region.hh"
-#include "multiregion.hh"
+#include "multovl/io/linewriter.hh"
+#include "multovl/region.hh"
+#include "multovl/multiregion.hh"
 
 // -- Implementation --
 

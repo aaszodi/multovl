@@ -40,7 +40,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "multovlopts.hh"
+#include "multovl/multovlopts.hh"
 #include "version.h"
 #include "build.h"
 

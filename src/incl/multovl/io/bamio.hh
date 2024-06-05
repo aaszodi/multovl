@@ -51,9 +51,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Library headers --
 
-#include "trackio.hh"
-#include "fileformat.hh"
-#include "baseregion.hh"
+#include "multovl/io/trackio.hh"
+#include "multovl/io/fileformat.hh"
+#include "multovl/baseregion.hh"
 
 // -- BAM tools --
 

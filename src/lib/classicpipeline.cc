@@ -36,11 +36,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "classicpipeline.hh"
-#include "fileio.hh"
-#include "multioverlap.hh"
-#include "baseregion.hh"
-#include "linewriter.hh"
+#include "multovl/classicpipeline.hh"
+#include "multovl/io/fileio.hh"
+#include "multovl/multioverlap.hh"
+#include "multovl/baseregion.hh"
+#include "multovl/io/linewriter.hh"
 #include "version.h"
 #include "build.h"
 

@@ -45,13 +45,14 @@ using namespace std;
 
 // -- Own headers --
 
-#include "multioverlap.hh"
-#include "multiregion.hh"
+#include "multovl/multioverlap.hh"
+#include "multovl/multiregion.hh"
+#include "tempfile.hh"  // for serialization
+
 using namespace multovl;
 
 #include "boost/archive/text_iarchive.hpp"
 #include "boost/archive/text_oarchive.hpp"
-#include "tempfile.hh"  // for serialization
 
 // -- Fixture --
 

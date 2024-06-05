@@ -37,7 +37,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- own header --
 
-#include "fileformat.hh"
+#include "multovl/io/fileformat.hh"
 using namespace multovl::io;
 
 BOOST_AUTO_TEST_SUITE(fileformatsuite)

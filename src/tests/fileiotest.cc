@@ -41,8 +41,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- own headers --
 
-#include "fileio.hh"
-#include "baseregion.hh"
+#include "multovl/io/fileio.hh"
+#include "multovl/baseregion.hh"
 #include "thirdparty.h"
 using namespace multovl;
 
@@ -123,7 +123,7 @@ struct FileioFixture
             // ...won't return...
         }
         boost::filesystem::path inputpath = 
-            curpath / "src" / "test" / "data" / filename;
+            curpath / "src" / "tests" / "data" / filename;
         return inputpath.string();
     }
     

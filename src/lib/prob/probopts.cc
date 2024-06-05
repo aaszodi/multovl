@@ -36,7 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "probopts.hh"
+#include "multovl/prob/probopts.hh"
 #include "thirdparty.h"
 
 // -- Boost headers --

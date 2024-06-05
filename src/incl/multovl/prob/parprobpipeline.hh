@@ -39,8 +39,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "probpipeline.hh"
-#include "parprobopts.hh"
+#include "multovl/prob/probpipeline.hh"
+#include "multovl/prob/parprobopts.hh"
 
 // -- Boost headers --
 

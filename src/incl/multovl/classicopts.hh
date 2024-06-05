@@ -46,7 +46,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Base class header --
 
-#include "multovlopts.hh"
+#include "multovl/multovlopts.hh"
 
 // == Classes ==
 

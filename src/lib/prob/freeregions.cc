@@ -47,7 +47,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "freeregions.hh"
+#include "multovl/prob/freeregions.hh"
 
 // == Implementation ==
 

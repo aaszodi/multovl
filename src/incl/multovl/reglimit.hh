@@ -51,7 +51,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "ancregion.hh"     // pulls in region.hh as well
+#include "multovl/ancregion.hh"     // pulls in region.hh as well
 
 // == Classes ==
 

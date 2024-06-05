@@ -37,7 +37,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "ancregion.hh"
+#include "multovl/ancregion.hh"
 using namespace multovl;
 #include "tempfile.hh"  // temporary file utility
 

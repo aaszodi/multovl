@@ -60,7 +60,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "baseregion.hh"
+#include "multovl/baseregion.hh"
 
 namespace multovl {
 

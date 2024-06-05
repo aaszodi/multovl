@@ -36,7 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "errors.hh"
+#include "multovl/errors.hh"
 
 // == Implementation ==
 

@@ -43,8 +43,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "errors.hh"
-#include "multovlopts.hh"
+#include "multovl/errors.hh"
+#include "multovl/multovlopts.hh"
 
 // -- Boost headers --
 

@@ -37,8 +37,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "multiregion.hh"
-#include "region.hh"
+#include "multovl/multiregion.hh"
+#include "multovl/region.hh"
 using namespace multovl;
 #include "tempfile.hh"  // temporary file utility
 

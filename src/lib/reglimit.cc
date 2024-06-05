@@ -36,7 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "reglimit.hh"
+#include "multovl/reglimit.hh"
 
 // -- Boost headers --
 

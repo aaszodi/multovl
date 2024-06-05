@@ -34,7 +34,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </LICENSE> */
 // == MODULE timer.cc ==
 
-#include "timer.hh"
+#include "multovl/timer.hh"
 
 // -- Standard headers --
 

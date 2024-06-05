@@ -7,7 +7,8 @@
 
 set(movlsrc
     baseregion.cc region.cc ancregion.cc errors.cc reglimit.cc
-    polite.cc multioverlap.cc multovlopts.cc multiregion.cc timer.cc
+    polite.cc multioverlap.cc multovlopts.cc classicopts.cc
+    multiregion.cc timer.cc
     basepipeline.cc classicpipeline.cc
 )
 if (MULTOVL_USE_STATIC_LIBS)

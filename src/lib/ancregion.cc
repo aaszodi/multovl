@@ -45,7 +45,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "ancregion.hh"
+#include "multovl/ancregion.hh"
 
 // == Implementation ==
 

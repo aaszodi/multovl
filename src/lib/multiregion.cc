@@ -42,7 +42,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "multiregion.hh"
+#include "multovl/multiregion.hh"
 
 // -- Boost headers --
 

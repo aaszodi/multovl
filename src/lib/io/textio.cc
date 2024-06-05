@@ -36,8 +36,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "textio.hh"
-#include "linereader.hh"
+#include "multovl/io/textio.hh"
+#include "multovl/io/linereader.hh"
 
 // -- Standard library --
 

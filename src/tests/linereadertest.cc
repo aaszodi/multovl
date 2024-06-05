@@ -44,7 +44,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <limits>
 
-#include "linereader.hh"
+#include "multovl/io/linereader.hh"
 using namespace multovl;
 
 struct LinereaderFixture

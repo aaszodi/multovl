@@ -40,7 +40,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "classicopts.hh"
+#include "multovl/classicopts.hh"
 #include "thirdparty.h"
 
 // -- Boost headers --

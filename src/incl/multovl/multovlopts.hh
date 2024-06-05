@@ -46,7 +46,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Polite header --
 
-#include "polite.hh"
+#include "multovl/polite.hh"
 
 // == Classes ==
 

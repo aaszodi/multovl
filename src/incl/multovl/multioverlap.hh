@@ -59,8 +59,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "reglimit.hh"
-#include "multiregion.hh"
+#include "multovl/reglimit.hh"
+#include "multovl/multiregion.hh"
 
 // == Classes ==
 

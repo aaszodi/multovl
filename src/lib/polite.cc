@@ -41,7 +41,7 @@ using namespace std;
 
 // -- Own headers --
 
-#include "polite.hh"
+#include "multovl/polite.hh"
 #include "thirdparty.h"
 
 namespace multovl {

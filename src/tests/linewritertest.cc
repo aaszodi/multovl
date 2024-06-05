@@ -39,8 +39,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include "linewriter.hh"
-#include "multiregion.hh"
+#include "multovl/io/linewriter.hh"
+#include "multovl/multiregion.hh"
 using namespace multovl;
 
 struct LinewriterFixture

@@ -68,8 +68,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "region.hh"
-#include "linewriter.hh"
+#include "multovl/region.hh"
+#include "multovl/io/linewriter.hh"
 
 // -- Typedefs --
 

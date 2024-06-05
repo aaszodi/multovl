@@ -39,9 +39,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "basepipeline.hh"
-#include "multioverlap.hh"
-#include "classicopts.hh"
+#include "multovl/basepipeline.hh"
+#include "multovl/multioverlap.hh"
+#include "multovl/classicopts.hh"
 
 // -- Standard headers --
 

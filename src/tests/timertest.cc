@@ -48,7 +48,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 using namespace std;
 
-#include "timer.hh"
+#include "multovl/timer.hh"
 using namespace multovl;
 
 static void sleep_seconds(int sec)

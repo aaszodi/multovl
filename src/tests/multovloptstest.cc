@@ -47,7 +47,7 @@ using namespace std;
 
 // -- Own header --
 
-#include "multovlopts.hh"
+#include "multovl/multovlopts.hh"
 using namespace multovl;
 
 // gets rid of annoying "deprecated conversion from string constant blah blah" warning

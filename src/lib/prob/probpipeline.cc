@@ -36,8 +36,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "probpipeline.hh"
-#include "fileio.hh"
+#include "multovl/prob/probpipeline.hh"
+#include "multovl/io/fileio.hh"
 
 // -- Boost headers --
 

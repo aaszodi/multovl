@@ -179,6 +179,7 @@ include("${THIRDPARTY_DIR}/CMakeLists.txt")
 include_directories(
     ${SRCDIR}
     ${SRCDIR}/config
+    ${SRCDIR}/incl
     ${Boost_INCLUDE_DIR} # On MacOS, both seem to be needed
     ${Boost_INCLUDE_DIRS}
     ${ZLIB_INCLUDE_DIRS}
@@ -188,6 +189,21 @@ include_directories(
 # -- END OF LIBRARIES --
 
 # -- SOURCE TREE --
+
+# Unit tests
+if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+    include(CTest)
+    enable_testing()
+    
+    # Code coverage
+    # Currently only GNU compiler + gcov 
+    include("${CMAKE_SOURCE_DIR}/cmake/coverage.cmake")
+    if(GCOV_CAPABLE_COMPILER)
+        set(CMAKE_CXX_FLAGS "-g -O0 -Wall ${GCOV_COMPILER_FLAGS}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCOV_COMPILER_FLAGS}")
+        message(STATUS "Coverage tests were set up.")
+    endif()
+endif()
 
 # Add the source directory and recursively everything under it
 # (see respective CMakeLists.txt files therein)

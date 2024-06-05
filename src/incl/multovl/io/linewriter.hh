@@ -51,7 +51,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "multiregion.hh"
+#include "multovl/multiregion.hh"
 
 namespace multovl {
 

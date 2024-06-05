@@ -39,10 +39,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "basepipeline.hh"
-#include "stat.hh"
-#include "shuffleovl.hh"
-#include "probopts.hh"
+#include "multovl/basepipeline.hh"
+#include "multovl/prob/stat.hh"
+#include "multovl/prob/shuffleovl.hh"
+#include "multovl/prob/probopts.hh"
 
 namespace multovl {
 namespace prob {

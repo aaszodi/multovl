@@ -36,7 +36,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "empirdistr.hh"
+#include "multovl/prob/empirdistr.hh"
 
 // -- Boost headers --
 

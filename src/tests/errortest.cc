@@ -37,7 +37,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- own header --
 
-#include "errors.hh"
+#include "multovl/errors.hh"
 using namespace multovl;
 
 // -- standard --

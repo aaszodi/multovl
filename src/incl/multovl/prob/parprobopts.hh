@@ -46,7 +46,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Base class header --
 
-#include "probopts.hh"
+#include "multovl/prob/probopts.hh"
 
 // == Classes ==
 

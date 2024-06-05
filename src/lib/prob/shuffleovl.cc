@@ -40,7 +40,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own header --
 
-#include "shuffleovl.hh"
+#include "multovl/prob/shuffleovl.hh"
 
 // -- Boost headers --
 

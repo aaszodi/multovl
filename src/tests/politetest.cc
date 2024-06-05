@@ -46,7 +46,7 @@ using namespace std;
 
 // -- Library headers --
 
-#include "polite.hh"
+#include "multovl/polite.hh"
 using namespace multovl;
 
 // -- Derived classes --

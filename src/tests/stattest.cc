@@ -38,7 +38,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- own headers --
 
-#include "stat.hh"
+#include "multovl/prob/stat.hh"
 using namespace multovl;
 using namespace prob;
 

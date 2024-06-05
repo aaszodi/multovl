@@ -52,11 +52,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "classicpipeline.hh"
-#include "multioverlap.hh"
-#include "multiregion.hh"
-#include "fileio.hh"
-using namespace multovl;
+#include "multovl/classicpipeline.hh"
 
 // == MAIN ==
 
@@ -65,7 +61,7 @@ int main(int argc, char *argv[])
     try
     {
         // set up and run pipeline
-        ClassicPipeline pipeline(argc, argv);
+        multovl::ClassicPipeline pipeline(argc, argv);
         bool ok = pipeline.run();
         if (!ok)
         {

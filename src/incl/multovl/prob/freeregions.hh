@@ -45,8 +45,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Own headers --
 
-#include "baseregion.hh"
-#include "randomgen.hh"
+#include "multovl/baseregion.hh"
+#include "multovl/prob/randomgen.hh"
 
 // -- System headers --
 

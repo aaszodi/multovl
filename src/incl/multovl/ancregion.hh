@@ -55,7 +55,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Library headers --
 
-#include "region.hh"    // base class for AncestorRegion
+#include "multovl/region.hh"    // base class for AncestorRegion
 
 namespace multovl {
 
