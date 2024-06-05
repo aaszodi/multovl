@@ -55,10 +55,3 @@ flag_fix(cfg)
 add_executable(multovl_config multovl_config.c)
 target_link_libraries(multovl_config cfg)
 flag_fix(multovl_config)
-
-# install won't find non-toplevel targets
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    # apps
-    install(TARGETS multovl_config RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
-endif()
-
