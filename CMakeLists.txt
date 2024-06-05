@@ -5,9 +5,9 @@
 # cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \ <-- define for Makefile targets, not for Visual Studio or XCode
 #   -DBOOST_ROOT=/path/to/boost \ <-- default is "/usr/local/boost"
 #   -DBoost_INCLUDE_DIR=/path/to/boost/include \ <-- optional if not found automatically, note the "Boost_..." spelling
-#	-DBOOST_LIBRARYDIR=/path/to/boost/libs \ <-- optional if not found automatically
+#   -DBOOST_LIBRARYDIR=/path/to/boost/libs \ <-- optional if not found automatically
 #   -DUSE_SYSTEM_ZLIB \ <-- optional, default ON under UNIX, OFF under Windows
-#	-DZLIB_ROOT=/path/to/zlib <- location of Zlib, ignored if USE_SYSTEM_ZLIB is OFF
+#   -DZLIB_ROOT=/path/to/zlib <- location of Zlib, ignored if USE_SYSTEM_ZLIB is OFF
 #   ..
 #
 # The Debug build will contain the unit tests but no INSTALL or PACKAGE targets.
@@ -15,16 +15,16 @@
 # Generators for multi-configuration IDEs will enable both.
 #
 # Static vs shared/dynamic linking:-
-#	By default everything will be linked statically. To link everything dynamically, specify
-#	-DMULTOVL_USE_STATIC_LIBS:BOOL=OFF
-#	You can specify dynamic linkage for each of the 3rd party libraries (not recommended)
-#	by setting 
-#	-D{Boost,BAMTOOLS}_USE_STATIC_LIBS:BOOL=OFF as appropriate.
+#   By default everything will be linked statically. To link everything dynamically, specify
+#   -DMULTOVL_USE_STATIC_LIBS:BOOL=OFF
+#   You can specify dynamic linkage for each of the 3rd party libraries (not recommended)
+#   by setting 
+#   -D{Boost,BAMTOOLS}_USE_STATIC_LIBS:BOOL=OFF as appropriate.
 #
 # Optional parameters:-
 #   -DTOOLCHAIN=<toolchain> for choosing C and C++ compilers, see 'cmake/toolchain.cmake'
 #   -DCMAKE_CXX_COMPILER=<compiler> for using a C++ compiler other than the system default
-#	-DCMAKE_C_COMPILER=<compiler> for using a C compiler other than the system default
+#   -DCMAKE_C_COMPILER=<compiler> for using a C compiler other than the system default
 #   -DCMAKE_INSTALL_PREFIX=/inst/path for defining the installation root,
 #       makes sense only when CMAKE_BUILD_TYPE=Release
 #
@@ -35,27 +35,30 @@
 cmake_minimum_required(VERSION 3.20.5)
 
 # Directory layout:-
-# multovl					<== ${CMAKE_SOURCE_DIR}: top-level
-# ├── cmake					<== extra CMake includes (finders, OS-specific hacks...)
-# ├── thirdparty			<== Third-party support libraries
-# │   ├── bamtools			<== BamTools V2.3.1 (AA) modified version
-# │   └── zlib				<== Zlib V1.2.8 to be compiled on Windows
-# ├── doc					<== ${DOCDIR}: Documentation
-# │   ├── doxygen			<== Doxygen input
-# │   └── html				<== HTML docs under version control, e.g. user guide
+# multovl                   <== ${CMAKE_SOURCE_DIR}: top-level
+# ├── cmake                 <== extra CMake includes (finders, OS-specific hacks...)
+# ├── thirdparty            <== Third-party support libraries
+# │   ├── bamtools          <== BamTools V2.3.1 (AA) modified version
+# │   └── zlib              <== Zlib V1.2.8 to be compiled on Windows
+# ├── doc                   <== ${DOCDIR}: Documentation
+# │   ├── doxygen           <== Doxygen input
+# │   └── html              <== HTML docs under version control, e.g. user guide
 # ├── containers            <== Containerization setup
 # │   ├── docker     
 # │   └── singularity
-# └── src					<== ${SRCDIR}: generic multovl components
-#     ├── config			<== C source for the config/build information library
-#     ├── exercise			<== timing tests
-#     ├── file				<== file-based: "classic" multovl
-#     │   ├── prob			<== overlap probabilities: [par]multovlprob
-#     │   │   └── test		<== unit tests for multovlprob components
-#     │   └── test			<== unit tests for file-based multovl components (mainly I/O)
-#     ├── scripts			<== ${SCRIPTS}: helper scripts
-#     └── test				<== unit tests for generic multovl components
-#         └── data			<== input files for unit tests
+# └── src                   <== ${SRCDIR}: application main source files
+#     ├── config            <== C source for the config/build information library
+#     ├── exercise          <== timing tests
+#     ├── incl              <== top-level header file directory: -I this
+#     │   └── multovl       <== Multovl headers (*.hh) in `multovl` namespace
+#     │       ├── io        <== Input-output headers in `multovl::io` namespace
+#     │       └── prob      <== Probability calculation headers in `multovl::prob` namespace
+#     ├── lib               <== Multovl library implementation sources (*.cc)
+#     │   ├── io            <== Input-output implementation sources
+#     │   └── prob          <== Probability implementation sources
+#     ├── scripts           <== ${SCRIPTS}: helper scripts
+#     └── tests             <== unit tests
+#         └── data          <== input files for unit tests
 
 # Extra Find... modules, include files
 set(MYCMAKE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
@@ -146,7 +149,7 @@ set(Boost_USE_MULTITHREADED ON)
 # If Boost is linked statically, then the Visual Studio runtime must be static, too
 if(MSVC AND Boost_USE_STATIC_LIBS)
     set(Boost_USE_STATIC_RUNTIME ON 
-		CACHE BOOL "Shall the Boost libraries be linked against the static runtime?")
+        CACHE BOOL "Shall the Boost libraries be linked against the static runtime?")
 endif()
 
 # The minimum Boost version
@@ -154,14 +157,14 @@ set(BOOST_MINIMUM_VERSION "1.74.0")
 
 find_package( Boost ${BOOST_MINIMUM_VERSION}
     COMPONENTS filesystem system 
-	unit_test_framework program_options serialization
+    unit_test_framework program_options serialization
 )
 
 # list of Boost libraries needed by apps
 set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY} 
     ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-	${Boost_SERIALIZATION_LIBRARY}
+    ${Boost_SERIALIZATION_LIBRARY}
 )
 
 # -- Third-party libraries --
@@ -226,22 +229,22 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     
     # shared libraries
     if(NOT MULTOVL_USE_STATIC_LIBS)
-    	install(FILES 
-    		${CMAKE_BINARY_DIR}/bamtools/libbamtools.so.${BAMTOOLS_VERSION}
-    		${CMAKE_BINARY_DIR}/bin/libmovl.so
-    		${CMAKE_BINARY_DIR}/bin/file/libmovl_fileio.so
-			PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE 
-				GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-			DESTINATION ${MULTOVL_DESTDIR}/lib
-    	)
-    	# BamTools shared object symlink
-		install(CODE "execute_process( \
-			COMMAND ${CMAKE_COMMAND} -E create_symlink \
-			${CMAKE_BINARY_DIR}/bamtools/libbamtools.so.${BAMTOOLS_VERSION} \
-			${CMAKE_BINARY_DIR}/bamtools/libbamtools.so   \
-			)"
-		)
-	endif()
+        install(FILES 
+            ${CMAKE_BINARY_DIR}/bamtools/libbamtools.so.${BAMTOOLS_VERSION}
+            ${CMAKE_BINARY_DIR}/bin/libmovl.so
+            ${CMAKE_BINARY_DIR}/bin/file/libmovl_fileio.so
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE 
+                GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+            DESTINATION ${MULTOVL_DESTDIR}/lib
+        )
+        # BamTools shared object symlink
+        install(CODE "execute_process( \
+            COMMAND ${CMAKE_COMMAND} -E create_symlink \
+            ${CMAKE_BINARY_DIR}/bamtools/libbamtools.so.${BAMTOOLS_VERSION} \
+            ${CMAKE_BINARY_DIR}/bamtools/libbamtools.so   \
+            )"
+        )
+    endif()
     
     # scripts
     # Note: install(PROGRAMS... wouldn't add the exec permissions)
