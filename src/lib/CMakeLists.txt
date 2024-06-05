@@ -16,10 +16,12 @@ if (MULTOVL_USE_STATIC_LIBS)
 else()
 	add_library(movl SHARED ${movlsrc})
 endif()
+target_link_libraries(movl PUBLIC cfg ${BAMTOOLS_LIBRARIES} ${MULTOVL_BOOST_LIBS})
 flag_fix(movl)
 
 # Additional I/O components
 include("io/components.cmake")
 
-# Probability library
+# -- Multovl Probability library --
+
 add_subdirectory(prob)

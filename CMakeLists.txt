@@ -224,27 +224,30 @@ endif(DOXYGEN_FOUND)
 # -- INSTALLATION --
 
 if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
-    # apps are installed from their respective subdirs
-    # see corresponding CMakeLists.txt files
+    # apps
+    set(_applications multovl_config multovl multovlprob parmultovlprob)
+    install(TARGETS ${_applications}
+        RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
     
-    # shared libraries
-    if(NOT MULTOVL_USE_STATIC_LIBS)
-        install(FILES 
-            ${CMAKE_BINARY_DIR}/bamtools/libbamtools.so.${BAMTOOLS_VERSION}
-            ${CMAKE_BINARY_DIR}/bin/libmovl.so
-            ${CMAKE_BINARY_DIR}/bin/file/libmovl_fileio.so
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE 
-                GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-            DESTINATION ${MULTOVL_DESTDIR}/lib
-        )
-        # BamTools shared object symlink
-        install(CODE "execute_process( \
-            COMMAND ${CMAKE_COMMAND} -E create_symlink \
-            ${CMAKE_BINARY_DIR}/bamtools/libbamtools.so.${BAMTOOLS_VERSION} \
-            ${CMAKE_BINARY_DIR}/bamtools/libbamtools.so   \
-            )"
-        )
+    # libraries
+    set(_libraries cfg movl movl_prob ${BAMTOOLS_CORE_LIBRARY}) # without Zlib
+    if(NOT ZLIB_FOUND)
+        # not provided by system, install "our own"
+        set(_libraries ${_libraries} ${ZLIB_LIBRARIES})
     endif()
+    if(MULTOVL_USE_STATIC_LIBS)
+        install(TARGETS  ${_libraries}
+            ARCHIVE DESTINATION ${MULTOVL_DESTDIR}/lib)
+    else()
+        # `NAMELINK_COMPONENT` takes care of BamTools .so symlink
+        install(TARGETS ${_libraries}
+            LIBRARY NAMELINK_COMPONENT DESTINATION ${MULTOVL_DESTDIR}/lib)
+    endif()
+    
+    # library headers
+    install(DIRECTORY ${SRCDIR}/incl/
+        DESTINATION ${MULTOVL_DESTDIR}/include
+        FILES_MATCHING PATTERN "*.hh")
     
     # scripts
     # Note: install(PROGRAMS... wouldn't add the exec permissions)
@@ -280,18 +283,29 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
     
     # Select package generators
-    if (UNIX)
-        set(CPACK_GENERATOR "TGZ")
-        set(CPACK_SOURCE_GENERATOR "TGZ")
-    elseif(WIN32)
+    if(WIN32)
         set(CPACK_GENERATOR "ZIP")
         set(CPACK_SOURCE_GENERATOR "ZIP")
+    else()
+        # UNIX
+        set(CPACK_GENERATOR "TGZ")
+        set(CPACK_SOURCE_GENERATOR "TGZ")
     endif()
     
-    # executable package (no source)
-    set(CPACK_IGNORE_FILES "cmake/;src/;build/;debug/;release/;\\\\.project;\\\\.git;"/\\\\.hh$";"/\\\\.a$";\\\\.DS_Store")
-    
     # source package    
-    set(CPACK_SOURCE_IGNORE_FILES "build/;debug/;containers/singularity/sandboxes;release/;\\\\.DS_Store;\\\\.project;\\\\.git")
+    set(CPACK_SOURCE_IGNORE_FILES
+        build/
+        debug/
+        release/
+        containers/singularity/sandboxes/
+        \\.git
+        \\.DS_Store
+    )
+    # Executable package
+    set(CPACK_IGNORE_FILES
+        ${CPACK_SOURCE_IGNORE_FILES}
+        cmake/
+        src/
+    )
     include(CPack)
 endif()
