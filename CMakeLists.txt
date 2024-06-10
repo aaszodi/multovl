@@ -77,10 +77,11 @@ endif()
 message(STATUS "System = ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
 
-# C++ language standard: C++11
-set(CMAKE_CXX_STANDARD 11)
+# C++ language standard: C++17
+set(CMAKE_CXX_STANDARD 17)
 
 # Version string for the project
+# The major and minor versions need not be numbers but must begin with a digit 0..9
 # see https://stackoverflow.com/a/47084079
 file(READ "${CMAKE_SOURCE_DIR}/VERSION" ver)
 string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${ver})
@@ -158,8 +159,7 @@ endif()
 set(BOOST_MINIMUM_VERSION "1.74.0")
 
 find_package( Boost ${BOOST_MINIMUM_VERSION}
-    COMPONENTS filesystem system 
-    unit_test_framework program_options serialization
+    COMPONENTS unit_test_framework program_options serialization
 )
 
 # list of Boost libraries needed by apps

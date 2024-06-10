@@ -76,7 +76,8 @@ struct API_EXPORT Sort {
         { }
 
         // comparison function
-        bool operator()(const BamTools::BamAlignment& lhs, const BamTools::BamAlignment& rhs) {
+        // Operator made `const`, 2024-06-08 AA
+        bool operator()(const BamTools::BamAlignment& lhs, const BamTools::BamAlignment& rhs) const {
             return sort_helper(m_order, lhs.Name, rhs.Name);
         }
 
@@ -112,7 +113,8 @@ struct API_EXPORT Sort {
         { }
 
         // comparison function
-        bool operator()(const BamTools::BamAlignment& lhs, const BamTools::BamAlignment& rhs) {
+        // made const 2024-06-10 AA
+        bool operator()(const BamTools::BamAlignment& lhs, const BamTools::BamAlignment& rhs) const {
 
             // force unmapped aligmnents to end
             if ( lhs.RefID == -1 ) return false;
@@ -161,7 +163,8 @@ struct API_EXPORT Sort {
         { }
 
         // comparison function
-        bool operator()(const BamTools::BamAlignment& lhs, const BamTools::BamAlignment& rhs) {
+        // made const 2024-06-10 AA
+        bool operator()(const BamTools::BamAlignment& lhs, const BamTools::BamAlignment& rhs) const {
 
             // force alignments without tag to end
             T lhsTagValue;
@@ -196,7 +199,8 @@ struct API_EXPORT Sort {
     struct Unsorted : public AlignmentSortBase {
 
         // comparison function
-        inline bool operator()(const BamTools::BamAlignment&, const BamTools::BamAlignment&) {
+        // made const 2024-06-10 AA
+        inline bool operator()(const BamTools::BamAlignment&, const BamTools::BamAlignment&) const {
             return false;   // returning false tends to retain insertion order
         }
 

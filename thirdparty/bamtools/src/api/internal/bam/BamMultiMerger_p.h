@@ -61,7 +61,8 @@ struct MergeItemSorter : public std::binary_function<MergeItem, MergeItem, bool>
             : m_comp(comp)
         { }
 
-        bool operator()(const MergeItem& lhs, const MergeItem& rhs) {
+        // made const 2024-06-10 AA
+        bool operator()(const MergeItem& lhs, const MergeItem& rhs) const {
             const BamAlignment& l = *lhs.Alignment;
             const BamAlignment& r = *rhs.Alignment;
             return m_comp(l,r);
