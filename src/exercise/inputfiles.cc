@@ -58,13 +58,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <vector>
 #include <filesystem>
 
 // -- Boost headers --
 
 #include "boost/lexical_cast.hpp"
-#include "boost/filesystem.hpp"
 
 // -- Own headers --
 
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
         // create and open the track file
         std::string filenm = "track_" + boost::lexical_cast<std::string>(i) + ".bed";
         std::filesystem::path filepath = outpath / filenm;
-        std::filesystem::ofstream out(filepath);      
+        std::ofstream out(filepath);      
         if (!out)
         {
             std::cerr << "? Cannot not open \"" << filepath.string() << "\", skipped" << std::endl;
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
     // that spans all input regions
     // we write it 'by hand'
     std::filesystem::path freepath = outpath / "free.bed";
-    std::filesystem::ofstream out(freepath);    
+    std::ofstream out(freepath);    
     if (out)
     {
         const unsigned int FREEMAX = (reglen + (trackcnt-1)*delta) * groupcnt 
