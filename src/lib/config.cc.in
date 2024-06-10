@@ -117,7 +117,7 @@ VersionInfo::VersionInfo()
     add_inplace("Multovl", @MULTOVL_VERSION_MAJOR@, @MULTOVL_VERSION_MINOR@, @GITREV_COUNT@);   // "patchlevel" is the revision count
     add_inplace("Boost",
         BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
-    add_inplace("BamTools", "2.3.1 (AA)");
+    add_inplace("BamTools", "2.3.2 (AA)");
 }
 
 // see https://stackoverflow.com/questions/27960325/stdmap-emplace-without-copying-value

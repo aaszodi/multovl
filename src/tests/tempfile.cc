@@ -42,20 +42,19 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 #include <fstream>
+#include <cstdio> // for tmpnam
 
 // == Implementation --
 
 Tempfile::Tempfile()
 {
-    // used to have boost::filesystem::temp_directory_path() as prefix
-    // but this is supported only in later versions of Filesystem V3 :-(
-    // it definitely is not available in Boost 1.44
-    _path = boost::filesystem::unique_path();
+    std::string nm = std::tmpnam(nullptr); // random name, difficult to guess
+    _path = std::filesystem::path(nm);
 }
 
 Tempfile::~Tempfile()
 {
-    boost::filesystem::remove(_path);
+    std::filesystem::remove(_path);
 }
 
 std::ostream& Tempfile::print(std::ostream& outs) const

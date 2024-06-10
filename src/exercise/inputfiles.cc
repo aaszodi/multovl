@@ -59,12 +59,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <filesystem>
 
 // -- Boost headers --
 
 #include "boost/lexical_cast.hpp"
 #include "boost/filesystem.hpp"
-#include "boost/filesystem/fstream.hpp"
 
 // -- Own headers --
 
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         groupcnt = GROUPCNT,    // number of overlap groups
         reglen = REGLEN, // length of each region
         groupgap = GROUPGAP;    // distance between neighbouring overlap groups
-    boost::filesystem::path outdir;
+    std::filesystem::path outdir;
     bool outdirseen = false;
     
     // process command-line options
@@ -123,9 +123,9 @@ int main(int argc, char *argv[])
                 break;
             case 'D':
                 try {
-                    outdir = boost::filesystem::path(optarg);
+                    outdir = std::filesystem::path(optarg);
                     outdirseen = true;
-                } catch (const boost::filesystem::filesystem_error& err) {
+                } catch (const std::filesystem::filesystem_error& err) {
                     std::cerr << "! Silly directory path \"" << optarg <<
                         "\": " << err.what() << std::endl;
                     outdirseen = false;
@@ -170,8 +170,8 @@ int main(int argc, char *argv[])
     {
         try
         {
-            boost::filesystem::create_directories(outdir);
-        } catch (const boost::filesystem::filesystem_error& err) {
+            std::filesystem::create_directories(outdir);
+        } catch (const std::filesystem::filesystem_error& err) {
             std::cerr << "! Failed to create output dir \"" << outdir << "\": " <<
                 err.what() << std::endl;
             std::exit(EXIT_FAILURE);
@@ -194,13 +194,13 @@ int main(int argc, char *argv[])
     for (i=0; i<chromcnt; ++i)
         chroms.push_back("chr" + boost::lexical_cast<std::string>(i+1));
     
-    boost::filesystem::path outpath(outdir);
+    std::filesystem::path outpath(outdir);
     for (i=0; i<trackcnt; ++i)
     {
         // create and open the track file
         std::string filenm = "track_" + boost::lexical_cast<std::string>(i) + ".bed";
-        boost::filesystem::path filepath = outpath / filenm;
-        boost::filesystem::ofstream out(filepath);      
+        std::filesystem::path filepath = outpath / filenm;
+        std::filesystem::ofstream out(filepath);      
         if (!out)
         {
             std::cerr << "? Cannot not open \"" << filepath.string() << "\", skipped" << std::endl;
@@ -222,8 +222,8 @@ int main(int argc, char *argv[])
     // this is very simple, just one region per chromosome
     // that spans all input regions
     // we write it 'by hand'
-    boost::filesystem::path freepath = outpath / "free.bed";
-    boost::filesystem::ofstream out(freepath);    
+    std::filesystem::path freepath = outpath / "free.bed";
+    std::filesystem::ofstream out(freepath);    
     if (out)
     {
         const unsigned int FREEMAX = (reglen + (trackcnt-1)*delta) * groupcnt 

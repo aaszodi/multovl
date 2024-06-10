@@ -49,12 +49,12 @@ using namespace multovl;
 
 #include "boost/assign/list_inserter.hpp"
 #include "boost/lexical_cast.hpp"
-#include "boost/filesystem.hpp"
 
 // -- standard headers --
 
 #include <vector>
 #include <string>
+#include <filesystem>
 
 // -- Fixture --
 
@@ -107,7 +107,7 @@ struct FileioFixture
     // and then generate the full path to /filename/
     std::string locate_testfile(const std::string& filename)
     {
-        boost::filesystem::path curpath = boost::filesystem::current_path();     
+        std::filesystem::path curpath = std::filesystem::current_path();     
         while (curpath != "/")
         {
             if (curpath.filename() == "multovl")
@@ -121,7 +121,7 @@ struct FileioFixture
             BOOST_ERROR("! Got lost in file system");
             // ...won't return...
         }
-        boost::filesystem::path inputpath = 
+        std::filesystem::path inputpath = 
             curpath / "src" / "tests" / "data" / filename;
         return inputpath.string();
     }

@@ -40,8 +40,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/filesystem.hpp"
 #include "boost/algorithm/string.hpp"
+
+// -- Standard headers --
+
+#include <filesystem>
 
 // == Implementation ==
 
@@ -50,7 +53,7 @@ namespace io {
 
 Fileformat::Kind Fileformat::from_filename(const std::string& filenm)
 {
-    boost::filesystem::path filepath(filenm);
+    std::filesystem::path filepath(filenm);
     std::string ext = filepath.extension().string();
 
     if (ext[0] == '.')

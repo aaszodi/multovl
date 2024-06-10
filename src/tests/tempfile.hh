@@ -42,13 +42,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-// Use V3 of Boost::Filesystem, this is relevant between Boost versions 1.44 to 1.45
-#define BOOST_FILESYSTEM_VERSION 3
-#include "boost/filesystem.hpp"
-
 // -- Standard headers --
 
 #include <iostream>
+#include <filesystem>
 
 // == Classes ==
 
@@ -71,7 +68,7 @@ class Tempfile
     std::ostream& print(std::ostream& outs = std::cout) const;
     
     private:
-    boost::filesystem::path _path;
+    std::filesystem::path _path;
 };
 
 #endif  // MULTOVL_TEST_TEMPFILE_HEADER
