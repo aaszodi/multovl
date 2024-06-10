@@ -81,12 +81,13 @@ message(STATUS "Compiler = ${CMAKE_CXX_COMPILER_ID}")
 set(CMAKE_CXX_STANDARD 17)
 
 # Version string for the project
-# The major and minor versions need not be numbers but must begin with a digit 0..9
+# The major and minor versions need not be numbers but must begin with a digit 0..9,
+# then optionally dashes plus some lowercase letters or digits
 # see https://stackoverflow.com/a/47084079
 file(READ "${CMAKE_SOURCE_DIR}/VERSION" ver)
-string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${ver})
+string(REGEX MATCH "VERSION_MAJOR ([0-9]+[-0-9a-z]*)" _ ${ver})
 set(MULTOVL_VERSION_MAJOR ${CMAKE_MATCH_1})
-string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${ver})
+string(REGEX MATCH "VERSION_MINOR ([0-9]+[-0-9a-z]*)" _ ${ver})
 set(MULTOVL_VERSION_MINOR ${CMAKE_MATCH_1})
 set(MULTOVL_VERSION ${MULTOVL_VERSION_MAJOR}.${MULTOVL_VERSION_MINOR})
 

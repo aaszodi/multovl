@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <variant>
 
 // == Functions ==
 
@@ -62,22 +63,38 @@ unsigned int git_revision_count();
 
 // == Classes ==
 
-/// Simple object for storing version information of a particular package.
-struct Version {
-    std::string str;    ///< format is "major.minor" or "major.minor.patch"
+/// Object for storing version information of a particular package.
+class Version {
+    public:
     
+    /// Version string/number
+    /// Each of the "major", "minor" and "patch" components
+    /// may be a string or an int
+    typedef std::variant<std::string, int> ver_t;
+        
     /// Set up a Version object when the version numbers are provided.
-    /// \param maj The major version number
-    /// \param min The minor version number
-    /// \param pat The patch number
+    /// \param maj The major version string/number
+    /// \param min The minor version string/number
+    /// \param pat The patch string/number, optional, default empty (ignored)
     explicit Version(
-        unsigned int maj = 0,
-        unsigned int min = 0,
-        unsigned int pat = 0
+        const ver_t& maj,
+        const ver_t& min,
+        const ver_t& pat = ""
     );
     
     /// Set up a Version object when the version string is provided
-    explicit Version(const std::string& ver): str{ ver } {}
+    explicit Version(const std::string& ver): _str{ ver } {}
+    
+    /// Get the version string
+    std::string str() const { return _str; }
+    
+    private:
+    
+    static
+    std::string _tostr(const ver_t& m);
+    
+    std::string _str;    ///< format is "major.minor" or "major.minor.patch"
+
 };
 
 /// Stores version information about Multovl and its supporting third-party libraries.
@@ -103,9 +120,9 @@ class VersionInfo {
     
     void add_inplace(
         const std::string& pkgname,
-        unsigned int maj,
-        unsigned int min,
-        unsigned int pat = 0
+        const Version::ver_t& maj,
+        const Version::ver_t& min,
+        const Version::ver_t& pat = ""
     );
     void add_inplace(
         const std::string& pkgname,

@@ -57,7 +57,7 @@ std::string detailed_versioninfo() {
 
 std::string library_version(const std::string& pkgname) {
     try {
-        return vinfo.get(pkgname).str;
+        return vinfo.get(pkgname).str();
     } catch(const std::out_of_range& ex) {
         return "";
     }
@@ -101,20 +101,39 @@ std::string git_short_checksum() { return BOOST_PP_STRINGIZE(@GITREV_SHA1SHORT@)
 std::string git_revision_date() { return BOOST_PP_STRINGIZE(@GITREV_DATE@); }
 unsigned int git_revision_count() { return @GITREV_COUNT@ ; }
 
+// -- Version methods --
+
 Version::Version(
-    unsigned int maj,
-    unsigned int min,
-    unsigned int pat
+    const ver_t& maj,
+    const ver_t& min,
+    const ver_t& pat
 ) {
-    str = std::to_string(maj) + "."
-        + std::to_string(min) + "."
-        + std::to_string(pat);
+    std::string s = _tostr(maj) + "." + _tostr(min);
+    std::string patstr = _tostr(pat);
+    if (patstr != "") {
+        s += "." + patstr;
+    }
+    _str = s;
 }
+
+std::string Version::_tostr(const ver_t& m) {
+    if (m.index() == 1) {
+        return std::to_string(std::get<int>(m));
+    } else {
+        return std::get<std::string>(m);
+    }
+}
+
+// -- VersionInfo methods --
 
 // The ctor deals with all the gory details of getting the version numbers.
 VersionInfo::VersionInfo()
 {
-    add_inplace("Multovl", @MULTOVL_VERSION_MAJOR@, @MULTOVL_VERSION_MINOR@, @GITREV_COUNT@);   // "patchlevel" is the revision count
+    add_inplace("Multovl", 
+        BOOST_PP_STRINGIZE(@MULTOVL_VERSION_MAJOR@),
+        BOOST_PP_STRINGIZE(@MULTOVL_VERSION_MINOR@),
+        @GITREV_COUNT@ // use the revision count as patchlevel, always uint
+    );   
     add_inplace("Boost",
         BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100);
     add_inplace("BamTools", "2.3.2 (AA)");
@@ -123,9 +142,9 @@ VersionInfo::VersionInfo()
 // see https://stackoverflow.com/questions/27960325/stdmap-emplace-without-copying-value
 void VersionInfo::add_inplace(
     const std::string& pkgname,
-    unsigned int maj,
-    unsigned int min,
-    unsigned int pat
+    const Version::ver_t& maj,
+    const Version::ver_t& min,
+    const Version::ver_t& pat
 ) {
     _vers.emplace(
         std::piecewise_construct,
@@ -147,7 +166,7 @@ void VersionInfo::add_inplace(
 
 std::string VersionInfo::str(const std::string& pkgname) const {
     Version v{ get(pkgname) };
-    std::string s{ pkgname + " version " + v.str };
+    std::string s{ pkgname + " version " + v.str() };
     return s;
 }
 
