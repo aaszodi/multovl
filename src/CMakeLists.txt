@@ -20,7 +20,11 @@ add_subdirectory(${SRCDIR}/exercise exercise)
 
 # -- Multovl applications --
 
-# "classic" Multovl, single-core variant
+# Configuration information
+add_executable(config_info config_info.cc ${CMAKE_CURRENT_BINARY_DIR}/lib/config.cc)
+flag_fix(config_info)
+
+# "classic" Multovl
 add_executable(multovl multovl.cc)
 target_link_libraries(multovl ${MULTOVLIBS})
 flag_fix(multovl)
@@ -42,7 +46,7 @@ flag_fix(parmultovlprob)
 
 # target to build all apps
 add_custom_target(apps DEPENDS 
-    multovl 
+    config_info multovl 
     multovlprob parmultovlprob)
 
 

@@ -227,7 +227,7 @@ endif(DOXYGEN_FOUND)
 
 if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     # apps
-    set(_applications multovl multovlprob parmultovlprob)
+    set(_applications config_info multovl multovlprob parmultovlprob)
     install(TARGETS ${_applications}
         RUNTIME DESTINATION ${MULTOVL_DESTDIR}/bin)
     
