@@ -53,8 +53,9 @@ struct MergeItem {
     ~MergeItem(void) { }
 };
 
+/// NOTE: std::binary_function replaced for C++17, 2024-06-10 AA
 template<typename Compare>
-struct MergeItemSorter : public std::binary_function<MergeItem, MergeItem, bool> {
+struct MergeItemSorter : public binary_function_replacement<MergeItem, MergeItem, bool> {
 
     public:
         MergeItemSorter(const Compare& comp = Compare())

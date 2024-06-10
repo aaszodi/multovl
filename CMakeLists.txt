@@ -170,6 +170,9 @@ set(MULTOVL_BOOST_LIBS ${Boost_DATE_TIME_LIBRARY}
     ${Boost_SERIALIZATION_LIBRARY}
 )
 
+# Prevent Boost from using old constructs not allowed in C++17 any more
+add_compile_definitions(BOOST_NO_CXX98_FUNCTION_BASE)
+
 # -- Third-party libraries --
 
 # Multovl now brings its own, slightly edited version of the BamTools library

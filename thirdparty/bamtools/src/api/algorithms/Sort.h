@@ -21,6 +21,19 @@
 #include <string>
 #include <vector>
 
+/// This is a replacement for `std::binary_function`
+/// which was removed from C++17.
+/// 2024-06-10 AA
+/// Source: https://stackoverflow.com/a/56001387
+template<class Arg1, class Arg2, class Result> 
+struct binary_function_replacement
+{
+    using first_argument_type = Arg1;
+    using second_argument_type = Arg2;
+    using result_type = Result;
+};
+
+
 namespace BamTools {
 namespace Algorithms {
 
@@ -50,7 +63,7 @@ struct API_EXPORT Sort {
     }
 
     //! Base class for our sorting function objects
-    typedef std::binary_function<BamAlignment, BamAlignment, bool> AlignmentSortBase;
+    typedef binary_function_replacement<BamAlignment, BamAlignment, bool> AlignmentSortBase;
 
     /*! \struct BamTools::Algorithms::Sort::ByName
         \brief Function object for comparing alignments by name
