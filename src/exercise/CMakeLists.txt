@@ -25,14 +25,23 @@ else()
     set(EXT "sh")
 endif()
 
-# make the 'runner' test script
-# use this to run the parallel multovls "forever" to catch multithreaded bugs
+# The 'runner' test script
+# use this for timing and performance profiling if available
+
 # Native conversion of the current bindir is needed for Windows and cannot hurt on Unix
 file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" EXERCISE_PATH)
-configure_file( runner.${EXT}.in ${CMAKE_CURRENT_BINARY_DIR}/runner.${EXT} @ONLY)
 
-# make the 'timer' test script
-# use this to collect timing data
-### configure_file( timer.${EXT}.in timer.${EXT} @ONLY)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    find_program(PROFILER NAMES perf)
+    if (PROFILER)
+        message(STATUS "Profiler tool ${PROFILER} found, profiling enabled")
+    else()
+        message(WARNING "perf profiler tool not found")
+    endif()
+else()
+    message(WARNING "Profiling can be done only on Linux and RelWithDebInfo builds")
+    set(PROFILER "perf-NOTFOUND")
+endif()
+configure_file( runner.${EXT}.in ${CMAKE_CURRENT_BINARY_DIR}/runner.${EXT} @ONLY)
 
 add_custom_target(exerciser DEPENDS inputfiles)

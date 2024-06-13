@@ -7,32 +7,43 @@
 # -- Directories --
 
 PGMS=@PROJECT_BINARY_DIR@/bin
-TEST=${PGMS}/exercise
-DATA=${TEST}/running
+TESTDIR=${PGMS}/exercise
+DATADIR=${TESTDIR}/data
+OUTPUT_FILE=${DATADIR}/program_output.txt
 
-# -- Default values for script parameters --
+# -- Fixed settings for input files --
 
-REPEAT=1
 CHROM=20
 DELTA=10
 GROUPCNT=1000
 TRACKNO=8
 
+# -- Can profiling be done? --
+
+PROF=@PROFILER@
+if [[ "$PROF" =~ "-NOTFOUND" ]]; then
+    unset PROF
+    OPTSTR="r:h"
+else
+    OPTSTR="r:ph"
+fi
+
+# -- Default values for script parameters --
+
+DO_PROFILE=1  # false
+REPEAT=0
+
 # -- Functions --
 
 print_usage()
 {
-    cat <<HERE 
-Script to run a MULTOVL variant with big input files
-Usage: `basename $0` [script-options] program [program-options]
-Script options:
-    -r <repeat>: Number of repeated runs, default ${REPEAT}
-    -c <chrom>: number of chromosomes in input files, default ${CHROM}
-    -d <delta>: relative shift of regions, default ${DELTA}
-    -g <groupcnt>: number of overlap groups, default ${GROUPCNT}
-    -t <trackno>: number of input tracks, default ${TRACKNO}
-    -h, -?: Print this help and exit
-HERE
+    echo "Usage: `basename $0` [-p | -r <repeat> ] program [program-options]"
+    echo "Script options:"
+    if [[ $PROF ]]; then
+        echo "  -p: Profile <program> with ${PROF}, overrides '-r'"
+    fi
+    echo "  -r <repeat>: Run and time <program> this many times, default 0 (don't run)"
+    echo "  -h, -?: Print this help and exit"
 }
 
 # == MAIN ==
@@ -42,17 +53,18 @@ if [[ $# -lt 1 ]]; then
 	exit 99
 fi
 
-while getopts r:c:d:g:t:h OPTION
-do
+while getopts $OPTSTR OPTION; do
     case $OPTION in
         r) REPEAT=$OPTARG ;;
-        c) CHROM=$OPTARG ;;
-        d) DELTA=$OPTARG ;;
-        g) GROUPCNT=$OPTARG ;;
-        t) TRACKNO=$OPTARG ;;
+        p) REPEAT=0; DO_PROFILE=0 ;; # DO_PROFILE is "true"
         h|\?) print_usage; exit 99 ;;
     esac
 done
+if [[ $DO_PROFILE != 0 && $REPEAT == 0 ]]; then
+    echo "No -p, no -r set, exiting"
+    exit 99
+fi
+
 shift `expr $OPTIND - 1`
 if [[ $# -lt 1 ]]; then
 	echo "You must specify the path to the program to be run."
@@ -64,12 +76,22 @@ if [[ ! -x $1 ]]; then
 fi
 
 # setup
-TIMER_FILE=${DATA}/timer_output.txt
-OUTPUT_FILE=${DATA}/program_output.txt
-echo "Creating exercise directory ${DATA}"
-mkdir -p ${DATA}
+echo "Creating exercise directory ${DATADIR}"
+mkdir -p ${DATADIR}
+INPUTCMD="${TESTDIR}/inputfiles -c ${CHROM} -d ${DELTA} -D ${DATADIR} -t ${TRACKNO} -g ${GROUPCNT}"
+
+if [[ $DO_PROFILE == 0 ]]; then
+    echo "Start profiling"
+    ${INPUTCMD}
+    # profiling, specifically for 'perf'
+    $PROF record --call-graph dwarf -o ${DATADIR}/perf.data $@ ${DATADIR}/track_*.bed > ${OUTPUT_FILE}
+    echo "Profiling data collection done. Run the appropriate analysis tool"
+    exit
+fi
+
+# No profiling requested, do the timing instead
+TIMER_FILE=${DATADIR}/timer_output.txt
 rm -f ${TIMER_FILE}
-INPUTCMD="${TEST}/inputfiles -c ${CHROM} -d ${DELTA} -D ${DATA} -t ${TRACKNO} -g ${GROUPCNT}"
 
 # time output format for Linux only (GNU extension)
 if [[ $(uname -s) = "Linux" ]]; then
@@ -77,16 +99,17 @@ if [[ $(uname -s) = "Linux" ]]; then
     # TIME env var is set because I could not get the "-f \"..\"" quotation marks right
     export TIME="\t%E real\t%U user\t%S sys\t%P CPU"
 fi
+echo "Start timing"
 for iter in $(seq $REPEAT); do
     echo "Run ${iter}"
     # clean slate
-    rm -f ${DATA}/track_*.bed
+    rm -f ${DATADIR}/track_*.bed
     rm -f ${OUTPUT_FILE}
     # make new input
     ${INPUTCMD}
     # command to execute and redirect its outputs
     # do the timing
-	/usr/bin/time -a -o ${TIMER_FILE} $@ ${DATA}/track_*.bed >& ${OUTPUT_FILE}
+	/usr/bin/time -a -o ${TIMER_FILE} $@ ${DATADIR}/track_*.bed >& ${OUTPUT_FILE}
     if [ $? != 0 ]; then
         echo "Program failure, check ${OUTPUT_FILE}"
         break
