@@ -37,7 +37,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Standard headers --
 
 #include <vector>
-#include <sstream>
 
 // -- Boost headers --
 
@@ -76,10 +75,16 @@ bool AncestorRegion::operator<(const AncestorRegion& rhs) const
 
 std::string AncestorRegion::to_attrstring() const
 {
-    std::ostringstream ostr;
-    ostr << track_id() << ':' << name() << ':' << strand()
-        << ':' << first() << '-' << last();
-    return ostr.str();
+    std::string astr = std::to_string(track_id());
+    astr += ':';
+    astr += name();
+    astr += ':';
+    astr += strand();
+    astr += ':';
+    astr += std::to_string(first());
+    astr += '-';
+    astr += std::to_string(last());
+    return astr;
 }
 
 }   // namespace multovl

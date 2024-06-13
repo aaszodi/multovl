@@ -99,8 +99,9 @@ std::string MultiRegion::anc_str() const
         if (cnt > 1)
         {
             // ancestor gets a prefix "<cnt>*"
-            ancstr += boost::lexical_cast<std::string>(cnt) + '*'
-                + ait->to_attrstring();
+            ancstr += boost::lexical_cast<std::string>(cnt);
+            ancstr += "*"; // avoid temporaries with +=
+            ancstr += ait->to_attrstring();
             for (; cnt > 1; --cnt, ++ait); // skip the multiple occurrences
         }
         else
