@@ -172,9 +172,17 @@ Linereader::Status Linereader::parse(const string& line)
 
 bool Linereader::empty_white(const string& str)
 {
-    // SunPro with OpenMP does not like static init here (?)
-    const std::regex EMPTY_WHITE("^[[:space:]]*$", std::regex::extended);
-    return(str == "" || std::regex_search(str, EMPTY_WHITE));
+    if (str == "") {
+        return true;
+    }
+    for (const auto& c : str) {
+        // linear search, not bothering with some of the more exotic whitespace
+        // also not bothering with std::all_of and friends yet
+        if (c != ' ' && c != '\t' && c != '\n') {
+            return false;
+        }
+    }
+    return true;
 }
 
 unsigned int Linereader::str_to_uint(std::string& str)
