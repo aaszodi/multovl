@@ -198,19 +198,23 @@ include_directories(
 
 # -- SOURCE TREE --
 
-# Unit tests
+# Tests, coverage
 if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     include(CTest)
     enable_testing()
     
-    # Code coverage
-    # Currently only GNU compiler + gcov 
-    include("${CMAKE_SOURCE_DIR}/cmake/coverage.cmake")
-    if(GCOV_CAPABLE_COMPILER)
-        set(CMAKE_CXX_FLAGS "-g -O0 -Wall ${GCOV_COMPILER_FLAGS}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCOV_COMPILER_FLAGS}")
-        message(STATUS "Coverage tests were set up.")
-    endif()
+    # Code coverage, using the script from
+    # https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake
+    include("${MYCMAKE_PATH}/CodeCoverage.cmake")
+    set(CODE_COVERAGE_VERBOSE TRUE)
+    append_coverage_compiler_flags()
+    setup_target_for_coverage_lcov(
+        NAME multovl_coverage
+        EXECUTABLE multovl "${SRCDIR}/tests/data/triple[a-c].bed"
+        DEPENDENCIES multovl
+        BASE_DIRECTORY "${SRCDIR}"
+        EXCLUDE "${Boost_INCLUDE_DIRS}" "thirdparty" "tests"
+    )
 endif()
 
 # Add the source directory and recursively everything under it
