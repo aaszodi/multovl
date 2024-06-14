@@ -271,9 +271,10 @@ bool ClassicPipeline::write_gff_output()
         
         // simply write the regions
         for (const auto& mreg : mregs) {
-            std::cout << lw.write(mreg) << std::endl;
+            std::cout << lw.write(mreg) << '\n';
         }
     }
+    std::cout << std::flush;
     return true;    // cannot really go wrong
 }
 
@@ -289,9 +290,10 @@ bool ClassicPipeline::write_bed_output()
         
         // simply write the regions
         for (const auto& mreg : mregs) {
-            std::cout << lw.write(mreg) << std::endl;
+            std::cout << lw.write(mreg) << '\n';
         }
     }
+    std::cout << std::flush;
     return true;    // cannot really go wrong
 }
 
@@ -308,15 +310,15 @@ void ClassicPipeline::write_comments()
     }
     
     // the command-line parameters
-    std::cout << "# Parameters = " << opt_ptr()->param_str() << std::endl;
+    std::cout << "# Parameters = " << opt_ptr()->param_str() << '\n';
     
     // add the input file names as comments
     if (opt_ptr()->load_from() != "")
     {
         std::cout << "# Input data loaded from archive = " 
-            << opt_ptr()->load_from() << std::endl;
+            << opt_ptr()->load_from() << '\n';
     }
-    std::cout << "# Input files = " << inputs().size() << std::endl;
+    std::cout << "# Input files = " << inputs().size() << '\n';
     for (const auto& inp : inputs()) {
         std::cout << "# " << inp.name;
         if (inp.trackid > 0)
@@ -327,12 +329,13 @@ void ClassicPipeline::write_comments()
         } else {
             std::cout << " : skipped";
         }
-        std::cout << std::endl;
+        std::cout << '\n';
     }
     
     // list multiplicity information
-    std::cout << "# Overlap count = " << counter.total() << std::endl;
-    std::cout << "# Multiplicity counts = " << counter.to_string() << std::endl;
+    std::cout << "# Overlap count = " << counter.total() << '\n';
+    std::cout << "# Multiplicity counts = " << counter.to_string() 
+        << std::endl;   // final flush
 }
 
 }   // namespace multovl

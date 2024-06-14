@@ -370,10 +370,10 @@ unsigned int ProbPipeline::calc_actual_overlaps()
 bool ProbPipeline::write_output()
 {
     // Preamble: the command-line parameters
-    std::cout << "# Parameters = " << opt_ptr()->param_str() << std::endl;
+    std::cout << "# Parameters = " << opt_ptr()->param_str() << '\n';
     
     // input file names (the fixed are listed in the parameters above)
-    std::cout << "# Input files = " << inputs().size() << std::endl;
+    std::cout << "# Input files = " << inputs().size() << '\n';
     for (const auto& inp : inputs())
     {
         std::cout << "# " << inp.name;
@@ -389,15 +389,15 @@ bool ProbPipeline::write_output()
         	std::cout << " [fixed]";
         else
         	std::cout << " [shuffled]";
-        std::cout << std::endl;
+        std::cout << '\n';
     }
 
     // output the result in the selected format to stdout as CSV
     // for the whole range of multiplicities seen
     // we count how many multiplicities were properly analysed
     unsigned int mcount = 0;
-    std::cout << "# == Overlap length statistics ==" << std::endl
-        << "Multiplicity,Actual,Mean,SD,Pvalue,Zscore" << std::endl;
+    std::cout << "# == Overlap length statistics ==" << '\n'
+        << "Multiplicity,Actual,Mean,SD,Pvalue,Zscore" << '\n';
     for (unsigned int m = stat().min_mult(); m <= stat().max_mult(); ++m)
     {
         try {
@@ -407,7 +407,7 @@ bool ProbPipeline::write_output()
                 const EmpirDistr& nd = distr.nulldistr();
                 std::cout << m << ',' << distr.actual() << ','
                     << nd.mean() << ',' << nd.std_dev() << ','
-                    << distr.p_value() << ',' << distr.z_score() << std::endl;
+                    << distr.p_value() << ',' << distr.z_score() << '\n';
                 ++mcount;
             }
         } catch (const Stat::NotfoundException&) {
