@@ -46,8 +46,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // -- Boost headers --
 
-#include "boost/lexical_cast.hpp"
-
 // == Implementation ==
 
 namespace multovl {
@@ -67,7 +65,7 @@ MultiRegion::MultiRegion(unsigned int first, unsigned int last,
 {
     update_solitary();
 #ifndef NDEBUG
-    std::cerr << "anclen = " << _ancestors.size() << ", ancstr = \"" << anc_str() << "\"" << std::endl;
+    std::cerr << "MultiRegion: anclen = " << _ancestors.size() << ", ancstr = \"" << anc_str() << "\"" << std::endl;
 #endif
 }
 
@@ -90,25 +88,26 @@ std::vector<int> MultiRegion::ancestor_trackids() const
 
 std::string MultiRegion::anc_str() const
 {
+    if (ancestors().size() == 0) {
+        // only relevant for empty
+        return "";
+    }
     std::string ancstr = "";
-    for (ancregset_t::const_iterator ait = _ancestors.begin(); ait != _ancestors.end(); ++ait)
-    {
-        // compose the ancestor attribute
-        if (ait != _ancestors.begin()) ancstr += '|';
-        unsigned int cnt = _ancestors.count(*ait);  // multiset, multiple element
-        if (cnt > 1)
-        {
-            // ancestor gets a prefix "<cnt>*"
-            ancstr += boost::lexical_cast<std::string>(cnt);
+    auto ait = ancestors().begin();
+    auto nextit = ait;
+    while(ait != ancestors().end()) {
+        // compose the ancestor attribute string
+        if (ait != ancestors().begin()) ancstr += '|';
+        // find first element not equal to *ait
+        unsigned int cnt;
+        for(cnt = 0; nextit != ancestors().end() && *ait == *nextit; ++cnt, nextit++);
+        if (cnt > 1) {
+            // ancestor attribute string gets a prefix "<cnt>*"
+            ancstr += std::to_string(cnt);
             ancstr += "*"; // avoid temporaries with +=
-            ancstr += ait->to_attrstring();
-            for (; cnt > 1; --cnt, ++ait); // skip the multiple occurrences
         }
-        else
-        {
-            // ancestor occurs only once
-            ancstr += ait->to_attrstring();
-        }
+        ancstr += ait->to_attrstring();
+        ait = nextit;   // stepper
     }
     return ancstr;
 }
@@ -119,21 +118,14 @@ std::string MultiRegion::anc_str() const
 // private
 bool MultiRegion::update_solitary()
 {
-    if (ancestors().size() == 1)
-    {
-        const ancregset_t::const_iterator& ancit = ancestors().begin();
-        _solitary = (
-            _ancestors.count(*ancit) == 1 &&
-            ancit->first() == this->first() && 
-            ancit->last() == this->last()
-        );
-    }
-    else
+    if (ancestors().size() == 1) {
+        const auto& ancit = ancestors().begin(); // points to the one and only ancestor
+        _solitary = (ancit->first() == this->first() && ancit->last() == this->last());
+    } else {
         _solitary = false;
+    }
     return _solitary;
 }
-
-
 
 }   // namespace multovl
 
