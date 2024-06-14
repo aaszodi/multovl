@@ -73,7 +73,7 @@ class BaseRegion:
     /// Inits to empty (makes sense when using as input buffer)
     BaseRegion(): 
         _first(0), _last(0),
-        _strand(0), _name("")
+        _strand('.'), _name("")
     {}
     
     /**

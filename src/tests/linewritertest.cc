@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(gffwriter_test)
 
     // GFF version 2
     
-    exps = "chr1\tsrc\tregion\t80\t90\t.\t+";
+    exps = "chr1\tsrc\tregion\t80\t90\t.\t+\t.\t.";
     obss = glw.write(reg);
     BOOST_CHECK_EQUAL(exps, obss);
     

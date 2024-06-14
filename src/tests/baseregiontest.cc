@@ -82,15 +82,17 @@ BOOST_FIXTURE_TEST_SUITE(baseregionsuite, BaseRegionFixture)
 
 BOOST_AUTO_TEST_CASE(empty_test)
 {
-    BOOST_CHECK(r_empty.first() == 0);
-    BOOST_CHECK(r_empty.last() == 0);
+    BOOST_CHECK_EQUAL(r_empty.first(), 0);
+    BOOST_CHECK_EQUAL(r_empty.last(), 0);
+    BOOST_CHECK_EQUAL(r_empty.strand(), '.');
+    BOOST_CHECK_EQUAL(r_empty.name(), "");
     BOOST_CHECK(r_empty.is_empty());
 }
 
 BOOST_AUTO_TEST_CASE(length_test)
 {
-    BOOST_CHECK(r_empty.length() == 0);
-    BOOST_CHECK(r15.length() == 5);
+    BOOST_CHECK_EQUAL(r_empty.length(), 0);
+    BOOST_CHECK_EQUAL(r15.length(), 5);
 }
 
 // Instead of separately testing the < operator,
