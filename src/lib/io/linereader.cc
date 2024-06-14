@@ -127,9 +127,9 @@ namespace io {
 
 // -- Linereader methods --
 
-Linereader::Linereader(const string& commentchars):
-    _comment_regex("^[[:space:]]*["+commentchars+"][[:space:]]*", std::regex::extended)
-{
+const char Linereader::WHITESPACE[] = " \t\n";
+
+Linereader::Linereader() {
     reset();
 }
 
@@ -142,9 +142,6 @@ void Linereader::reset()
 
 Linereader::Status Linereader::parse(const string& line)
 {
-    const auto COMMENTSTRIPFLAGS = std::regex_constants::match_default | 
-        std::regex_constants::format_sed | std::regex_constants::format_first_only;
-    
     reset();
     string tline = boost::trim_right_copy_if(line, boost::is_cntrl());
     
@@ -156,10 +153,11 @@ Linereader::Status Linereader::parse(const string& line)
     }
 
     // parse simple comments
-    if (std::regex_search(tline, _comment_regex))
+    auto commentoffs = parse_comment(tline);
+    if (commentoffs != std::string::npos)
     {
         // strip leading ws and the comment chars
-        _comment = std::regex_replace(tline, _comment_regex, "", COMMENTSTRIPFLAGS);
+        _comment = tline.substr(commentoffs);
         _status = COMMENT;
         return _status;
     }
@@ -175,14 +173,26 @@ bool Linereader::empty_white(const string& str)
     if (str == "") {
         return true;
     }
-    for (const auto& c : str) {
-        // linear search, not bothering with some of the more exotic whitespace
-        // also not bothering with std::all_of and friends yet
-        if (c != ' ' && c != '\t' && c != '\n') {
-            return false;
-        }
+    return (std::string::npos == str.find_first_not_of(WHITESPACE));
+}
+
+std::string::size_type Linereader::parse_comment(const string& line) {
+    auto notws1 = line.find_first_not_of(WHITESPACE);
+    if (notws1 == std::string::npos) {
+        // unlikely, indicates all-whitespace line
+        return notws1;
     }
-    return true;
+    if (line[notws1] != COMCH) {
+        // need a '#' after initial whitespace
+        return std::string::npos;
+    }
+    if (++notws1 == line.size()) {
+        // # was the last character, the comment itself is empty
+        return notws1;
+    }
+    // find the first non-ws after the '#'. notws1 already incremented
+    auto notws2 = line.find_first_not_of(WHITESPACE, notws1);
+    return (notws2 == std::string::npos? notws1: notws2);
 }
 
 unsigned int Linereader::str_to_uint(std::string& str)

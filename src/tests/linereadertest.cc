@@ -54,16 +54,33 @@ struct LinereaderFixture
     {}
     
     BaseRegion region;
+    io::BedLinereader blr;
+    io::Linereader::Status status;
 };
 
 BOOST_FIXTURE_TEST_SUITE(linereadersuite, LinereaderFixture)
 
+BOOST_AUTO_TEST_CASE(empty_ws_test)
+{
+    status = blr.parse("");
+    BOOST_CHECK(status == io::Linereader::EMPTY);
+    status = blr.parse(" \t  \n");
+    BOOST_CHECK(status == io::Linereader::EMPTY);
+}
+
+BOOST_AUTO_TEST_CASE(comment_test)
+{
+    status = blr.parse(" # foo");
+    BOOST_CHECK(status == io::Linereader::COMMENT);
+    BOOST_CHECK_EQUAL(blr.comment(), "foo");
+    status = blr.parse(" #");
+    BOOST_CHECK(status == io::Linereader::COMMENT);
+    BOOST_CHECK_EQUAL(blr.comment(), "");
+}
+
 BOOST_AUTO_TEST_CASE(bedreader_test)
 {
-    io::BedLinereader blr;
-    
     BaseRegion reg;
-    io::Linereader::Status status;
     bool ok;
 
     status = blr.parse("chr1\t10\t20\tregion\t0.8\t+");

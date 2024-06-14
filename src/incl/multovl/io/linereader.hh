@@ -48,7 +48,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // -- Standard headers --
 
 #include <string>
-#include <regex>
 #include <map>
 #include <iostream>
 #include <stdexcept>
@@ -85,8 +84,7 @@ class Linereader
     };
     
     /// Sets up a Linereader object.
-    /// \param commentchars the character(s) that signify the beginning of a comment
-    explicit Linereader(const std::string& commentchars="#");
+    Linereader();
     
     virtual
     ~Linereader() = default;
@@ -151,6 +149,10 @@ class Linereader
     /// Returns /true/ if /str/ is empty or contains whitespace characters only.
     static bool empty_white(const std::string& str);
     
+    /// Returns offset of a comment after "^[[:space:]]*#[[:space:]]"
+    /// or std::string::npos if /line/ is not a comment
+    static std::string::size_type parse_comment(const std::string& line);
+
     /// Parse a /line/ assuming it contains coordinate data.
     /// Implementations must set _status bits (ERROR and DATA) accordingly.
     virtual
@@ -162,6 +164,7 @@ class Linereader
     unsigned int str_to_uint(std::string& str);
     
     // these data members can be set during parsing by the derived classes
+    // they are protected for simplicity's sake
     Status _status;	///< the status after parsing
     size_t _fieldcnt;   ///< how many column fields have been seen
     std::string _comment;    ///< store a comment line
@@ -174,7 +177,8 @@ class Linereader
     
     private:
     
-    std::regex _comment_regex;    
+    static const char WHITESPACE[];
+    static const char COMCH = '#';
 };
 
 /**
@@ -189,7 +193,7 @@ class BedLinereader: public Linereader
     public:
     
     /// Sets up a BedLinereader object.
-    BedLinereader(): Linereader("#") { reset(); }
+    BedLinereader(): Linereader() { reset(); }
     
     /// Updates the contents of a region with what has been parsed from a BED-formatted line.
     /// Does nothing if the calling object is not in the DATA state.
@@ -228,7 +232,6 @@ class GffLinereader: public BedLinereader
     /// Parse a /line/ assuming it contains GFF-formatted data.
     virtual
     void parse_data(const std::string& line) override;
-    
 };
 
 }   // namespace io
