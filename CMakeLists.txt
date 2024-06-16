@@ -205,9 +205,11 @@ if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     
     # Code coverage, using the script from
     # https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake
+    # Modified by AA, doesn't givr fatal errors if prerequisites are not satisfied
     include("${MYCMAKE_PATH}/CodeCoverage.cmake")
     set(CODE_COVERAGE_VERBOSE TRUE)
     append_coverage_compiler_flags()
+    # let's use the `lcov` Linux tool
     setup_target_for_coverage_lcov(
         NAME multovl_coverage
         EXECUTABLE multovl "${SRCDIR}/tests/data/triple[a-c].bed"

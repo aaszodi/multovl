@@ -148,7 +148,7 @@ find_program( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/scripts/test)
 find_program( CPPFILT_PATH NAMES c++filt )
 
 if(NOT GCOV_PATH)
-    message(FATAL_ERROR "gcov not found! Aborting...")
+    message(WARNING "gcov not found, coverage tests skipped")
 endif() # NOT GCOV_PATH
 
 # Check supported compiler (Clang, GNU and Flang)
@@ -156,11 +156,11 @@ get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 foreach(LANG ${LANGUAGES})
   if("${CMAKE_${LANG}_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
     if("${CMAKE_${LANG}_COMPILER_VERSION}" VERSION_LESS 3)
-      message(FATAL_ERROR "Clang version must be 3.0.0 or greater! Aborting...")
+      message(WARNING "Clang version must be 3.0.0 or greater, coverage tests skipped")
     endif()
   elseif(NOT "${CMAKE_${LANG}_COMPILER_ID}" MATCHES "GNU"
          AND NOT "${CMAKE_${LANG}_COMPILER_ID}" MATCHES "(LLVM)?[Ff]lang")
-    message(FATAL_ERROR "Compiler is not GNU or Flang! Aborting...")
+    message(WARNING "Compiler is not GNU or Flang, coverage tests skipped")
   endif()
 endforeach()
 
@@ -242,11 +242,13 @@ function(setup_target_for_coverage_lcov)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT LCOV_PATH)
-        message(FATAL_ERROR "lcov not found! Aborting...")
+        message(WARNING "lcov not found, coverage tests skipped")
+        return()
     endif() # NOT LCOV_PATH
 
     if(NOT GENHTML_PATH)
-        message(FATAL_ERROR "genhtml not found! Aborting...")
+        message(WARNING "genhtml not found, coverage tests skipped")
+        return()
     endif() # NOT GENHTML_PATH
 
     # Set base directory (as absolute path), or default to PROJECT_SOURCE_DIR
@@ -421,7 +423,8 @@ function(setup_target_for_coverage_gcovr_xml)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT GCOVR_PATH)
-        message(FATAL_ERROR "gcovr not found! Aborting...")
+        message(WARNING "gcovr not found, coverage tests skipped")
+        return()
     endif() # NOT GCOVR_PATH
 
     # Set base directory (as absolute path), or default to PROJECT_SOURCE_DIR
@@ -513,7 +516,8 @@ function(setup_target_for_coverage_gcovr_html)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT GCOVR_PATH)
-        message(FATAL_ERROR "gcovr not found! Aborting...")
+        message(WARNING "gcovr not found, coverage tests skipped")
+        return()
     endif() # NOT GCOVR_PATH
 
     # Set base directory (as absolute path), or default to PROJECT_SOURCE_DIR
@@ -616,11 +620,13 @@ function(setup_target_for_coverage_fastcov)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT FASTCOV_PATH)
-        message(FATAL_ERROR "fastcov not found! Aborting...")
+        message(WARNING "fastcov not found, coverage tests skipped")
+        return()
     endif()
 
     if(NOT Coverage_SKIP_HTML AND NOT GENHTML_PATH)
-        message(FATAL_ERROR "genhtml not found! Aborting...")
+        message(WARNING "genhtml not found, coverage tests skipped")
+        return()
     endif()
 
     # Set base directory (as absolute path), or default to PROJECT_SOURCE_DIR
