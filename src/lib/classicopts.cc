@@ -38,9 +38,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
-// -- Own header --
+// -- Own headers --
 
 #include "multovl/classicopts.hh"
+#include "multovl/io/fileformat.hh"
 
 // -- Boost headers --
 
@@ -55,8 +56,8 @@ ClassicOpts::ClassicOpts():
 {
 	add_option<std::string>("source", &_source, "multovl", 
 		"Source field in GFF output", 's');
-	add_option<std::string>("outformat", &_outformat, "GFF", 
-		"Output format {BED,GFF}, case-insensitive, default GFF", 'f');
+	add_option<std::string>("output", &_output, "", 
+		"Output file, format BED or GFF, auto-detected from extension, standard output in GFF format if omitted", 'o');
 	add_option<std::string>("save", &_saveto, "", 
 		"Save program data to archive file, default: do not save");
 	add_option<std::string>("load", &_loadfrom, "", 
@@ -67,10 +68,16 @@ bool ClassicOpts::check_variables()
 {
 	MultovlOptbase::check_variables();
 	
-	// canonicalize the output format: currently BED and GFF are accepted
-	boost::algorithm::to_upper(_outformat);
-	if (_outformat != "BED" && _outformat != "GFF")
-	    _outformat = "GFF"; // default
+	// figure out the output format: currently BED and GFF are accepted
+	_outformat = "GFF"; // default
+	if (_output != "") {
+	    // file name specified
+	    auto fmt = io::Fileformat::from_filename(_output);
+	    if (fmt == io::Fileformat::Kind::BED) {
+	        _outformat = "BED";
+	        // anything else will be set to GFF by default
+	    }
+	}
 	
     // there must be at least 1 positional param
     // unless --load has been set in which case
@@ -89,6 +96,7 @@ std::string ClassicOpts::param_str() const
     outstr += " -s " + _source + " -f " + _outformat;
     if (_loadfrom != "") outstr += " --load " + _loadfrom;
     if (_saveto != "") outstr += " --save " + _saveto;
+    if (_output != "") outstr += " -o " + _output;
     return outstr;
 }
 
@@ -98,7 +106,7 @@ std::ostream& ClassicOpts::print_help(std::ostream& out) const
 		<< "Usage: multovl [options] [<infile1> [ <infile2> ... ]]" << std::endl
 		<< "Accepted input file formats: BED, GFF/GTF, BAM (detected from extension)" << std::endl
         << "<infileX> arguments are ignored if --load is set" << std::endl
-		<< "Output goes to stdout, select format with the -f option" << std::endl;
+		<< "Output goes to stdout in GFF format by default, specify output file with the -o option" << std::endl;
 	Polite::print_help(out);
 	return out;
 }

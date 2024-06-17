@@ -106,6 +106,7 @@ bool BasePipeline::run()
     if (!errors().perfect())
     {
         std::cerr << "! Problems encountered during output" << std::endl;
+        errors().print(std::cerr);
         if (!errors().ok())
             return false;   // stop on errors only
         else

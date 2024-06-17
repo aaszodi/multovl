@@ -226,23 +226,43 @@ bool ClassicPipeline::write_output()
         }
     }
     
-    // output the result in the selected format to stdout
-    if (opt_ptr()->outformat() == "BED")
-    {
-        // write BED output
-        return write_bed_output();
+    // write the result either to a file or to stdout
+    auto outfnm = opt_ptr()->output();
+    auto outform = opt_ptr()->outformat();
+    if (outfnm != "") {
+        // write to file if it opens OK
+        try {
+            std::ofstream outf(outfnm);
+            outf.exceptions(outf.failbit); // raise exceptions for failure
+            write_result(outf, outform);
+        } catch(const std::ios_base::failure& err) {
+            add_error("Output goes to stdout because I cannot write to output file " + outfnm, err.what());
+            // fall back to stdout
+            write_result(std::cout, outform);
+        }
     } else {
-        // default GFF2
-        return write_gff_output();
+        // write to stdout
+        write_result(std::cout, outform);
     }
 }
 
 // -- Result output methods --
 
-bool ClassicPipeline::write_gff_output()
+bool ClassicPipeline::write_result(std::ostream& outf, const std::string& format) {
+    if (format == "BED")
+    {
+        // write BED output
+        return write_bed_output(outf);
+    } else {
+        // default GFF2
+        return write_gff_output(outf);
+    }
+}
+
+bool ClassicPipeline::write_gff_output(std::ostream& outf)
 {
     // GFF2 metainfo
-    std::cout << "##gff-version 2" << std::endl;
+    outf << "##gff-version 2" << std::endl;
     
     // get the current date, print in ISO-8601 format
     // inspired by CPPreference.com
@@ -250,16 +270,16 @@ bool ClassicPipeline::write_gff_output()
     const unsigned int TSTRLEN = 11;
     char timestr[TSTRLEN];
     std::strftime(timestr, TSTRLEN, "%Y-%m-%d", std::gmtime(&time));
-    std::cout << "##date " << timestr << std::endl;
+    outf << "##date " << timestr << std::endl;
 
     // version information, GFF style
-    std::cout << "##source-version " << config::versioninfo() << ", "
+    outf << "##source-version " << config::versioninfo() << ", "
         << config::build_type() << " build, compiler: "
         << config::build_compiler() 
         << ", system: "<< config::build_system() << std::endl;
     
     // MultOvl standard comments
-    write_comments();
+    write_comments(outf);
     
     // process each chromosome in turn
     for (const auto& cm : cmovl()) {
@@ -271,17 +291,17 @@ bool ClassicPipeline::write_gff_output()
         
         // simply write the regions
         for (const auto& mreg : mregs) {
-            std::cout << lw.write(mreg) << '\n';
+            outf << lw.write(mreg) << '\n';
         }
     }
-    std::cout << std::flush;
+    outf << std::flush;
     return true;    // cannot really go wrong
 }
 
-bool ClassicPipeline::write_bed_output()
+bool ClassicPipeline::write_bed_output(std::ostream& outf)
 {
     // MultOvl standard comments
-    write_comments();
+    write_comments(outf);
     
     // process each chromosome in turn
     for (const auto& cm : cmovl()) {
@@ -290,10 +310,10 @@ bool ClassicPipeline::write_bed_output()
         
         // simply write the regions
         for (const auto& mreg : mregs) {
-            std::cout << lw.write(mreg) << '\n';
+            outf << lw.write(mreg) << '\n';
         }
     }
-    std::cout << std::flush;
+    outf << std::flush;
     return true;    // cannot really go wrong
 }
 
@@ -301,7 +321,7 @@ bool ClassicPipeline::write_bed_output()
 // Since the comments have the same syntax for BED and GFF,
 // this could be factored out.
 // Lists the parameters, the input files, multiplicity statistics. Private
-void ClassicPipeline::write_comments()
+void ClassicPipeline::write_comments(std::ostream& outf)
 {
     // count "histograms": overlap combinations
     MultiOverlap::Counter counter;
@@ -310,31 +330,31 @@ void ClassicPipeline::write_comments()
     }
     
     // the command-line parameters
-    std::cout << "# Parameters = " << opt_ptr()->param_str() << '\n';
+    outf << "# Parameters = " << opt_ptr()->param_str() << '\n';
     
     // add the input file names as comments
     if (opt_ptr()->load_from() != "")
     {
-        std::cout << "# Input data loaded from archive = " 
+        outf << "# Input data loaded from archive = " 
             << opt_ptr()->load_from() << '\n';
     }
-    std::cout << "# Input files = " << inputs().size() << '\n';
+    outf << "# Input files = " << inputs().size() << '\n';
     for (const auto& inp : inputs()) {
-        std::cout << "# " << inp.name;
+        outf << "# " << inp.name;
         if (inp.trackid > 0)
         {
-            std::cout << " = track " 
+            outf << " = track " 
                 << inp.trackid << ", region count = " 
                 << inp.regcnt;
         } else {
-            std::cout << " : skipped";
+            outf << " : skipped";
         }
-        std::cout << '\n';
+        outf << '\n';
     }
     
     // list multiplicity information
-    std::cout << "# Overlap count = " << counter.total() << '\n';
-    std::cout << "# Multiplicity counts = " << counter.to_string() 
+    outf << "# Overlap count = " << counter.total() << '\n';
+    outf << "# Multiplicity counts = " << counter.to_string() 
         << std::endl;   // final flush
 }
 

@@ -62,6 +62,9 @@ class ClassicOpts : public MultovlOptbase
 	/// \return the definition for the "source" column in the GFF output.
 	const std::string& source() const { return _source; }
 	
+	/// \return output file path, "" means "write to standard output
+	const std::string& output() const { return _output; }
+	
 	/// \return the desired output format. May be {BED,GFF}, case-insensitive, default GFF
 	const std::string& outformat() const { return _outformat; }
 	
@@ -92,7 +95,7 @@ class ClassicOpts : public MultovlOptbase
 
 	private:
 	
-	std::string _source, _outformat,
+	std::string _source, _output, _outformat,
 	    _saveto, _loadfrom;
 };
 

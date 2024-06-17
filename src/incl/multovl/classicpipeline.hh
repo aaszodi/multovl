@@ -47,6 +47,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <map>
 #include <string>
+#include <iostream>
 
 namespace multovl {
 
@@ -106,9 +107,10 @@ protected:
 private:
     
     unsigned int read_tracks();
-    bool write_gff_output();
-    bool write_bed_output();
-    void write_comments();
+    bool write_result(std::ostream& outf, const std::string& format);
+    bool write_gff_output(std::ostream& outf);
+    bool write_bed_output(std::ostream& outf);
+    void write_comments(std::ostream& outf);
     
     chrom_multovl_map _cmovl;   ///< chromosome ==> MultiOverlap map
 };
