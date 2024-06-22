@@ -207,16 +207,42 @@ if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     # https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake
     # Modified by AA, doesn't givr fatal errors if prerequisites are not satisfied
     include("${MYCMAKE_PATH}/CodeCoverage.cmake")
-    set(CODE_COVERAGE_VERBOSE TRUE)
-    append_coverage_compiler_flags()
-    # let's use the `lcov` Linux tool
-    setup_target_for_coverage_lcov(
-        NAME multovl_coverage
-        EXECUTABLE multovl "${SRCDIR}/tests/data/triple[a-c].bed"
-        DEPENDENCIES multovl
-        BASE_DIRECTORY "${SRCDIR}"
-        EXCLUDE "${Boost_INCLUDE_DIRS}" "thirdparty" "tests"
-    )
+    if(CAN_DO_COVERAGE)
+        set(CODE_COVERAGE_VERBOSE TRUE)
+        if(LCOV_PATH)
+            # let's use the `lcov` Linux tool
+            append_coverage_compiler_flags()
+            setup_target_for_coverage_lcov(
+                NAME multovl_coverage
+                EXECUTABLE multovl "${SRCDIR}/tests/data/triple[a-c].bed"
+                DEPENDENCIES multovl
+                BASE_DIRECTORY "${SRCDIR}"
+                EXCLUDE "${Boost_INCLUDE_DIRS}" "thirdparty" "tests"
+            )
+        elseif(GCOVR_PATH)
+            # gcovr
+            append_coverage_compiler_flags()
+            setup_target_for_coverage_gcovr_html(
+                NAME multovl_coverage
+                EXECUTABLE multovl "${SRCDIR}/tests/data/triple[a-c].bed"
+                DEPENDENCIES multovl
+                BASE_DIRECTORY "${SRCDIR}"
+                EXCLUDE "${Boost_INCLUDE_DIRS}" "thirdparty" "tests"
+            )
+        elseif(FASTCOV_PATH)
+            # fastcov
+            append_coverage_compiler_flags()
+            setup_target_for_coverage_fastcov(
+                NAME multovl_coverage
+                EXECUTABLE multovl "${SRCDIR}/tests/data/triple[a-c].bed"
+                DEPENDENCIES multovl
+                BASE_DIRECTORY "${SRCDIR}"
+                EXCLUDE "${Boost_INCLUDE_DIRS}" "thirdparty" "tests"
+            )
+        else()
+            message(WARNING "No lcov or gcovr or fastcov. Edit top-level CMakeLists.txt to use something else")
+        endif()
+    endif()
 endif()
 
 # Add the source directory and recursively everything under it

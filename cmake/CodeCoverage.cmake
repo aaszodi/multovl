@@ -140,6 +140,9 @@ include(CMakeParseArguments)
 option(CODE_COVERAGE_VERBOSE "Verbose information" FALSE)
 
 # Check prereqs
+## Added by AA, 2024-06-22
+set(CAN_DO_COVERAGE FALSE)
+
 find_program( GCOV_PATH gcov )
 find_program( LCOV_PATH  NAMES lcov lcov.bat lcov.exe lcov.perl)
 find_program( FASTCOV_PATH NAMES fastcov fastcov.py )
@@ -147,8 +150,9 @@ find_program( GENHTML_PATH NAMES genhtml genhtml.perl genhtml.bat )
 find_program( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/scripts/test)
 find_program( CPPFILT_PATH NAMES c++filt )
 
-if(NOT GCOV_PATH)
-    message(WARNING "gcov not found, coverage tests skipped")
+if(NOT GCOV_PATH AND NOT LCOV_PATH AND NOT FASTCOV_PATH AND NOT GENHTML_PATH AND NOT GCOVR_PATH)
+    message(WARNING "No coverage tools found, coverage tests skipped")
+    return()
 endif() # NOT GCOV_PATH
 
 # Check supported compiler (Clang, GNU and Flang)
@@ -157,13 +161,17 @@ foreach(LANG ${LANGUAGES})
   if("${CMAKE_${LANG}_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
     if("${CMAKE_${LANG}_COMPILER_VERSION}" VERSION_LESS 3)
       message(WARNING "Clang version must be 3.0.0 or greater, coverage tests skipped")
+      return()
     endif()
   elseif(NOT "${CMAKE_${LANG}_COMPILER_ID}" MATCHES "GNU"
          AND NOT "${CMAKE_${LANG}_COMPILER_ID}" MATCHES "(LLVM)?[Ff]lang")
     message(WARNING "Compiler is not GNU or Flang, coverage tests skipped")
+    return()
   endif()
 endforeach()
 
+# if we got this far, coverage can be measured
+set(CAN_DO_COVERAGE TRUE)
 set(COVERAGE_COMPILER_FLAGS "-g --coverage"
     CACHE INTERNAL "")
 
@@ -243,11 +251,13 @@ function(setup_target_for_coverage_lcov)
 
     if(NOT LCOV_PATH)
         message(WARNING "lcov not found, coverage tests skipped")
+        set(CAN_DO_COVERAGE FALSE)
         return()
     endif() # NOT LCOV_PATH
 
     if(NOT GENHTML_PATH)
         message(WARNING "genhtml not found, coverage tests skipped")
+        set(CAN_DO_COVERAGE FALSE)
         return()
     endif() # NOT GENHTML_PATH
 
@@ -424,6 +434,7 @@ function(setup_target_for_coverage_gcovr_xml)
 
     if(NOT GCOVR_PATH)
         message(WARNING "gcovr not found, coverage tests skipped")
+        set(CAN_DO_COVERAGE FALSE)
         return()
     endif() # NOT GCOVR_PATH
 
@@ -507,7 +518,7 @@ endfunction() # setup_target_for_coverage_gcovr_xml
 #                                            #  to BASE_DIRECTORY, with CMake 3.4+)
 # )
 # The user can set the variable GCOVR_ADDITIONAL_ARGS to supply additional flags to the
-# GCVOR command.
+# GCOVR command.
 function(setup_target_for_coverage_gcovr_html)
 
     set(options NONE)
@@ -517,6 +528,7 @@ function(setup_target_for_coverage_gcovr_html)
 
     if(NOT GCOVR_PATH)
         message(WARNING "gcovr not found, coverage tests skipped")
+        set(CAN_DO_COVERAGE FALSE)
         return()
     endif() # NOT GCOVR_PATH
 
@@ -621,11 +633,13 @@ function(setup_target_for_coverage_fastcov)
 
     if(NOT FASTCOV_PATH)
         message(WARNING "fastcov not found, coverage tests skipped")
+        set(CAN_DO_COVERAGE FALSE)
         return()
     endif()
 
     if(NOT Coverage_SKIP_HTML AND NOT GENHTML_PATH)
         message(WARNING "genhtml not found, coverage tests skipped")
+        set(CAN_DO_COVERAGE FALSE)
         return()
     endif()
 
@@ -740,18 +754,26 @@ function(setup_target_for_coverage_fastcov)
 endfunction() # setup_target_for_coverage_fastcov
 
 function(append_coverage_compiler_flags)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_COMPILER_FLAGS}" PARENT_SCOPE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_COMPILER_FLAGS}" PARENT_SCOPE)
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${COVERAGE_COMPILER_FLAGS}" PARENT_SCOPE)
-    message(STATUS "Appending code coverage compiler flags: ${COVERAGE_COMPILER_FLAGS}")
+    if(CAN_DO_COVERAGE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_COMPILER_FLAGS}" PARENT_SCOPE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_COMPILER_FLAGS}" PARENT_SCOPE)
+        set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${COVERAGE_COMPILER_FLAGS}" PARENT_SCOPE)
+        message(STATUS "Appending code coverage compiler flags: ${COVERAGE_COMPILER_FLAGS}")
+    else()
+        message(WARNING "Will not append coverage flags")
+    endif()
 endfunction() # append_coverage_compiler_flags
 
 # Setup coverage for specific library
 function(append_coverage_compiler_flags_to_target name)
-    separate_arguments(_flag_list NATIVE_COMMAND "${COVERAGE_COMPILER_FLAGS}")
-    target_compile_options(${name} PRIVATE ${_flag_list})
-    if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-        target_link_libraries(${name} PRIVATE gcov)
+    if(CAN_DO_COVERAGE)
+        separate_arguments(_flag_list NATIVE_COMMAND "${COVERAGE_COMPILER_FLAGS}")
+        target_compile_options(${name} PRIVATE ${_flag_list})
+        if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+            target_link_libraries(${name} PRIVATE gcov)
+        endif()
+    else()
+        message(WARNING "Will not append coverage flags to target ${name}")
     endif()
 endfunction()
 
