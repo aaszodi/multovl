@@ -229,21 +229,23 @@ bool ClassicPipeline::write_output()
     // write the result either to a file or to stdout
     auto outfnm = opt_ptr()->output();
     auto outform = opt_ptr()->outformat();
+    bool retval = false;
     if (outfnm != "") {
         // write to file if it opens OK
         try {
             std::ofstream outf(outfnm);
             outf.exceptions(outf.failbit); // raise exceptions for failure
-            write_result(outf, outform);
+            retval = write_result(outf, outform);
         } catch(const std::ios_base::failure& err) {
             add_error("Output goes to stdout because I cannot write to output file " + outfnm, err.what());
             // fall back to stdout
-            write_result(std::cout, outform);
+            retval = write_result(std::cout, outform);
         }
     } else {
         // write to stdout
-        write_result(std::cout, outform);
+        retval = write_result(std::cout, outform);
     }
+    return retval;
 }
 
 // -- Result output methods --
