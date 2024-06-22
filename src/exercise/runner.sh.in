@@ -9,7 +9,7 @@
 PGMS=@PROJECT_BINARY_DIR@/bin
 TESTDIR=${PGMS}/exercise
 DATADIR=${TESTDIR}/data
-OUTPUT_FILE=${DATADIR}/program_output.txt
+OUTPUT_FILE=${DATADIR}/program_output.gff
 
 # -- Fixed settings for input files --
 
@@ -23,8 +23,10 @@ TRACKNO=8
 PROF=@PROFILER@
 if [[ "$PROF" =~ "-NOTFOUND" ]]; then
     unset PROF
+    OPTHELPSTR="[ -r <repeat> ]"
     OPTSTR="r:h"
 else
+    OPTHELPSTR="[-p | -r <repeat> ]"
     OPTSTR="r:ph"
 fi
 
@@ -37,7 +39,7 @@ REPEAT=0
 
 print_usage()
 {
-    echo "Usage: `basename $0` [-p | -r <repeat> ] program [program-options]"
+    echo "Usage: $(basename $0) $OPTHELPSTR program [program-options]"
     echo "Script options:"
     if [[ $PROF ]]; then
         echo "  -p: Profile <program> with ${PROF}, overrides '-r'"
@@ -83,8 +85,13 @@ INPUTCMD="${TESTDIR}/inputfiles -c ${CHROM} -d ${DELTA} -D ${DATADIR} -t ${TRACK
 if [[ $DO_PROFILE == 0 ]]; then
     echo "Start profiling"
     ${INPUTCMD}
-    # profiling, specifically for 'perf'
-    $PROF record --call-graph dwarf -o ${DATADIR}/perf.data $@ ${DATADIR}/track_*.bed > ${OUTPUT_FILE}
+    # profiling command line
+    PROFTOOL=$(basename $PROF)
+    case $PROFTOOL in
+        "perf") $PROF record --call-graph dwarf -o ${DATADIR}/perf.data $@ -o ${OUTPUT_FILE} ${DATADIR}/track_*.bed ;;
+        "xctrace") $PROF record --template 'Time Profiler' --output ${DATADIR}/xc.trace --launch -- $@ -o ${OUTPUT_FILE} ${DATADIR}/track_*.bed ;;
+        *) echo "Do not know how to run profiling tool ${PROFTOOL}" ;;
+    esac
     echo "Profiling data collection done. Run the appropriate analysis tool"
     exit
 fi
@@ -109,7 +116,7 @@ for iter in $(seq $REPEAT); do
     ${INPUTCMD}
     # command to execute and redirect its outputs
     # do the timing
-	/usr/bin/time -a -o ${TIMER_FILE} $@ ${DATADIR}/track_*.bed >& ${OUTPUT_FILE}
+	/usr/bin/time -a -o ${TIMER_FILE} $@  -o ${OUTPUT_FILE} ${DATADIR}/track_*.bed
     if [ $? != 0 ]; then
         echo "Program failure, check ${OUTPUT_FILE}"
         break

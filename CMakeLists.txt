@@ -2,7 +2,7 @@
 # 2015-03-28 Andras Aszodi
 #
 # USAGE: you should invoke cmake in your build directory like this:-
-# cmake -DCMAKE_BUILD_TYPE=(Debug|Release) \ <-- define for Makefile targets, not for Visual Studio or XCode
+# cmake -DCMAKE_BUILD_TYPE=(Debug|RelWithDebInfo|Release) \ <-- define for Makefile targets, not for Visual Studio or XCode
 #   -DBOOST_ROOT=/path/to/boost \ <-- default is "/usr/local/boost"
 #   -DBoost_INCLUDE_DIR=/path/to/boost/include \ <-- optional if not found automatically, note the "Boost_..." spelling
 #   -DBOOST_LIBRARYDIR=/path/to/boost/libs \ <-- optional if not found automatically
