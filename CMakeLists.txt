@@ -318,6 +318,12 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CPACK_PACKAGE_VENDOR "Andras Aszodi")
     set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
     set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
+
+    # For the binary package we add the "system processor" name
+    # this is safe as long as we don't cross-compile
+    set(CPACK_PACKAGE_FILE_NAME
+        multovl-${MULTOVL_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}
+    )
     
     # Select package generators
     if(WIN32)
@@ -335,8 +341,8 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
         debug/
         release/
         containers/singularity/sandboxes/
-        \\.git
-        \\.DS_Store
+        \\\\.git
+        \\\\.DS_Store
     )
     # Executable package
     set(CPACK_IGNORE_FILES
