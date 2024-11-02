@@ -1,5 +1,8 @@
 # MULTOVL in a Singularity container
 
+Version 1.5
+November 2024
+
 By convention the Singularity recipes have a `.def` extension,
 and the image files `.sif`. The latter are `.gitignore`-d.
 
@@ -17,7 +20,7 @@ Check if everything is all right:
 
 ```
 singularity test multovl.sif
-singularity exec multovl.sif multovl ../../src/test/data/triple[a-c].bed
+singularity exec multovl.sif multovl ../../src/tests/data/triple[a-c].bed
 ```
 
 ## Uploading the image
@@ -27,13 +30,12 @@ Sign the image:
 `singularity sign multovl.sif`
 
 ...and then upload it. The example below uses AA's Sylabs repo.
+Tag the image with the Multovl version (currently 1.5)
 
 ```
 singularity remote login
-singularity push multovl.sif library://andras.aszodi/default/multovl:1.4
+singularity push multovl.sif library://andras.aszodi/default/multovl:1.5
 ```
-
-Change the parameters as appropriate.
 
 ## Run the MULTOVL container
 

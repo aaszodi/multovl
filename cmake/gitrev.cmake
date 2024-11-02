@@ -7,10 +7,12 @@
 # Note that these variables will not be updated after a `git commit` or `git pull`
 # unless CMake is re-run.
 
+# The following are all strings...
 set(GITREV_SHA1 "(unknown)" CACHE INTERNAL "Git SHA1" FORCE)
 set(GITREV_SHA1SHORT "(unknown)" CACHE INTERNAL "Git short SHA1" FORCE)
 set(GITREV_DATE "(unknown)" CACHE INTERNAL "Git date" FORCE)
-set(GITREV_COUNT "(unknown)" CACHE INTERNAL "Git revision count" FORCE)
+# ...except the revision count which shall be an uint (0 by default)
+set(GITREV_COUNT "0" CACHE INTERNAL "Git revision count" FORCE)
 
 find_program(GIT_SCM git DOC "Git version control")
 mark_as_advanced(GIT_SCM)

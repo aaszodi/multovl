@@ -15,7 +15,7 @@ Stage: build
 ### You can refer to the value set here by using `{{ MULTOVL_VERSION }}`
 ### anywhere in the definition file.
 ### %arguments
-###    MULTOVL_VERSION=1.4
+###    MULTOVL_VERSION=1.5
 
 %setup
     # Create `/multovl` and its subdir `containers/singularity` in the container
@@ -32,7 +32,6 @@ Stage: build
     # ├── doc		
     # │   └── html	        <-- HTML docs under version control, needed by `make install`
     # ...
-    # ├── include           <-- copied
     # ├── src               <-- copied
     # └── thirdparty        <-- copied
     #
@@ -42,7 +41,6 @@ Stage: build
     ../../CMakeLists.txt /multovl
     ../../VERSION /multovl/VERSION
     ../../cmake/* /multovl/cmake/
-    ../../include/* /multovl/include/
     ../../src/* /multovl/src/
     ../../thirdparty/* /multovl/thirdparty/
     # Needed by `make install` to work properly
@@ -61,8 +59,8 @@ Stage: build
     # Start building
     cd $BUILDDIR
     
-    # CMake, everything linked statically
-    cmake -DCMAKE_BUILD_TYPE=Release \
+    # CMake, everything linked statically. GNU toolchain
+    cmake -DCMAKE_BUILD_TYPE=Release -DTOOLCHAIN=gnu \
         -DCMAKE_INSTALL_PREFIX=${INSTALLDIR} ${MULTOVL_ROOT}
     
     # Build
@@ -80,7 +78,7 @@ Bootstrap: library
 From: ubuntu:jammy
 Stage: prod
 
-### NOTE: You may use `{{ MULTOVL_VERSION }}` instead of `1.4` in this section
+### NOTE: You may use `{{ MULTOVL_VERSION }}` instead of `1.5` in this section
 ### when Apptainer >= 1.2 gets available on the cluster of your choice
 ### See note to the `%arguments` section on top
 
@@ -88,24 +86,24 @@ Stage: prod
 %environment
     export LC_ALL="C"
     export 
-    export PATH=/usr/local/multovl/1.4/bin:${PATH}
+    export PATH=/usr/local/multovl/1.5/bin:${PATH}
 
 %files from build
     # Copy the MULTOVL installation directory from the previous "build" stage
     # to the same location in the "prod" stage
-    /usr/local/multovl/1.4
+    /usr/local/multovl/1.5
 
 %test
-	# A very simple test harness to check if the main 'multovl' executable is working
-	/usr/local/multovl/1.4/bin/multovltest.sh /usr/local/multovl/1.4/bin/multovl
-	if [ $? -ne 0 ]; then
-		exit 1
-	fi
+    # A very simple test harness to check if the main 'multovl' executable is working
+    /usr/local/multovl/1.5/bin/multovltest.sh /usr/local/multovl/1.5/bin/multovl
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
 
 # Information
 %labels
     Author András Aszódi
-    Version 1.4
+    Version 1.5
 
 %help
     MULTOVL: Multiple overlaps of genomic regions.
