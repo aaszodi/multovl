@@ -197,7 +197,7 @@ include_directories(
 
 # -- SOURCE TREE --
 
-# Tests, coverage
+# Debug builds support testing and maybe coverage
 if (MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Debug")
     include(CTest)
     enable_testing()
@@ -257,9 +257,36 @@ else(DOXYGEN_FOUND)
     message(WARNING "Doxygen not found, API documentation will not be created")
 endif(DOXYGEN_FOUND)
 
-# -- INSTALLATION --
-
+# Release builds support installation and optionally Docker image builds
 if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
+
+	# -- Container images --
+	
+	# Docker
+	find_program(Docker_EXECUTABLE docker)
+	if(Docker_EXECUTABLE)
+		message(STATUS "Docker found, image will be built")
+		# Docker-related files
+		set(_docker_dir ${CMAKE_SOURCE_DIR}/containers/docker)
+		# the Docker context directory will be where the binaries are
+		set(_docker_ctxdir ${CMAKE_CURRENT_BINARY_DIR}/bin)
+		add_custom_target(docker_image
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+				${_docker_dir}/.dockerignore ${_docker_dir}/docker_runner.sh ${_docker_ctxdir}
+			COMMAND ${CMAKE_COMMAND} -E copy_directory
+				${SRCDIR}/scripts ${_docker_ctxdir}
+			COMMAND ${Docker_EXECUTABLE} build
+				--tag aaszodi/multovl:${MULTOVL_VERSION}-${CMAKE_HOST_SYSTEM_PROCESSOR}
+				--build-arg MULTOVL_VERSION=${MULTOVL_VERSION}
+				--file ${_docker_dir}/Dockerfile
+				${_docker_ctxdir}
+		)
+	else()
+		message(WARNING "Docker not found, image will not be built")
+	endif()
+	
+	# -- Installation --
+	
     # apps
     set(_applications config_info multovl multovlprob parmultovlprob)
     install(TARGETS ${_applications}
@@ -291,13 +318,6 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE 
             GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         DESTINATION ${MULTOVL_DESTDIR}/bin)
-    
-    # Dockerfile
-    # The installation directory ${MULTOVL_DESTDIR} will be the Docker build context
-    set(_dockerdir "${PROJECT_SOURCE_DIR}/containers/docker")
-    install(FILES "${_dockerdir}/Dockerfile" DESTINATION ${MULTOVL_DESTDIR})
-    
-    # Singularity-related stuff not installed
     
     # documentation
     install(FILES "${PROJECT_SOURCE_DIR}/README.md" "${PROJECT_SOURCE_DIR}/LICENSE" 

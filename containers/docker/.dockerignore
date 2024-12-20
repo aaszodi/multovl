@@ -1,0 +1,9 @@
+# .dockerignore for Multovl
+# This file is copied to ${CMAKE_CURRENT_BINARY_DIR} by CMake
+# CMake's stuff
+CMakeFiles
+Makefile
+cmake_install.cmake
+# Multovl directories we don't need
+exercise/
+lib/
