@@ -1,30 +1,34 @@
 # How to Dockerise MULTOVL
 
-## Build and install
+**Short version**: Run the `docker_image` target in a Release build.
 
-First build a Release version with static linking and install it.
-Define the installation location via `-DCMAKE_INSTALL_PREFIX` to CMake.
+**Detailed explanations** are below.
 
-The installation is under `${CMAKE_INSTALL_PREFIX}/multovl/${MULTOVL_VERSION}`
-where `${MULTOVL_VERSION}` is currently `1.5`.
+## How the image is built
 
-## Build the Docker image
+The Docker image provided by the CMake target `docker_image` simply
+encapsulates the Multovl executables already built by the `apps` target.
+In other words, the Multovl tools are not built together with the Docker image,
+they are just copied into it. This saves image build time. The price
+you pay for this convenience:
 
-The installation directory above serves as the Docker build context:
+- The image can be built on _bona fide_ Linux hosts only. That is, you cannot build
+on a Windows or MacOS host using Docker Desktop, because the Multovl architecture
+will not be Linux and therefore cannot be run in the container.
+- The Multovl tools must be built with static linking to avoid
+copying the support libraries. This is the default anyway.
 
-`cd ${CMAKE_INSTALL_PREFIX}/multovl/${MULTOVL_VERSION}`
+## How to build the Docker image
 
-and then
+First build a Release version with static linking on a Linux host
+by running `make -j N apps` where `N` is the number of build threads.
 
-`docker build -t aaszodi/multovl:${MULTOVL_VERSION} .` (use the current version tag)
-
-`docker image ls` should then show an image like this:
-
-```
-REPOSITORY        TAG                IMAGE ID       CREATED          SIZE
-aaszodi/multovl   1.5                a7a16b85445d   16 minutes ago   79.7MB
-```
-
+Then simply run `make docker_image` which will be very quick. The
+longest phase is the download of the parent OS image (currently Ubuntu 24.04 LTS).
+The resulting image will be tagged as `aaszodi/multovl:X.Y-ARCH` where
+`X.Y` is the Multovl version (currently 1.5) and `ARCH` is the host 
+machine architecture as returned by `uname -m`. For instance, `x86_64`
+for Intel CPUs, `aarch64` for ARM, `ppc64le` for PowerPC.
 
 ## Uploading the image to the Docker Hub
 
@@ -42,6 +46,6 @@ https://docs.docker.com/engine/reference/commandline/login/#credentials-store
 Login Succeeded
 ```
 
-Then push the image, e.g. for Version 1.5:
+Then push the image, e.g. the ARM version:
 
-`docker push aaszodi/multovl:1.5`
+`docker push aaszodi/multovl:1.5-aarch64`
