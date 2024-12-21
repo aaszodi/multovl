@@ -265,22 +265,27 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
 	# Docker
 	find_program(Docker_EXECUTABLE docker)
 	if(Docker_EXECUTABLE)
-		message(STATUS "Docker found, image will be built")
-		# Docker-related files
-		set(_docker_dir ${CMAKE_SOURCE_DIR}/containers/docker)
-		# the Docker context directory will be where the binaries are
-		set(_docker_ctxdir ${CMAKE_CURRENT_BINARY_DIR}/bin)
-		add_custom_target(docker_image
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${_docker_dir}/.dockerignore ${_docker_dir}/docker_runner.sh ${_docker_ctxdir}
-			COMMAND ${CMAKE_COMMAND} -E copy_directory
-				${SRCDIR}/scripts ${_docker_ctxdir}
-			COMMAND ${Docker_EXECUTABLE} build
-				--tag aaszodi/multovl:${MULTOVL_VERSION}-${CMAKE_HOST_SYSTEM_PROCESSOR}
-				--build-arg MULTOVL_VERSION=${MULTOVL_VERSION}
-				--file ${_docker_dir}/Dockerfile
-				${_docker_ctxdir}
-		)
+	    if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+            message(STATUS "Docker image will be built")
+            # Docker-related files live here (e.g. '.dockerignore', 'multovl_runner.sh')
+            set(_docker_dir ${CMAKE_SOURCE_DIR}/containers/docker)
+            # the Docker context directory will be where the binaries are
+            set(_docker_ctxdir ${CMAKE_CURRENT_BINARY_DIR}/bin)
+            add_custom_target(docker_image
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    ${_docker_dir}/.dockerignore ${_docker_dir}/multovl_runner.sh ${_docker_ctxdir}
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    ${SRCDIR}/scripts ${_docker_ctxdir}/scripts
+                COMMAND ${Docker_EXECUTABLE} build
+                    --tag aaszodi/multovl:${MULTOVL_VERSION}-${CMAKE_HOST_SYSTEM_PROCESSOR}
+                    --build-arg MULTOVL_VERSION=${MULTOVL_VERSION}
+                    --file ${_docker_dir}/Dockerfile
+                    ${_docker_ctxdir}
+            )
+            add_dependencies(docker_image apps)
+        else()
+            message(WARNING "System OS is ${CMAKE_SYSTEM_NAME}, Docker image is built on Linux hosts only")
+        endif()
 	else()
 		message(WARNING "Docker not found, image will not be built")
 	endif()
@@ -328,7 +333,9 @@ if(MULTICONFIG OR CMAKE_BUILD_TYPE STREQUAL "Release")
             DESTINATION ${MULTOVL_DESTDIR}/doc/doxygen)
     endif(DOXYGEN)
 
-    # packaging: common settings
+    # -- Packaging --
+    
+    # Common settings
     set(CPACK_PACKAGE_VERSION_MAJOR "${MULTOVL_VERSION_MAJOR}")
     set(CPACK_PACKAGE_VERSION_MINOR "${MULTOVL_VERSION_MINOR}")
     set(CPACK_PACKAGE_VERSION_PATCH "${GITREV_SHA1SHORT}")
