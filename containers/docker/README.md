@@ -15,7 +15,7 @@ you pay for this convenience:
 - The image can be built on _bona fide_ Linux hosts only. That is, you cannot build
 on a Windows or MacOS host using Docker Desktop, because the Multovl architecture
 will not be Linux and therefore cannot be run in the container.
-- The Multovl tools must be built with static linking to avoid
+- The Multovl tools **must be built with static linking** to avoid
 copying the support libraries. This is the default anyway.
 
 ## How to build the Docker image
@@ -49,3 +49,27 @@ Login Succeeded
 Then push the image, e.g. the ARM version:
 
 `docker push aaszodi/multovl:1.5-aarch64`
+
+## Multi-architecture configuration
+
+Once you built all the images on different architectures and 
+pushed them to the Docker hub, create a Docker image manifest
+by running the command below. 
+
+This is an example, modify it as necessary by changing the tags:
+
+```
+docker manifest create \
+aaszodi/multovl:1.5-latest \
+--amend aaszodi/multovl:1.5-x86_64 \
+--amend aaszodi/multovl:1.5-aarch64 \
+--amend aaszodi/multovl:1.5-ppc64le
+```
+
+Then push the manifest to the Docker hub:
+
+```
+docker login
+docker manifest push aaszodi/multovl:1.5-latest
+docker logout
+```
